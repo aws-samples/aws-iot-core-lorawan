@@ -1,0 +1,479 @@
+# Copyright 2019-2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License").
+# You may not use this file except in compliance with the License.
+# A copy of the License is located at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# or in the "license" file accompanying this file. This file is distributed
+# on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+# express or implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+
+Description: Alarming per Mail/SMS with AWS IoT Events
+Parameters:
+  AlarmMailParameter:
+    Type: String
+    MinLength: 1
+    ConstraintDescription: Must contain a valid e-mail address
+    Description: E-Mail address for sending alarm e-mails
+
+  AlarmSMSParameter:
+    Type: String
+    MinLength: 1
+    AllowedPattern: ^\+.*
+    ConstraintDescription: Must contain a valid phone number starting with "+"
+    Description: Mobile phone number for SMS alarms (e.g. +4915200000000)
+    
+
+  ParamInputTopicForDetectionModelInput:
+    Type: String
+    MinLength: 1
+    Default: dt/lorawantransformed/moisture/#
+    Description: IoT Rule with a subscription to that topic will be created and configured to forwarded any payloads to IoT Events detection model input
+
+  ParamErrorTopicForDebugging:
+    Type: String
+    MinLength: 1
+    Default: errors
+    Description: IoT Rule will be configured to publish errors to this topic
+
+Resources:
+  SampleIoTRuleToSendInputToEvent:
+    Type: "AWS::IoT::TopicRule"
+    Properties:
+      RuleName: !Sub '${AWS::StackName}_ForwardLoRaWANTelemetryToIoTEvents'
+      TopicRulePayload:
+        RuleDisabled: false
+        Sql:
+          !Join [
+            "",
+            [
+              "SELECT * from ",
+              "'",
+              !Ref ParamInputTopicForDetectionModelInput,
+              "'",
+            ],
+          ]
+        Actions:
+          - IotEvents:
+              InputName: !Ref DetectorModelInput
+              RoleArn: !GetAtt SampleIoTRuleToSendInputToEventRole.Arn
+
+        ErrorAction:
+          Republish:
+            RoleArn: !GetAtt SampleIoTRuleToSendInputToEventRole.Arn
+            Topic: !Ref ParamErrorTopicForDebugging
+            Qos: 0
+
+  SampleIoTRuleToSendInputToEventRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - iot.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: iotevents:BatchPutMessage
+                Resource: "*"
+
+              - Effect: Allow
+                Action: iot:Publish
+                Resource:
+                  !Join [
+                    "",
+                    [
+                      "arn:aws:iot:",
+                      !Ref "AWS::Region",
+                      ":",
+                      !Ref "AWS::AccountId",
+                      ":topic/dt/*",
+                    ],
+                  ]
+
+  DetectorModelInput:
+    Type: AWS::IoTEvents::Input
+    Properties:
+      InputName: !Sub '${AWS::StackName}MoistureSensorMeasurement'
+      InputDescription: Measurement of soil moisture from a LoRaWAN device 
+      InputDefinition:
+        Attributes:
+          - JsonPath: payload.transformed_payload.water_soil
+          - JsonPath: payload.transformed_payload.DeviceId
+
+  AlarmingTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub '${AWS::StackName}_AlarmingTopic'
+      DisplayName: "Alarming topic"
+
+  MySubscriptionEmail:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !Ref AlarmMailParameter
+      Protocol: email
+      TopicArn: !Ref AlarmingTopic
+
+  MySubscriptionSMS:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !Ref AlarmSMSParameter
+      Protocol: sms
+      TopicArn: !Ref AlarmingTopic
+
+  IoTEventsRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "iotevents.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+  IoTEventsRolePolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: "root"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "*"
+            Resource: "*"
+      Roles:
+        - Ref: IoTEventsRole
+
+  DetectorModel:
+    Type: AWS::IoTEvents::DetectorModel
+    DependsOn:
+      - DetectorModelInput
+    Properties:
+      DetectorModelName: !Sub '${AWS::StackName}_SoilmoistureEventDetectionModel'
+      DetectorModelDescription: A sample detector model
+      Key: payload.transformed_payload.DeviceId
+      RoleArn: !GetAtt IoTEventsRole.Arn
+      EvaluationMethod: SERIAL
+
+      DetectorModelDefinition:
+        States:
+        - StateName: Unknown
+          OnInput:
+            Events:
+            - EventName: SetLastKnownTelemetryValue
+              Condition: 'true'
+              Actions:
+              - SetVariable:
+                  VariableName: last_known_telemetry_value
+                  Value: 
+                    !Join [
+                      "",
+                      [
+                        "$input.",
+                        !Ref DetectorModelInput,
+                        ".payload.transformed_payload.water_soil"
+                      ]
+                    ]
+            TransitionEvents:
+            - EventName: IsHealthy
+              Condition: "$variable.last_known_telemetry_value > $variable.config_threshold"
+              Actions: []
+              NextState: Healthy
+            - EventName: IsDry
+              Condition: "$variable.last_known_telemetry_value <= $variable.config_threshold"
+              Actions: []
+              NextState: Dry
+          OnEnter:
+            Events:
+            - EventName: SetLastKnownTelemetryValue
+              Condition: 'true'
+              Actions:
+              - SetVariable:
+                  VariableName: last_known_telemetry_value
+                  Value: 
+                    !Join [
+                      "",
+                      [
+                        "$input.",
+                        !Ref DetectorModelInput,
+                        ".payload.transformed_payload.water_soil"
+                      ]
+                    ]
+            - EventName: SetConfigurationVariables
+              Condition: 'true'
+              Actions:
+              - SetVariable:
+                  VariableName: config_threshold
+                  Value: '20'
+              - SetVariable:
+                  VariableName: config_timeout_till_unknownstate
+                  Value: '1'
+          OnExit:
+            Events: []
+        - StateName: Dry
+          OnInput:
+            Events:
+            - EventName: ResetTimer
+              Condition: 'true'
+              Actions:
+              - ResetTimer:
+                  TimerName: unknown_timer
+            - EventName: 'SetLastKnownTelemetryValue '
+              Condition: 'true'
+              Actions:
+              - SetVariable:
+                  VariableName: last_known_telemetry_value
+                  Value: 
+                    !Join [
+                      "",
+                      [
+                        "$input.",
+                        !Ref DetectorModelInput,
+                        ".payload.transformed_payload.water_soil"
+                      ]
+                    ]
+
+            TransitionEvents:
+            - EventName: IsHealthy
+              Condition: "$variable.last_known_telemetry_value > $variable.config_threshold"
+              Actions: []
+              NextState: Healthy
+            - EventName: Timeout
+              Condition: timeout('unknown_timer')
+              Actions: []
+              NextState: Unknown
+          OnEnter:
+            Events:
+            - EventName: SendNotificationToUser
+              Condition: "$variable.last_known_state != 'dry'"
+              Actions:
+              - Sns:
+                  TargetArn: 
+                    !Join [
+                      "",
+                      [
+                        "arn:aws:sns:",
+                        !Ref "AWS::Region",
+                        ":",
+                        !Ref "AWS::AccountId",
+                        ":", 
+                        !Sub '${AWS::StackName}_AlarmingTopic'
+                      ],
+                    ]
+
+                  Payload:
+                    ContentExpression: !Join
+                      - ""
+                      - - |
+                          'Dear user, 
+
+                          Your plant requires watering, we recently measured a moisture level of ${$variable.last_known_telemetry_value}%. 
+                          
+                          That measurement  was received from a sensor attached to a LoRaWAN device 
+                        - ${
+                        - !Sub 
+                          - "$input.${NameOfDetectorModelInput}.payload.transformed_payload.DeviceId"
+                          - { NameOfDetectorModelInput: !Ref DetectorModelInput}
+                        - "}"
+                        - |
+                          .
+                          
+                          kind regards, your LoRaWAN-based plant monitoring solution
+                          '
+
+                    Type: STRING
+              - IotTopicPublish:
+                  MqttTopic: debug
+                  Payload:
+                    ContentExpression: !Join
+                      - ""
+                      - - |
+                          'Dear user, 
+
+                          Your plant requires watering, we recently measured a moisture level of ${$variable.last_known_telemetry_value}%. 
+                          
+                          That measurement  was received from a sensor attached to a LoRaWAN device 
+                        - ${
+                        - !Sub 
+                          - "$input.${NameOfDetectorModelInput}.payload.transformed_payload.DeviceId"
+                          - { NameOfDetectorModelInput: !Ref DetectorModelInput}
+                        - "}"
+                        - |
+                          .
+                          
+                          kind regards, your LoRaWAN-based plant monitoring solution
+                          '
+                          
+                    Type: STRING
+            - EventName: SetLastKnownState
+              Condition: 'true'
+              Actions:
+              - SetVariable:
+                  VariableName: last_known_state
+                  Value: "'dry'"
+            - EventName: SetTimerTillUnknownState
+              Condition: 'true'
+              Actions:
+              - SetTimer:
+                  TimerName: unknown_timer
+                  DurationExpression: "$variable.config_timeout_till_unknownstate*60"
+            - EventName: SetLastKnownTelemetryValue
+              Condition: 'true'
+              Actions:
+              - SetVariable:
+                  VariableName: last_known_telemetry_value
+                  Value: 
+                    !Join [
+                      "",
+                      [
+                        "$input.",
+                        !Ref DetectorModelInput,
+                        ".payload.transformed_payload.water_soil"
+                      ]
+                    ]
+          OnExit:
+            Events: []
+        - StateName: Healthy
+          OnInput:
+            Events:
+            - EventName: ResetTimer
+              Condition: 'true'
+              Actions:
+              - ResetTimer:
+                  TimerName: unknown_timer
+            - EventName: 'SetLastKnownTelemetryValue '
+              Condition: 'true'
+              Actions:
+              - SetVariable:
+                  VariableName: last_known_telemetry_value
+                  Value: 
+                    !Join [
+                      "",
+                      [
+                        "$input.",
+                        !Ref DetectorModelInput,
+                        ".payload.transformed_payload.water_soil"
+                      ]
+                    ]
+            TransitionEvents:
+            - EventName: IsDry
+              Condition: "$variable.last_known_telemetry_value <= $variable.config_threshold"
+              Actions: []
+              NextState: Dry
+            - EventName: Timeout
+              Condition: timeout('unknown_timer')
+              Actions: []
+              NextState: Unknown
+          OnEnter:
+            Events:
+            - EventName: SendNotificationToUser
+              Condition: "$variable.last_known_state != 'healthy'"
+              Actions:
+              - Sns:
+                  TargetArn: 
+                    !Join [
+                      "",
+                      [
+                        "arn:aws:sns:",
+                        !Ref "AWS::Region",
+                        ":",
+                        !Ref "AWS::AccountId",
+                        ":",
+                        !Sub '${AWS::StackName}_AlarmingTopic'
+                      ],
+                    ]
+                  
+                  Payload:
+                    ContentExpression: !Join
+                      - ""
+                      - - |
+                          'Dear user, 
+
+                          Congratulations, your plant now has a healthy moisture level of ${$variable.last_known_telemetry_value}%. 
+                          
+                          That measurement  was received from a sensor attached to a LoRaWAN device 
+                        - ${
+                        - !Sub 
+                          - "$input.${NameOfDetectorModelInput}.payload.transformed_payload.DeviceId"
+                          - { NameOfDetectorModelInput: !Ref DetectorModelInput}
+                        - "}"
+                        - |
+                          .
+                          
+                          kind regards, your LoRaWAN-based plant monitoring solution
+                          '
+
+                    Type: STRING
+
+              - IotTopicPublish:
+                  MqttTopic: debug
+                  Payload:
+                    Type: STRING
+                    ContentExpression: !Join
+                      - ""
+                      - - |
+                          'Dear user, 
+
+                          Congratulations, your plant now has a healthy moisture level of ${$variable.last_known_telemetry_value}%. 
+                          
+                          That measurement  was received from a sensor attached to a LoRaWAN device 
+                        - ${
+                        - !Sub 
+                          - "$input.${NameOfDetectorModelInput}.payload.transformed_payload.DeviceId"
+                          - { NameOfDetectorModelInput: !Ref DetectorModelInput}
+                        - "}"
+                        - |
+                          .
+                          
+                          kind regards, your LoRaWAN-based plant monitoring solution
+                          '
+
+                    Type: STRING
+            - EventName: SetLastKnownState
+              Condition: 'true'
+              Actions:
+              - SetVariable:
+                  VariableName: last_known_state
+                  Value: "'healthy'"
+            - EventName: SetTimerTillUnknownState
+              Condition: 'true'
+              Actions:
+              - SetTimer:
+                  TimerName: unknown_timer
+                  DurationExpression: "$variable.config_timeout_till_unknownstate*60"
+            - EventName: SetLastKnownTelemetryValue
+              Condition: 'true'
+              Actions:
+              - SetVariable:
+                  VariableName: last_known_telemetry_value
+                  Value: 
+                    !Join [
+                      "",
+                      [
+                        "$input.",
+                        !Ref DetectorModelInput,
+                        ".payload.transformed_payload.water_soil"
+                      ]
+                    ]
+          OnExit:
+            Events: []
+        InitialStateName: Unknown
+

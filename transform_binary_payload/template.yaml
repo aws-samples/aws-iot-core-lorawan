@@ -1,0 +1,160 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Transformation of LoRaWAN binary payloads 
+
+Parameters:
+  ParamBinaryDecoderName:
+    Type: String
+    Default: sample_device
+    Description: Name of binary decoder as configured in src-iotrule-transformation/app.py
+
+  TopicIncomingBinaryMessages:
+    Type: String
+    Default: lorawanbinary
+    Description: Topic pattern for subscription to messages from a AWS IoT Core for LoRaWAN destination
+
+  TopicOutgoingErrors:
+    Type: String
+    Default: lorawanerror
+    Description: Topic for errors
+
+  TopicOutgoingTransformedMessages:
+    Type: String
+    Default: lorawantransformed
+    Description: Prefix for outgoing transformed messages
+
+Resources:
+  
+  ############################################################################################
+  # Payload transformation Lambda function to be called from AWS IoT Core. This function will refer to 
+  # layer "DecoderLayer" to include the necessary decoding libraries 
+  ############################################################################################
+
+  TransformLoRaWANBinaryPayloadFunction:
+    Type: AWS::Serverless::Function
+    Name: !Sub '${AWS::StackName}-TransformLoRaWANBinaryPayloadFunction'
+    Properties:
+      CodeUri: src-iotrule-transformation
+      Handler: app.lambda_handler
+      Runtime: python3.8
+      Layers:  
+        - Ref:  LoRaWANPayloadDecoderLayer
+      Environment:
+        Variables:
+          RETURN_RAW_DATA: True
+
+
+  ############################################################################################
+  # LAYERS
+  ############################################################################################
+  LoRaWANPayloadDecoderLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub '${AWS::StackName}-LoRaWANPayloadDecoderLayer'
+      Description: Payload decoders for LoRaWAN devices
+      ContentUri: src-payload-decoders
+      CompatibleRuntimes:
+        - python3.8
+      RetentionPolicy: Retain
+  
+  ############################################################################################
+  # This IoT Rule converts a binary message to a JSON message using a payload decoder, and then 
+  # republishes the JSON message.
+  # After transformation, the rule will republish the JSON payload to:
+  # dt/lorawantransformed
+  ############################################################################################
+  
+  TransformLoRaWANBinaryPayloadRule:
+    Type: "AWS::IoT::TopicRule"
+    Properties:
+      RuleName: !Sub '${AWS::StackName}_TransformLoRaWANBinaryPayloadFor_${ParamBinaryDecoderName}'
+      TopicRulePayload:
+        AwsIotSqlVersion: "2016-03-23"
+        RuleDisabled: false
+
+        Sql:
+            !Sub 
+              - |
+                SELECT aws_lambda("${LambdaARN}",
+                                  {"PayloadDecoderName": "${ParamBinaryDecoderName}", 
+                                  "PayloadData":PayloadData, 
+                                  "WirelessDeviceId": DeviceId, 
+                                   "WirelessMetadata": WirelessMetadata}) as transformed_payload, 
+                        WirelessDeviceId as transformed_payload.WirelessDeviceId,                                   
+                        WirelessMetadata.LoRaWAN.DevEui as transformed_payload.DevEui,
+                        WirelessDeviceId as lns_payload.WirelessDeviceId, 
+                        WirelessMetadata as lns_payload.WirelessMetadata,
+                        PayloadData as lns_payload.PayloadData,
+                        timestamp() as timestamp
+                        from '${TopicIncomingBinaryMessages}' 
+              - { LambdaARN: !GetAtt TransformLoRaWANBinaryPayloadFunction.Arn}            
+        Actions:
+            - Republish:
+                RoleArn: !GetAtt TransformLoRaWANBinaryPayloadRuleActionRole.Arn
+                Topic:
+                  !Join [
+                    "",
+                    [
+                      !Ref TopicOutgoingTransformedMessages
+                    ],
+                  ]
+                Qos: 0
+        ErrorAction:
+            Republish:
+              RoleArn: !GetAtt TransformLoRaWANBinaryPayloadRuleActionRole.Arn
+              Topic: !Ref TopicOutgoingErrors
+              Qos: 0
+
+  TransformLoRaWANBinaryPayloadFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt TransformLoRaWANBinaryPayloadFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: iot.amazonaws.com
+
+  TransformLoRaWANBinaryPayloadRuleActionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - iot.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: iot:Publish
+                Resource:
+                  !Join [
+                    "",
+                    [
+                      "arn:aws:iot:",
+                      !Ref "AWS::Region",
+                      ":",
+                      !Ref "AWS::AccountId",
+                      ":topic/*",
+                    ],
+                  ]
+
+Outputs:
+  IoTRuleName:
+    Description: "Please add this AWS IoT Rule name as a Destination to AWS IoT LoRaWAN Core"
+    Value: !Ref TransformLoRaWANBinaryPayloadRule
+
+  TransformPayloadFunctionFunction:
+    Description: "Lambda Function ARN"
+    Value: !GetAtt TransformLoRaWANBinaryPayloadFunction.Arn
+  TransformPayloadFunctionIamRole:
+    Description: "Implicit IAM Role created for Lambda function"
+    Value: !GetAtt TransformLoRaWANBinaryPayloadRuleActionRole.Arn
+  DecoderLayerARN:
+    Value: !Ref LoRaWANPayloadDecoderLayer
+    Description: "ARN of payload decoder layer "
