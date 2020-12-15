@@ -41,7 +41,7 @@ For this sample to work, your LoRaWAN devices have to publish payloads to a topi
     "payload": {
         "transformed_payload": {
             "water_soil": 10.1,
-            "DeviceId": "33a9fdf8-e7ac-406f-9517-df4807603"
+            "WirelessDeviceId": "33a9fdf8-e7ac-406f-9517-df4807603"
         }
     }
   }
@@ -52,7 +52,7 @@ Additional JSON attributes are ignored. The name of the topic can be adjusted by
 If you have not implemented publishing of payloads from your LoRaWAN devices yet, please consider the following options:
 
 - You can test this sample by simulating ingestion from your LoRaWAN devices with an [AWS IoT Test client](https://docs.aws.amazon.com/iot/latest/developerguide/view-mqtt-messages.html) as described in [this section](#option-1-test-by-ingesting-sample-payload-via-aws-iot-mqtt-test-client)
-- You can use [transform a binary LoRaWAN payload into JSON sample](../integration/transform_binary_payload_custom) to learn how to use binary decoders to convert binary payloads from your LoRaWAN device into JSON and publish these payloads to above mentioned topic in above mentioned JSON structure.
+- You can use [transform a binary LoRaWAN payload into JSON sample](../integration/transform_binary_payload) to learn how to use binary decoders to convert binary payloads from your LoRaWAN device into JSON and publish these payloads to above mentioned topic in above mentioned JSON structure.
 
 ## Quick setup - deploy a sample application in your AWS Account
 
@@ -74,8 +74,7 @@ Please perform following steps:
 1. Check out this repository on your computer
 
     ```shell
-    # git clone https://github.com/aws-samples/aws-iotcore-lorawan , Not published yet!
-    git clone ssh://git.amazon.com/pkg/Aws-iot-lorawansb-sample
+    git clone https://github.com/aws-samples/aws-iot-core-lorawan , Not published yet!
     cd sample_applications/soilmoisture_alarming
     ```
 
@@ -114,7 +113,7 @@ Following resources have been deployed to your AWS account:
 **3.AWS IoT Events input `MoistureSensorMeasurement`**
   Please refer to section [How the IoT Event detector model works](#how-the-iot-event-detector-model-works) for details of detector model implementation
 
-**4. Amazon SNS topic `SBDemoAlarmTopic`**
+**4. Amazon SNS topic `AlarmingTopic`**
   This topic is pre-configured with two subscriptions (SMS and E-Mail) according to your parameter inputs in a CloudFormation template.
 
 ## How to run the application
@@ -132,7 +131,7 @@ To put detector in a "Dry" state, please ingest following payload to the above m
     "payload": {
         "transformed_payload": {
             "water_soil": 1,
-            "DeviceId": "33a9fdf8-e7ac-406f-9517-df4807603"
+            "WirelessDeviceId": "33a9fdf8-e7ac-406f-9517-df4807603"
         }
     }
 }
@@ -146,7 +145,7 @@ To put detector in a "Healthy" state, please ingest following payload to the abo
     "payload": {
         "transformed_payload": {
             "water_soil": 70,
-            "DeviceId": "33a9fdf8-e7ac-406f-9517-df4807603"
+            "WirelessDeviceId": "33a9fdf8-e7ac-406f-9517-df4807603"
         }
     }
 }
@@ -165,7 +164,7 @@ To connect the application to your LoRaWAN devices, you have to ensure that the 
     "payload": {
         "transformed_payload": {
             "water_soil": 10.1,
-            "DeviceId": "33a9fdf8-e7ac-406f-9517-df4807603"
+            "WirelessDeviceId": "33a9fdf8-e7ac-406f-9517-df4807603"
         }
     }
   }
@@ -174,9 +173,9 @@ To connect the application to your LoRaWAN devices, you have to ensure that the 
 Attribute values:
 
 - `water_soil` value is a float between 0 and 100 and reflects the relative soil moisture between 0% (dry) and 100% (full moistured).
-- `DeviceId` value is a string with a maximum length of 128 which uniquely identifies the device. For example, you could use LoRaWAN DeviceId or any other unique string.
+- `WirelessDeviceId` value is a string with a maximum length of 128 which uniquely identifies the device. For example, you could use LoRaWAN WirelessDeviceId or any other unique string.
 
-The aforementioned payload is expected to be published to an MQTT topic `dt/lorawantransformed/moisture/<DeviceId>` as defined in the AWS IoT Core Rule `ForwardLoRaWANTelemetryToIoTEvents`.
+The aforementioned payload is expected to be published to an MQTT topic `dt/lorawantransformed/moisture/<WirelessDeviceId>` as defined in the AWS IoT Core Rule `ForwardLoRaWANTelemetryToIoTEvents`.
 
 ## Advanced technical information
 

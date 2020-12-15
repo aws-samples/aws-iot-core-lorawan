@@ -8,12 +8,7 @@ Parameters:
     Type: String
     Default: sample_device
     Description: Name of binary decoder as configured in src-iotrule-transformation/app.py
-
-  TopicIncomingBinaryMessages:
-    Type: String
-    Default: +
-    Description: Topic pattern for subscription to messages from a AWS IoT Core for LoRaWAN destination. 
-
+    
   TopicError:
     Type: String
     Default: dt/lorawanerror
@@ -136,7 +131,6 @@ Resources:
                         WirelessDeviceId as lns_message.WirelessDeviceId, 
                         WirelessMetadata as lns_message.WirelessMetadata,
                         PayloadData as lns_message.PayloadData
-                        from '${TopicIncomingBinaryMessages}' 
               - { LambdaARN: !GetAtt TransformLoRaWANBinaryPayloadForTimestreamFunction.Arn }      
         Actions:
             - Lambda:

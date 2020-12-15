@@ -7,7 +7,7 @@ AWS IoT Core for LoRaWAN connects sensors with LoRaWAN gateways, allowing for de
 
 - [How to analyse LoRaWAN payloads with Amazon Timestream and visualize them with Grafana](timestream)
 
-    You can use "AWS IoT Core for LoRaWAN" to ingest time series data from your LoRaWAN devices into Amazon Timestream. After that you can visualize your data in Grafana using a [Grafana timestream plugin](https://grafana.com/grafana/plugins/grafana-timestream-datasource/installation). This repository how to build a sample solution for storing your times eries data and visualizing them.
+    You can use "AWS IoT Core for LoRaWAN" to ingest time series data from your LoRaWAN devices into Amazon Timestream. After that you can visualize your data in Grafana using a [Grafana timestream plugin](https://grafana.com/grafana/plugins/grafana-timestream-datasource/installation). This repository how to build a sample solution for storing your times series data and visualizing them.
 
 - [Sample soil moisture alarming application based on AWS IoT Core, AWS IoT Events and Amazon SNS ](soilmoisture_alarming)   
     Detecting events based on telemetry data from connected devices is a common use case in IoT across many industries. This repository contains a sample for integrating AWS IoT Events with LoRaWAN for IoT Core. You can learn how to translate telemetry values from a LoRaWAN device into events and notify users about these events using E-Mail and SMS. 
