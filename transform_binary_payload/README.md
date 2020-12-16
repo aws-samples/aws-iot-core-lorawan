@@ -18,7 +18,7 @@ A picture bellow illustrates an architecture in this sample:
 
 By executing a stack in a CloudFormation template the following resources will be deployed in your AWS account:
 
-- AWS IoT Rule  `samplebinarytransform_TransformLoRaWANBinaryPayload_sample_device` with the neccessary IAM roles to perform rule actions
+- AWS IoT Rule  `samplebinarytransform_TransformLoRaWANBinaryPayload_sample_device` with the necessary IAM roles to perform rule actions
 - AWS Lambda function `samplebinarytransform-TransformLoRaWANBinaryPayloadFunction...`
 - AWS Lambda layer `samplebinarytransform-LoRaWANPayloadDecoderLayer...`
   
@@ -26,7 +26,7 @@ The above names are listed under assumption that you will use `samplebinarytrans
 
 ## Example for transforming a LoRaWAN binary payload
 
-Please follow the steps  below to launch a sample solution in your AWS account, integrate it with LoRaWAN for Iot Core and test it.
+Please follow the steps  below to launch a sample solution in your AWS account, integrate it with LoRaWAN for IoT Core and test it.
 
 ### Step 1: Launch the AWS CloudFormation stack
 
@@ -48,7 +48,7 @@ In the Outputs section of your stack in the AWS CloudFormation console you find 
 
 ### Step 2: Testing binary transformation by simulating ingestion from a LoRaWAN device
 
-Please use an MQTT Test Client to ingest a following payload to the topic `lorawanbinary`:
+Please use an MQTT Test Client to invoke the AWS IoT Rule  `samplebinarytransform_TransformLoRaWANBinaryPayload_sample_device` by publishing the payload below to the MQTT topic `$aws/rules/samplebinarytransform_TransformLoRaWANBinaryPayloadFor_sample_device`. The payload is structured in a same way it will be ingested by AWS IoT Core for LoRaWAN:
 
 ```json
 {
@@ -73,6 +73,7 @@ Please use an MQTT Test Client to ingest a following payload to the topic `loraw
     } 
 }
 ```
+
 
 The expected output on the topic `dt/lorawantransformed` will be:
 
@@ -144,17 +145,18 @@ After a successful deployment of the AWS CloudFormation stack, you should config
      - If you already have created a LoRaWAN devices, please use the "Edit" function of the console to update the Destination of the device
 
 ## Step 4: Verify the invocation of the AWS IoT Rule on ingestion from a LoRaWAN device
-The following description assumes that you already configured and tested your LoRaWAN Device and LoRaWAN gateway in AWS IoT Core for LoRaWAN. To learn how to do this, please consult AWS IoT Core for LoRaWAN documentation.
+
+The following description assumes that you already configured and tested your LoRaWAN Device and LoRaWAN gateway in AWS IoT Core for LoRaWAN. To learn how to do this, please consult [AWS IoT Core for LoRaWAN developer guide](https://docs.aws.amazon.com/iot/latest/developerguide/connect-iot-lorawan.html#connect-iot-lorawan-getting-started-overview).
 
 To verify the invocation of the AWS IoT Rule, please follow these steps:
 1. Open "IoT Core" in an AWS management console
 2. Click on "Test" to open a MQTT client 
 3. Click on "Subscribe to topic"
-4. Add `dt/lorawantransformed` and click on "Subscribe"
+4. Add `lorawantransformed` and click on "Subscribe"
 5. Click on "Subscribe to topic"
-6. Add `dt/lorawanerror` and click on "Subscribe"
+6. Add `lorawanerror` and click on "Subscribe"
 7. Trigger or wait for the ingestion for your LoRaWAN device connected to AWS IoT Core for LoRaWAN
-6. After LoRaWAN device ingestion, you should see a payload like this on `dt/lorawantransformed` topic:
+6. After LoRaWAN device ingestion, you should see a payload like this on `lorawantransformed` topic:
 ```json
 {
   "transformed_payload": {
@@ -188,7 +190,14 @@ To verify the invocation of the AWS IoT Rule, please follow these steps:
 }
 ```
 
-Congratulations! You successfully implemnted and tested binary decoding for AWS IoT Core for LoRaWAN.
+Congratulations! You successfully implemented and tested binary decoding for AWS IoT Core for LoRaWAN.
+
+Now you can configure the processing of the decoded data by adding further actions to the AWS IoT Rule `samplebinarytransform_TransformLoRaWANBinaryPayload_sample_device`, for example actions to to:
+
+- Store the data in Amazon Timestream, DynamoDB or S3
+- Send a message as an input to AWS IoT events  
+- Send a message to AWS IoT analytics  
+
 ## Step 5: Cleaning up
 Please open AWS CloudFormation console, select the stack and click on "Delete"
 

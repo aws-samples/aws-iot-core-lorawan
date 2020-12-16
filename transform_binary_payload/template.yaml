@@ -9,11 +9,6 @@ Parameters:
     Default: sample_device
     Description: Name of binary decoder as configured in src-iotrule-transformation/app.py
 
-  TopicIncomingBinaryMessages:
-    Type: String
-    Default: lorawanbinary
-    Description: Topic pattern for subscription to messages from a AWS IoT Core for LoRaWAN destination
-
   TopicOutgoingErrors:
     Type: String
     Default: lorawanerror
@@ -37,7 +32,7 @@ Resources:
     Properties:
       CodeUri: src-iotrule-transformation
       Handler: app.lambda_handler
-      Runtime: python3.8
+      Runtime: python3.7
       Layers:  
         - Ref:  LoRaWANPayloadDecoderLayer
       Environment:
@@ -87,7 +82,6 @@ Resources:
                         WirelessMetadata as lns_payload.WirelessMetadata,
                         PayloadData as lns_payload.PayloadData,
                         timestamp() as timestamp
-                        from '${TopicIncomingBinaryMessages}' 
               - { LambdaARN: !GetAtt TransformLoRaWANBinaryPayloadFunction.Arn}            
         Actions:
             - Republish:

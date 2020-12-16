@@ -33,7 +33,7 @@ Resources:
     Properties:
       CodeUri: src-lambda-write-to-timestream
       Handler: app.lambda_handler
-      Runtime: python3.8
+      Runtime: python3.7
       Timeout: 10
       Environment:
         Variables:
@@ -72,7 +72,7 @@ Resources:
     Properties:
       CodeUri: src-lambda-transform
       Handler: app.lambda_handler
-      Runtime: python3.8
+      Runtime: python3.7
       Layers:  
         - Ref:  LoRaWANPayloadDecoderLayer
       Timeout: 10
