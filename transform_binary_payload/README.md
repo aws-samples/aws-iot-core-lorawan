@@ -52,7 +52,6 @@ Please use an MQTT Test Client to invoke the AWS IoT Rule  `samplebinarytransfor
 
 ```json
 {
-    "PayloadDecoderName": "sample_device",
     "PayloadData": "y7QKRAGpAQnEf/8=",
     "WirelessDeviceId": "57728ff8-5d1d-4130-9de2-f004d8722bc2",
     "WirelessMetadata": {
