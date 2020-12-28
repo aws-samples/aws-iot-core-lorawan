@@ -1,0 +1,363 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# software and associated documentation files (the "Software"), to deal in the Software
+# without restriction, including without limitation the rights to use, copy, modify,
+# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#
+#
+# The purpose of this template is to create two IoT Rules in your AWS Account:
+# - <stack name>_UpdateShadowWithLoRaWANPayload_<binary decoder name>
+# - <stack name>_UpdateShadowWithLoRaWANPayload_MapThingName_<binary decoder name>
+
+# Both rules will update a shadow of an AWS IoT Thing with a decoded payload from a LoRaWAN device. The
+# difference between both rules is how they detect the name of the AWS IoT Thing for the shadow update:
+#
+#  - The rule "<stack name>_UpdateShadowWithLoRaWANPayload_<binary decoder name>" will update a
+# shadow of AWS IoT Thing with the name derived from the value of the attribute "WirelessDeviceId"
+#
+#  - The rule "<stack name>_UpdateShadowWithLoRaWANPayload_MapThingName_<binary decoder name>" allows
+# customization of the logic do derive a Thing name throught AWS Lambda function. An example Lambda function
+# in this sample will perform a lookup in the IoT Registry based on the attribute name of the thing.
+
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Sample for publishing the telemetry and transmission metadata from a LoRaWAN device to the shadow of the AWS IoT Thing                                                                         
+
+#  ██████   █████  ██████   █████  ███    ███ ███████ ████████ ███████ ██████  ███████ 
+#  ██   ██ ██   ██ ██   ██ ██   ██ ████  ████ ██         ██    ██      ██   ██ ██      
+#  ██████  ███████ ██████  ███████ ██ ████ ██ █████      ██    █████   ██████  ███████ 
+#  ██      ██   ██ ██   ██ ██   ██ ██  ██  ██ ██         ██    ██      ██   ██      ██ 
+#  ██      ██   ██ ██   ██ ██   ██ ██      ██ ███████    ██    ███████ ██   ██ ███████    
+#                                                                                      
+Parameters:
+  # Name of binary decode to transform incoming binary LoRaWAN Payloads to JSON.
+  # For the demonstration purposes you can use the included sample decoder which will generate
+  # the payload like this:
+  # {
+  #    temperature": 26.55 -> random number
+  #    "humidity": 42.44, -> random number
+  #    "input_length": 11 -> length of payload received from a LoRaWAN device
+  #    "input_hex": "CBC4091501700109027FFF" -> payload received from a LoRaWAN device
+  # }
+  # Please review src-iotrule-transformation/app.py for instructions on how to add
+  # a binary decoder for your LoRaWAN device.
+  ParamBinaryDecoderName:
+    Type: String
+    Default: sample_device
+    Description: Name of binary decoder as configured in src-iotrule-transformation/app.py
+
+  # The IoT Rule will publish error messages on the topic configured below.
+  TopicOutgoingErrors:
+    Type: String
+    Default: iotthingshadowsample_error
+    Description: Topic for errors
+
+  # The IoT Rule will publish debug messages on the topic configured below.
+  TopicOutgoingDebug:
+    Type: String
+    Default: iotthingshadowsample_debug
+    Description: Name of topic to publish debug messages to
+
+  # The parameter below specifies a name of the IoT Thing shadow to update
+  ParamShadowName:
+    Type: String
+    Default: LoRaWANTelemetry
+
+  # The attribute according to the JSON path specified below will be used to
+  # detect the name of the IoT Thing for shadow update.
+  # Example: if you specify "WirelessDeviceId" and the incoming payload is
+  # {"WirelessDeviceId": # "8b00de4a-0fac-407b-93e6-8c59fd411f16",..."}
+  # , the shadow of the AWS IoT Thing with the name "8b00de4a-0fac-407b-93e6-8c59fd411f16" will be updated.
+  ParamShadowThingNamePath:
+    Type: String
+    Default: WirelessDeviceId
+    AllowedValues:
+      - WirelessDeviceId
+      - WirelessMetadata.LoRaWAN.DevEui
+    Description: JSON path to retrieve the name of the shadow IoT Thing
+
+#                                                                                      
+#  ██████  ███████ ███████  ██████  ██    ██ ██████   ██████ ███████ ███████ 
+#  ██   ██ ██      ██      ██    ██ ██    ██ ██   ██ ██      ██      ██      
+#  ██████  █████   ███████ ██    ██ ██    ██ ██████  ██      █████   ███████ 
+#  ██   ██ ██           ██ ██    ██ ██    ██ ██   ██ ██      ██           ██ 
+#  ██   ██ ███████ ███████  ██████   ██████  ██   ██  ██████ ███████ ███████ 
+#                                                                            
+
+Resources:
+  ############################################################################################
+  # This AWS IoT Rule rule will update a shadow of an AWS IoT Thing with a decoded payload from a LoRaWAN
+  #  device. It  will use of attributes  of the incoming payload message (e.g. value of attribute
+  # WirelessDeviceId) as a Thing name
+  ############################################################################################
+
+  UpdateShadowWithLoRaWANPayloadRule:
+    Type: "AWS::IoT::TopicRule"
+    Properties:
+      RuleName: !Sub "${AWS::StackName}_UpdateShadowWithLoRaWANPayload_${ParamBinaryDecoderName}"
+      TopicRulePayload:
+        AwsIotSqlVersion: "2016-03-23"
+        RuleDisabled: false
+
+        Sql: !Sub
+          - |
+            SELECT aws_lambda("${LambdaARN}",
+                              {"PayloadDecoderName": "${ParamBinaryDecoderName}", 
+                              "PayloadData":PayloadData, 
+                              "WirelessDeviceId": WirelessDeviceId, 
+                               "WirelessMetadata": WirelessMetadata}) as state.reported
+
+          - { LambdaARN: !GetAtt TransformLoRaWANBinaryPayloadFunction.Arn }
+        Actions:
+          - Republish:
+              RoleArn: !GetAtt UpdateShadowWithLoRaWANPayloadRuleActionRole.Arn
+              Topic:
+                !Join [
+                  "",
+                  [
+                    "$$aws/things/${",
+                    !Ref ParamShadowThingNamePath,
+                    "}/shadow/name/",
+                    !Ref ParamShadowName,
+                    "/update",
+                  ],
+                ]
+              Qos: 0
+          - Republish:
+              RoleArn: !GetAtt UpdateShadowWithLoRaWANPayloadRuleActionRole.Arn
+              Topic: !Join ["", [!Ref TopicOutgoingDebug]]
+              Qos: 0
+
+        ErrorAction:
+          Republish:
+            RoleArn: !GetAtt UpdateShadowWithLoRaWANPayloadRuleActionRole.Arn
+            Topic: !Ref TopicOutgoingErrors
+            Qos: 0
+
+  # Permission for AWS IoT Rule action
+  UpdateShadowWithLoRaWANPayloadRuleActionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - iot.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: iot:Publish
+                Resource:
+                  !Join [
+                    "",
+                    [
+                      "arn:aws:iot:",
+                      !Ref "AWS::Region",
+                      ":",
+                      !Ref "AWS::AccountId",
+                      ":topic/*",
+                    ],
+                  ]
+
+  ############################################################################################
+  # This AWS IoT Rule rule will update a shadow of an AWS IoT Thing with a decoded payload from a LoRaWAN
+  #  device. It allows  customization of the logic do derive a Thing name throught AWS Lambda function. An
+  # example Lambda function. In this sample will perform a lookup in the IoT Registry based on the attribute # name of the thing.
+  ############################################################################################
+  UpdateShadowWithLoRaWANPayloadMappedThingNameRule:
+    Type: "AWS::IoT::TopicRule"
+    Properties:
+      RuleName: !Sub "${AWS::StackName}_UpdateShadowWithLoRaWANPayload_MapThingName_${ParamBinaryDecoderName}"
+      TopicRulePayload:
+        AwsIotSqlVersion: "2016-03-23"
+        RuleDisabled: false
+
+        Sql: !Sub
+          - |
+            SELECT aws_lambda("${LambdaARN}",
+                              {"PayloadDecoderName": "${ParamBinaryDecoderName}", 
+                              "PayloadData":PayloadData, 
+                              "WirelessDeviceId": WirelessDeviceId, 
+                               "WirelessMetadata": WirelessMetadata}) as state.reported
+
+          - { LambdaARN: !GetAtt TransformLoRaWANBinaryPayloadFunction.Arn }
+        Actions:
+          - Republish:
+              RoleArn: !GetAtt UpdateShadowWithLoRaWANPayloadRuleActionRole.Arn
+              Topic:
+                !Join [
+                  "",
+                  [
+                    "$$aws/things/${",
+                    "aws_lambda(",
+                    '"',
+                    !GetAtt MapThingNameFunction.Arn,
+                    '"',
+                    ", {'searchvalue': WirelessDeviceId, 'searchtype': 'ASSOCIATED_THING'}).ThingName",
+                    "}/shadow/name/",
+                    !Ref ParamShadowName,
+                    "/update",
+                  ],
+                ]
+              Qos: 0
+          - Republish:
+              RoleArn: !GetAtt UpdateShadowWithLoRaWANPayloadRuleActionRole.Arn
+              Topic: !Join ["", [!Ref TopicOutgoingDebug]]
+              Qos: 0
+
+        ErrorAction:
+          Republish:
+            RoleArn: !GetAtt UpdateShadowWithLoRaWANPayloadRuleActionRole.Arn
+            Topic: !Ref TopicOutgoingErrors
+            Qos: 0
+
+  #########################################################################################################
+  # AWS Lambda function for mapping of the message payload to the name of AWS IoT Thing for shadow update #
+  #########################################################################################################
+  MapThingNameFunction:
+    Type: AWS::Serverless::Function
+    Name: !Sub "${AWS::StackName}-MapThingNameFunction"
+    Properties:
+      CodeUri: src-mapthingname
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Timeout: 10
+      Environment:
+        Variables:
+          # Allowed valeu for SEARCH_TYPE:
+          # ASSOCIATED_THING: Lookup the Thing associated to WirelessDeviceId (https://docs.aws.amazon.com/iot-wireless/2020-11-22/apireference/API_AssociateWirelessDeviceWithThing.html)
+          # THING_INDEX: Lookup the Thing by search of IoT Registry index. If using THING_INDEX, also specify parameter SEARCH_THING_ATTRIBUTENAME to define name of an attribute for matching in thing index,
+          # for example:
+          # SEARCH_THING_ATTRIBUTENAME: WirelessDeviceId
+          SEARCH_TYPE: THING_INDEX
+          SEARCH_THING_ATTRIBUTENAME: WirelessDeviceId
+      Policies:
+        - Statement:
+            - Sid: AllowSearchInIotIndex
+              Effect: Allow
+              Action: iot:SearchIndex
+              Resource:
+                !Join [
+                  "",
+                  [
+                    "arn:aws:iot:",
+                    !Ref "AWS::Region",
+                    ":",
+                    !Ref "AWS::AccountId",
+                    ":index/AWS_Things",
+                  ],
+                ]
+
+            - Sid: AllowGetWirelessDevice
+              Effect: Allow
+              Action: iotwireless:GetWirelessDevice
+              Resource:
+                !Join [
+                  "",
+                  [
+                    "arn:aws:iotwireless:",
+                    !Ref "AWS::Region",
+                    ":",
+                    !Ref "AWS::AccountId",
+                    ":WirelessDevice/*",
+                  ],
+                ]
+
+  # Provide AWS IoT a permission to invoke the lambda function
+  MapThingNameFunctionInvocationPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      SourceArn:
+        !Join [
+          "",
+          [
+            "arn:aws:iot:",
+            !Ref "AWS::Region",
+            ":",
+            !Ref "AWS::AccountId",
+            ":rule/",
+            !Ref UpdateShadowWithLoRaWANPayloadMappedThingNameRule,
+          ],
+        ]
+      Action: lambda:InvokeFunction
+      Principal: iot.amazonaws.com
+      FunctionName: !Ref MapThingNameFunction
+
+  ############################################################################################
+  # AWS Lambda function for binary decoding. This function will refer to
+  # layer "DecoderLayer" to include the necessary decoding libraries
+  ############################################################################################
+
+  TransformLoRaWANBinaryPayloadFunction:
+    Type: AWS::Serverless::Function
+    Name: !Sub "${AWS::StackName}-TransformLoRaWANBinaryPayloadFunction"
+    Properties:
+      CodeUri: src-iotrule-transformation
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Layers:
+        - Ref: LoRaWANPayloadDecoderLayer
+      Environment:
+        Variables:
+          RETURN_RAW_DATA: True
+
+  # Provide AWS IoT a permission to invoke the lambda function
+  TransformLoRaWANBinaryPayloadFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt TransformLoRaWANBinaryPayloadFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: iot.amazonaws.com
+
+  ############################################################################################
+  # AWS Lambda layer with decoders
+  ############################################################################################
+  LoRaWANPayloadDecoderLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub "${AWS::StackName}-LoRaWANPayloadDecoderLayer"
+      Description: Payload decoders for LoRaWAN devices
+      ContentUri: src-payload-decoders
+      CompatibleRuntimes:
+        - python3.8
+      RetentionPolicy: Retain
+
+#   ██████  ██    ██ ████████ ██████  ██    ██ ████████ ███████ 
+#  ██    ██ ██    ██    ██    ██   ██ ██    ██    ██    ██      
+#  ██    ██ ██    ██    ██    ██████  ██    ██    ██    ███████ 
+#  ██    ██ ██    ██    ██    ██      ██    ██    ██         ██ 
+#   ██████   ██████     ██    ██       ██████     ██    ███████ 
+#                                                               
+
+Outputs:
+  UpdateShadowWithLoRaWANPayloadRuleName:
+    Description: >
+      Option 1: Please use the value below to configure the Destination in AWS IoT Core for LoRaWAN. This rule will  will update a shadow of an AWS IoT Thing with the name derived from the value of the attribute WirelessDeviceId. For example, if incoming payload is {"WirelessDeviceId": # "8b00de4a-0fac-407b-93e6-8c59fd411f16",..."}, the shadow of the AWS IoT Thing with the name "8b00de4a-0fac-407b-93e6-8c59fd411f16" will be updated with a decoded payload.
+
+      To test this rule, please publish the payload below to the topic
+
+    Value: !Ref UpdateShadowWithLoRaWANPayloadRule
+
+  UpdateShadowWithLoRaWANPayloadMappedThingNameRuleName:
+    Description: >
+      Option 2: please use the value below to configure the Destination in AWS IoT Core for LoRaWAN. This rule will  will update a shadow of an AWS IoT Thing with the name calculated by the AWS Lambda function <stack name>-MapThingNameFunction". For example, if incoming payload is {"WirelessDeviceId": # "8b00de4a-0fac-407b-93e6-8c59fd411f16",..."}, the Lambda function will make a lookup in the AWS registry for a Thing with an attribue 'WirelessDeviceId=8b00de4a-0fac-407b-93e6-8c59fd411f16'. If it finds such a thing, the shadow of this thing will be updated with a decoded payload.
+
+    Value: !Ref UpdateShadowWithLoRaWANPayloadMappedThingNameRule
