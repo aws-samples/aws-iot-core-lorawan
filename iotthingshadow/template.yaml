@@ -247,8 +247,7 @@ Resources:
           # THING_INDEX: Lookup the Thing by search of IoT Registry index. If using THING_INDEX, also specify parameter SEARCH_THING_ATTRIBUTENAME to define name of an attribute for matching in thing index,
           # for example:
           # SEARCH_THING_ATTRIBUTENAME: WirelessDeviceId
-          SEARCH_TYPE: THING_INDEX
-          SEARCH_THING_ATTRIBUTENAME: WirelessDeviceId
+          SEARCH_TYPE: ASSOCIATED_THING
       Policies:
         - Statement:
             - Sid: AllowSearchInIotIndex
@@ -278,6 +277,20 @@ Resources:
                     ":",
                     !Ref "AWS::AccountId",
                     ":WirelessDevice/*",
+                  ],
+                ]
+            - Sid: AllowDescribeThibg
+              Effect: Allow
+              Action: iot:DescribeThing
+              Resource:
+                !Join [
+                  "",
+                  [
+                    "arn:aws:iot:",
+                    !Ref "AWS::Region",
+                    ":",
+                    !Ref "AWS::AccountId",
+                    ":thing/*",
                   ],
                 ]
 

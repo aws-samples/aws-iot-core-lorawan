@@ -15,7 +15,7 @@ In this repository you will find fully functional sample applications to quickly
     Detecting events based on telemetry data from connected devices is a common use case in IoT across many industries. This sample explains how to integrate AWS IoT Events with LoRaWAN for IoT Core. You can learn how to translate telemetry values from a LoRaWAN device into events and notify users about these events using E-Mail and SMS.
 
 - [Updating IoT Thing shadow with decoded device payload](iotthingshadow)  
-    [Shadows](https://docs.aws.amazon.com/iot/latest/developerguide/iot-device-shadows.html) can make a device’s state available to apps and other services whether the device is connected to AWS IoT or not. In this sample you will learn how to update the shadow of AWS IoT Thing with the telemetry from a LoRaWAN device. 
+    AWS IoT Thing [Shadows](https://docs.aws.amazon.com/iot/latest/developerguide/iot-device-shadows.html) can make a device’s state available to apps and other services whether the device is connected to AWS IoT or not. In this sample you will learn how to update the shadow of AWS IoT Thing with the telemetry from a LoRaWAN device. 
 
 # Getting help 
 - [API Reference](http://docs.aws.amazon.com/console/iot/wireless/intro/apiref)
