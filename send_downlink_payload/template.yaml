@@ -1,0 +1,155 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# software and associated documentation files (the "Software"), to deal in the Software
+# without restriction, including without limitation the rights to use, copy, modify,
+# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Send a base64 encoded payload to your LoRaWAN device by publishing to topic cmd/downlink/<AWSIoTCoreforLoRaWAN Device Id>
+
+#  ██████   █████  ██████   █████  ███    ███ ███████ ████████ ███████ ██████  ███████ 
+#  ██   ██ ██   ██ ██   ██ ██   ██ ████  ████ ██         ██    ██      ██   ██ ██      
+#  ██████  ███████ ██████  ███████ ██ ████ ██ █████      ██    █████   ██████  ███████ 
+#  ██      ██   ██ ██   ██ ██   ██ ██  ██  ██ ██         ██    ██      ██   ██      ██ 
+#  ██      ██   ██ ██   ██ ██   ██ ██      ██ ███████    ██    ███████ ██   ██ ███████    
+#                                                                                      
+
+Parameters:
+  LoRaWANAFPort:
+    Type: String
+    Default: 1
+    Description: FPort to use when sending messages
+
+  LoRaWANTransmitMode:
+    Type: Number
+    Default: 1
+    AllowedValues:
+      - 0
+      - 1
+    Description: 0 for UM (unacknowledge mode), 1 for AM (acknowledge mode)
+
+#                                                                                      
+#  ██████  ███████ ███████  ██████  ██    ██ ██████   ██████ ███████ ███████ 
+#  ██   ██ ██      ██      ██    ██ ██    ██ ██   ██ ██      ██      ██      
+#  ██████  █████   ███████ ██    ██ ██    ██ ██████  ██      █████   ███████ 
+#  ██   ██ ██           ██ ██    ██ ██    ██ ██   ██ ██      ██           ██ 
+#  ██   ██ ███████ ███████  ██████   ██████  ██   ██  ██████ ███████ ███████ 
+#                                                                            
+
+Resources:
+  SendDataToWirelessDeviceRule:
+    Type: "AWS::IoT::TopicRule"
+    Properties:
+      RuleName: !Sub "${AWS::StackName}_SendDataToWirelessDeviceRule"
+      TopicRulePayload:
+        AwsIotSqlVersion: "2016-03-23"
+        RuleDisabled: false
+        Sql: !Sub
+          - |
+            SELECT aws_lambda("${LambdaARN}",
+                              {"TransmitMode": ${TransmitMode}, 
+                              "FPort": ${FPort},
+                              "WirelessDeviceId": topic(3), 
+                               "PayloadData":  encode(*, 'base64')}) as sendresult 
+            FROM 'cmd/downlink/#'
+
+          - {
+              LambdaARN: !GetAtt SendDataToWirelessDeviceFunction.Arn,
+              FPort: !Ref LoRaWANAFPort,
+              TransmitMode: !Ref LoRaWANTransmitMode,
+            }
+
+        Actions:
+          - Republish:
+              RoleArn: !GetAtt SendDataToWirelessDeviceRuleRepublishRole.Arn
+              Topic: downlink/status/${topic(3)}
+              Qos: 0
+        ErrorAction:
+          Republish:
+            RoleArn: !GetAtt SendDataToWirelessDeviceRuleRepublishRole.Arn
+            Topic: downlink/error/${topic(3)}
+            Qos: 0
+
+  SendDataToWirelessDeviceRuleRepublishRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - iot.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: iot:Publish
+                Resource:
+                  !Join [
+                    "",
+                    [
+                      "arn:aws:iot:",
+                      !Ref "AWS::Region",
+                      ":",
+                      !Ref "AWS::AccountId",
+                      ":topic/downlink/*",
+                    ],
+                  ]
+
+  IoTPermissionForSendMessageToDeviceFunction:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt SendDataToWirelessDeviceFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: iot.amazonaws.com
+
+  SendDataToWirelessDeviceFunction:
+    Type: AWS::Serverless::Function
+    Name: !Sub "${AWS::StackName}-SendDataToWirelessDeviceFunction"
+    Properties:
+      CodeUri: src
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Timeout: 10
+      Policies:
+        - Statement:
+            - Sid: policy1
+              Effect: Allow
+              Action:
+                - iotwireless:SendDataToWirelessDevice
+              Resource: "*"
+
+#   ██████  ██    ██ ████████ ██████  ██    ██ ████████ ███████ 
+#  ██    ██ ██    ██    ██    ██   ██ ██    ██    ██    ██      
+#  ██    ██ ██    ██    ██    ██████  ██    ██    ██    ███████ 
+#  ██    ██ ██    ██    ██    ██      ██    ██    ██         ██ 
+#   ██████   ██████     ██    ██       ██████     ██    ███████ 
+#                                                               
+
+Outputs:
+  SendMessageToDeviceFunctionFunction:
+    Description: "Lambda Function ARN"
+    Value: !GetAtt SendDataToWirelessDeviceFunction.Arn
+  SampleTopic:
+    Description: "Use this topic to send a message, replacing <WirelessDeviceId> with the id of your AWS IoT Core for LoRaWAN device"
+    Value: cmd/downlink/<WirelessDeviceId>
+  SamplePayload:
+    Description: "Sample payload (0x00 in base64)"
+    Value: "AA=="
