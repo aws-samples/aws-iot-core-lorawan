@@ -1,0 +1,1 @@
+# Sample for workshop "How to build a binary decoder for AWS IoT Core for LoRaWAN"

@@ -1,0 +1,21 @@
+{
+  "PayloadData": "DRoAAAAABNYBLAA=",
+  "DeviceId": "11a9fdf8-e7ac-406f-9517-df4807603959",
+  "ApplicationId": 2,
+  "Metadata": {
+    "LoRaWAN": {
+      "DataRate": 0,
+      "DevEUI": "a84041b3618248f7",
+      "FPort": 2,
+      "Frequency": 867100000,
+      "Gateways": [
+        {
+          "GatewayEUI": "80029cfffe5cf1f3",
+          "RSSI": -31,
+          "SNR": 10.75
+        }
+      ],
+      "Timestamp": "2020-10-15T16:12:55Z"
+    }
+  }
+}
