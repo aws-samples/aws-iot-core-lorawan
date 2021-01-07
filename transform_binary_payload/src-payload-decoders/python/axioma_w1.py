@@ -79,7 +79,7 @@ def decode_log_data(bytes, offset, decoded_payload):
     log_index = 1
     payload_size = len(bytes)
     while (offset < payload_size):
-        # Add an hour - Change this to match the meter log storage period, default is 1 hour
+        # Add an hour  -  Change this to match the meter log storage period, default is 1 hour
         cumulative_timestamp += datetime.timedelta(hours=1)
 
         size = 2
