@@ -272,7 +272,7 @@ Please perform following steps to implement your own binary transformation model
 
     ```shell
     git clone https://github.com/aws-samples/aws-iot-core-lorawan 
-    cd integration/transform_binary_payload
+    cd aws-iot-core-lorawan/transform_binary_payload
     ```
 
 2. Review source code of binary transformation for example in [src-payload-decoders/python/sample_device.py](src-payload-decoders/python/sample_device.py). Create a copy of the example, e.g.

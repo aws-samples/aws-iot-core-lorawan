@@ -23,7 +23,6 @@ Please consider our [developer guide](https://docs.aws.amazon.com/iot/latest/dev
 - [Monitoring and alarming of soil moisture by using AWS IoT Core for LoRaWAN and AWS IoT Events](soilmoisture_alarming)  
     Detecting events based on telemetry data from connected devices is a common use case in IoT across many industries. This sample explains how to integrate AWS IoT Events with LoRaWAN for IoT Core. You can learn how to translate telemetry values from a LoRaWAN device into events and notify users about these events using E-Mail and SMS.
 
-
 ## Getting help 
 
 - [API Reference](http://docs.aws.amazon.com/console/iot/wireless/intro/apiref)

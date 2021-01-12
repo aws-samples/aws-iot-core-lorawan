@@ -41,7 +41,7 @@ Please follow the steps below :
 
     ```shell
     git clone https://github.com/aws-samples/aws-iot-core-lorawan 
-    cd integration/iotthingshadow
+    cd aws-iot-core-lorawan/iotthingshadow
     ```
 
 2. This sample uses AWS SAM to build and deploy all necessary resources. Please perform the following commands to build the SAM artifacts:
@@ -185,7 +185,7 @@ Please perform following steps to implement your own binary transformation model
 
     ```shell
     git clone https://github.com/aws-samples/aws-iot-core-lorawan 
-    cd integration/iotthingshadow
+    cd aws-iot-core-lorawan/iotthingshadow
     ```
 
 2. Review source code of binary transformation for example in [src-payload-decoders/python/sample_device.py](src-payload-decoders/python/sample_device.py). Create a copy of the example, e.g.

@@ -38,7 +38,7 @@ Please perform following steps to deploy the stack with AWS SAM:
 
     ```shell
     git clone https://github.com/aws-samples/aws-iot-core-lorawan 
-    cd integration/send_downlink_payload
+    cd aws-iot-core-lorawan/send_downlink_payload
     ```
 
 2. This sample uses AWS SAM to build and deploy all necessary resources (e.g. AWS Lambda function, AWS IoT Rule, AWS IAM Roles) to your AWS account. Please perform the following commands to build the SAM artifacts:

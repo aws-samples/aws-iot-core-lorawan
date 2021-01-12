@@ -28,10 +28,7 @@ def dict_from_payload(base64_input: str):
 
     result = {
         "temperature": temperature,
-        "humidity": humidity,
-        "input_length": len(decoded),
-        "input_hex": decoded.hex().upper(),
-
+        "humidity": humidity
     }
 
     return result
