@@ -59,7 +59,7 @@ Please perform the following steps to deploy a sample application:
 
     ```shell
     git clone https://github.com/aws-samples/aws-iot-core-lorawan 
-    cd integration/transform_binary_payload
+    cd aws-iot-core-lorawan/integration/transform_binary_payload
     ```
 
 2. Perform the following command to build the SAM artifacts:
@@ -78,6 +78,12 @@ Please perform the following steps to deploy a sample application:
     - Parameter **AWS Region:** select a region supporting AWS IoT Core for LoRaWAN
     
     Please note that `sam deploy --guided` should be only executed for a first deployment. To redeploy after that please use `sam deploy`.
+
+4. Please wait few minutes to complete the deployment
+
+    ```bash
+    Successfully created/updated stack - samplebinarytransform in <region>
+    ```
 
 
 ### Step 2: Testing binary transformation by simulating an ingestion from a LoRaWAN device
@@ -238,7 +244,7 @@ Please perform the following steps to deploy a sample application:
 
     ```shell
     git clone https://github.com/aws-samples/aws-iot-core-lorawan 
-    cd integration/transform_binary_payload
+    cd aws-iot-core-lorawan/transform_binary_payload
     ```
 
 2. Perform the following command to build the SAM artifacts:
@@ -255,7 +261,7 @@ Please perform the following steps to deploy a sample application:
 
     Please select the default values of parameters by typing "Enter", with the following exceptions:
     - Parameter **AWS Region:** select a region supporting AWS IoT Core for LoRaWAN
-    - Parameter **Decoder**: select a decoder name according to a following overview:
+    - Parameter **ParamBinaryDecoderName**: select a decoder name according to a following overview:
 
     | Manufacturer | Device              | Decoder name       |
     | ------------ | ------------------- | ------------------ |
@@ -266,6 +272,11 @@ Please perform the following steps to deploy a sample application:
 
   Please note that `sam deploy --guided` should be only executed for a first deployment. To redeploy after that please use `sam deploy`.
 
+4. Please wait few minutes to complete the deployment
+
+    ```bash
+    Successfully created/updated stack - samplebinarytransform in <region>
+    ```
 
 ### Step 2: Testing binary transformation by simulating an ingestion from a LoRaWAN device
 
@@ -430,7 +441,7 @@ Please perform following steps to implement your own binary transformation model
 
     ```shell
     git clone https://github.com/aws-samples/aws-iot-core-lorawan 
-    cd integration/transform_binary_payload
+    cd aws-iot-core-lorawan/transform_binary_payload
     ```
 
 2. Review source code of binary transformation for example in [src-payload-decoders/python/sample_device.py](src-payload-decoders/python/sample_device.py). Create a copy of the example, e.g.
@@ -461,7 +472,9 @@ Please perform following steps to implement your own binary transformation model
 
     Please note that `sam deploy --guided` should be only executed for a first deployment. To redeploy after that please use `sam deploy`.
 
+
     Congratulations! You successfully deployed your binary transformation logic into your AWS account. Please follow [this guidelines](#step-3-integrating-with-aws-iot-core-for-lorawan) to integrate with AWS IoT Core for LoRaWAN
+
 
 ## How to create an IAM role for AWS IoT Core for LoRaWAN destination
 

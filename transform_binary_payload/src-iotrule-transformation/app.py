@@ -38,6 +38,7 @@ import sys
 import sample_device
 import dragino_lht65
 import axioma_w1
+import tabs_objectlocator
 
 # Allowed payload type values. This array will be used for validation of the "type" attribute for a
 # handle of a Lambda function. For each value in the list below, you should import a module with the
