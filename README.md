@@ -7,7 +7,7 @@ Please consider our [developer guide](https://docs.aws.amazon.com/iot/latest/dev
 ## Samples for typical design patterns
 
 - [A "Hello world" application: decoding uplink binary payloads](transform_binary_payload)  
-    LoRaWAN devices typically send uplink payloads as binary encoded messages. In this sample you will learn how to decode a binary message from your LoRaWAN device and integrate the decoded payload with more than 17 AWS services.
+    LoRaWAN devices typically send uplink payloads as binary encoded messages. In this sample you will learn how to decode a binary message from your LoRaWAN device and integrate the decoded payload with more than 17 AWS services using AWS IoT Rules. Example decoders for the following devices are included: Browan Tabs Object Locator, Axioma W1, Dragino LHT65. [Contributions](CONTRIBUTING.MD) to example binary decoders are welcome.
 
 - [Sending downlink payload to a LoRaWAN device](send_downlink_payload)  
     In this sample you will learn how to implement different options for sending downlink payload to your LoRaWAN devices. It includes examples for AWS SDK, AWS CLI and AWS IoT Core message broker.
