@@ -9,6 +9,7 @@ This repository contains resources for you to learn how to transform binary payl
   - Browan Tabs Object Locator
   - Dragino LHT65
   - Axioma W1
+  - Elsys
 
 
 - An [AWS IoT Rule](#example-for-transforming-a-lorawan-binary-payload) for transforming incoming LoRaWAN binary payloads and acting on the resulting JSON. In this sample, the IoT Rule uses a [republish action](https://docs.aws.amazon.com/iot/latest/developerguide/republish-rule-action.html) to republish transformed payload to another MQTT topic. You can use a similar approach to customize the rule actions for the requirements of your application.
@@ -38,6 +39,7 @@ Example binary deocoders for the following devices are included in this sample:
 | Browan       | Tabs Object Locator | tabs_objectlocator |
 | Axioma       | W1                  | axioma_w1          |
 | Dragino      | LHT65               | dragino_lht65      |
+| Elsys        | all                 | elsys              |
 
 
 Before you proceed, please select a preferred approach for using this sample:
@@ -268,6 +270,7 @@ Please perform the following steps to deploy a sample application:
     | Axioma       | W1                  | axioma_w1          |
     | Dragino      | LHT65               | dragino_lht65      |
     | Browan       | Tabs Object Locator | tabs_objectlocator |
+    | Elsys        | all                 | elsys              |
     
 
   Please note that `sam deploy --guided` should be only executed for a first deployment. To redeploy after that please use `sam deploy`.
@@ -291,6 +294,7 @@ The payload is structured in a same way as it will be ingested by AWS IoT Core f
 | Axioma       | W1                  | eoFaXxADAAAAwKRZXwMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= |
 | Dragino      | LHT65               | DRoAAAAABNYBLAA=                                                 |
 | Browan       | Tabs Object Locator | Ae48SPbhAgRupmA=                                                 |
+| Elsys        | all                 | MDEwMEUyMDIyOTA0MDAyNzA1MDYwNjAzMDgwNzBENjIxOTAwRTIxOTAwQTM=     |
 
 ```json
 {
