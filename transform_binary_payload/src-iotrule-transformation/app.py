@@ -40,6 +40,7 @@ import dragino_lht65
 import axioma_w1
 import tabs_objectlocator
 import elsys
+import globalsat_lt100
 
 # Allowed payload type values. This array will be used for validation of the "type" attribute for a
 # handle of a Lambda function. For each value in the list below, you should import a module with the
@@ -52,7 +53,7 @@ import elsys
 # please add name of your binary decoder (e.g. "mylorawandevice") here (see "Step 4" above)
 VALID_PAYLOAD_DECODER_NAMES = ["sample_device",
                                "dragino_lht65", "axioma_w1", "tabs_objectlocator",
-                               "elsys"]
+                               "elsys", "globalsat_lt100"]
 
 # Function name for logging
 FUNCTION_NAME = "ConvertBinaryPayload"
