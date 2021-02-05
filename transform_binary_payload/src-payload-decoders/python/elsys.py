@@ -22,6 +22,7 @@
 
 import base64
 import json
+import helpers
 
 DEBUG_OUTPUT = False
 
@@ -59,20 +60,6 @@ TYPE_SETTINGS = 0x3E       #  n bytes  Sensor settings sent to server at startup
 TYPE_RFU = 0x3F            # Reserved for future use
 
 
-def bin16dec(binary):
-    number = binary & 0xFFFF
-    if 0x8000 & number:
-        number = -(0x010000 - number)
-    return number
-
-
-def bin8dec(binary):
-    number = binary & 0xFF
-    if 0x80 & number:
-        number = -(0x0100 - number)
-    return number
-
-
 def dict_from_payload(base64_input: str):
     decoded = base64.b64decode(base64_input)
 
@@ -89,7 +76,7 @@ def dict_from_payload(base64_input: str):
     while i < len(decoded):
         if decoded[i] == TYPE_TEMP:  # Temperature
             temp = (decoded[i + 1] << 8) | (decoded[i + 2])
-            temp = bin16dec(temp)
+            temp = helpers.bin16dec(temp)
             result['temperature'] = temp / 10
             i += 3
         elif decoded[i] == TYPE_RH:  # Humidity
@@ -97,9 +84,9 @@ def dict_from_payload(base64_input: str):
             result['humidity'] = rh
             i += 2
         elif decoded[i] == TYPE_ACC:  # Acceleration X,Y,Z
-            result['accX'] = bin8dec(decoded[i + 1])
-            result['accY'] = bin8dec(decoded[i + 2])
-            result['accZ'] = bin8dec(decoded[i + 3])
+            result['accX'] = helpers.bin8dec(decoded[i + 1])
+            result['accY'] = helpers.bin8dec(decoded[i + 2])
+            result['accZ'] = helpers.bin8dec(decoded[i + 3])
             i += 4
         elif decoded[i] == TYPE_LIGHT:  # Light
             result['light'] = (decoded[i + 1] << 8) | (decoded[i + 2])
@@ -132,7 +119,7 @@ def dict_from_payload(base64_input: str):
             i += 5
         elif decoded[i] == TYPE_EXT_TEMP1:  # Ext temp 1
             temp = (decoded[i + 1] << 8) | (decoded[i + 2])
-            temp = bin16dec(temp)
+            temp = helpers.bin16dec(temp)
             result['extTemp1'] = temp / 10
             i += 3
         elif decoded[i] == TYPE_EXT_DIGITAL:  # Ext dig input 1
@@ -146,9 +133,9 @@ def dict_from_payload(base64_input: str):
             i += 2
         elif decoded[i] == TYPE_IR_TEMP:  # IR temp
             iTemp = (decoded[i + 1] << 8) | (decoded[i + 2])
-            iTemp = bin16dec(iTemp)
+            iTemp = helpers.bin16dec(iTemp)
             eTemp = (decoded[i + 3] << 8) | (decoded[i + 4])
-            eTemp = bin16dec(eTemp)
+            eTemp = helpers.bin16dec(eTemp)
             result['irTempInt'] = iTemp / 10
             result['irTempExt'] = eTemp / 10
             i += 5
@@ -186,7 +173,7 @@ def dict_from_payload(base64_input: str):
             i += 3
         elif decoded[i] == TYPE_EXT_TEMP2:  # Ext temp 2
             temp = (decoded[i + 1] << 8) | (decoded[i + 2])
-            temp = bin16dec(temp)
+            temp = helpers.bin16dec(temp)
             if 'extTemp2' in result:
                 if type(result['extTemp2']) is float:
                     result['extTemp2'] = [result['extTemp2']]
