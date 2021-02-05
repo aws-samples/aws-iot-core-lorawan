@@ -7,7 +7,7 @@ This repository contains resources for you to learn how to transform binary payl
 - Binary decoders for a set of devices, which will be deployed in an [AWS Lambda layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html) so that it may be used in any of your Python lambda functions. Following binary decoders are included:
   - Decoder simulating a temperature and humidity sensor device. It enables you to test is sample without having a physical LoRaWAN device.
   - Browan Tabs Object Locator
-  - Dragino LHT65
+  - Dragino LHT65, LGT92, LSE01
   - Axioma W1
   - Elsys
   - Globalsat LT-100
@@ -41,6 +41,8 @@ Example binary deocoders for the following devices are included in this sample:
 | Browan       | Tabs Object Locator | tabs_objectlocator |
 | Axioma       | W1                  | axioma_w1          |
 | Dragino      | LHT65               | dragino_lht65      |
+| Dragino      | LGT92               | dragino_lgt92      |
+| Dragino      | LSE01               | dragino_lse01      |
 | Elsys        | all                 | elsys              |
 | Globalsat    | LT-100              | globalsat_lt100    |
 | NAS          | Pulse Reader UM3080 | nas_um3080         |
@@ -299,10 +301,13 @@ The payload is structured in a same way as it will be ingested by AWS IoT Core f
 | ------------ | ------------------- | ---------------------------------------------------------------- |
 | Axioma       | W1                  | eoFaXxADAAAAwKRZXwMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= |
 | Dragino      | LHT65               | DRoAAAAABNYBLAA=                                                 |
+| Dragino      | LSE01               | AuHtlACmawQPVGM=                                                 |
+| Dragino      | LGT92               | DSEAAAEVCMUGpAA=                                                 |
 | Browan       | Tabs Object Locator | Ae48SPbhAgRupmA=                                                 |
 | Elsys        | all                 | MDEwMEUyMDIyOTA0MDAyNzA1MDYwNjAzMDgwNzBENjIxOTAwRTIxOTAwQTM=     |
 | Globalsat    | LT-100              | MDA4MjY0MDI2NERBRDlGQjg4RENENg==                                 |
 | NAS          | Pulse Reader UM3080 | NDNGNjFBNEIxMjAxMDAwMDAwMjBDNDA5MDAwMA==                         |
+
 
 
 ```json
