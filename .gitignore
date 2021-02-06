@@ -3,3 +3,4 @@ tools/*
 .DS_Store
 **/.aws-sam/*
 **/samconfig.toml
+**/**.pem
