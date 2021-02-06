@@ -49,7 +49,7 @@ Example binary deocoders for the following devices are included in this sample:
 Before you proceed, please select a preferred approach for using this sample:
 
 - If you don't have a LoRaWAN device yet, or your LoRaWAN device is not included in a list above, please proceed to [Approach A: using simulated decoder](#approach-a-using-simulated-decoder). You will learn how to use binary decoding based on a decoder for a simulated device.
-- If your device is included in the list above, please proceed to [Approach B](#approach-a-using-simulated-decoder). You will get guidelines on how to deploy a binary decoder for your device.
+- If your device is included in the list above, please proceed to [Approach B](#approach-b-using-lorawan-device-with-an-included-decoder). You will get guidelines on how to deploy a binary decoder for your device.
 
 
 ## Approach A: using simulated decoder
