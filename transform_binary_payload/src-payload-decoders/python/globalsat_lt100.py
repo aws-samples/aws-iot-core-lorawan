@@ -67,7 +67,7 @@ def bin32dec(binary):
     return number
 
 
-def dict_from_payload(base64_input: str):
+def dict_from_payload(base64_input: str, fport: int = None):
     decoded = base64.b64decode(base64_input)
 
     if DEBUG_OUTPUT:
@@ -114,11 +114,13 @@ def dict_from_payload(base64_input: str):
     battery_capacity = int(decoded[2])
 
     # Get latitude from byte 3-6
-    lat = (decoded[3] << 24) | (decoded[4] << 16) | (decoded[5] << 8) | (decoded[6])
+    lat = (decoded[3] << 24) | (decoded[4] << 16) | (
+        decoded[5] << 8) | (decoded[6])
     lat = bin32dec(lat) / 1000000
 
     # Get longitude from byte 7-10
-    long = (decoded[7] << 24) | (decoded[8] << 16) | (decoded[9] << 8) | (decoded[10])
+    long = (decoded[7] << 24) | (decoded[8] << 16) | (
+        decoded[9] << 8) | (decoded[10])
     long = bin32dec(long) / 1000000
 
     # Output
