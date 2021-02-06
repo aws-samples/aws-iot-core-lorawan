@@ -26,26 +26,26 @@ Please consider our [developer guide](https://docs.aws.amazon.com/iot/latest/dev
 ## Included binary decoders
 LoRaWAN devices often encode transmitted data in a binary format, as it increases transmission efficiency and improves battery lifetime. However, as the data arrive in the cloud, many use cases require a structured format. Transforming the binary data into JSON, for example, enables filtering and enrichment using [AWS IoT SQL](https://docs.aws.amazon.com/iot/latest/developerguide/iot-sql-reference.html) as well as integration with further AWS services  using [AWS IoT Rule Actions](https://docs.aws.amazon.com/iot/latest/developerguide/iot-rule-actions.html).
 
-The sample[Decoding binary payloads from LoRaWAN devices](transform_binary_payload) repository contains the binary decoders for the following devices:
+The sample [Decoding binary payloads from LoRaWAN devices](transform_binary_payload) repository contains the binary decoders for the following devices. Please note that all decoders are provided without any guarantee to fit for any specific purpose and are intended for use in a laboratory or prototypic environment.
 
-- Air quality / CO2 / environment measurement
+- **Air quality / CO2 / environment measurement**
   - Elsys ERS CO2
-- Door and window opening
+- **Door and window opening**
   - Elsys EMS Door
   - Dragino LDS01
-- GNSS Tracking
+- **GNSS tracking**
   - Dragino LGT92
   - Globalsat LT-100
   - Browan Tabs Object Locator
-- Presence and smart home
+- **Presence and smart home**
   - Tektelic Smart Room Sensor
-- Sound level measurement
+- **Sound level measurement**
   - Elsys ERS Sound
-- Temperature, humidity and moisture
+- **Temperature, humidity and moisture**
   - Dragino LHT65 (temperature and humidity)
   - Dragino LSE01 (temperature and moisture)
   - Elsys ERS Lite
-- Water Metering
+- **Water Metering**
   - Axioma W1
 
 [Contributions](CONTRIBUTING.md) to example binary decoders are welcome.
