@@ -15,7 +15,7 @@ This repository contains resources for you to learn how to transform binary payl
 
 - An [AWS IoT Rule](#example-for-transforming-a-lorawan-binary-payload) for transforming incoming LoRaWAN binary payloads and acting on the resulting JSON. In this sample, the IoT Rule uses a [republish action](https://docs.aws.amazon.com/iot/latest/developerguide/republish-rule-action.html) to republish transformed payload to another MQTT topic. You can use a similar approach to customize the rule actions for the requirements of your application.
 
-You can quickly test this sample by [deploying these resources using AWS SAM](#step-1-deploy-the-sample-in-your-aws-account). If you prefer to build your own binary transformation routine for an LoRaWAN device, please follow this [step-by-step guidance](#how-to-build-transformation-routine-for-your-lorawan-device).
+You can quickly test this sample by [deploying these resources using AWS SAM](#step-1-deploy-the-sample-in-your-aws-account). If you prefer to build your own binary transformation decoder for a LoRaWAN device, please follow this [step-by-step guidance](#how-to-build-and-deploy-a-binary-decoder-for-your-lorawan-device).
 
 ## Solution Architecture
 
@@ -446,7 +446,7 @@ Now you can configure the processing of the decoded data by adding further actio
 ## Step 5: Cleaning up
 Please open AWS CloudFormation console, select the stack and click on "Delete"
 
-## How to build transformation routine for your LoRaWAN device 
+## How to build and deploy a binary decoder for your LoRaWAN device
 
 ### Prerequisites
 
@@ -464,17 +464,31 @@ Please perform following steps to implement your own binary transformation model
     cd aws-iot-core-lorawan/transform_binary_payload
     ```
 
-2. Review source code of binary transformation for example in [src-payload-decoders/python/sample_device.py](src-payload-decoders/python/sample_device.py). Create a copy of the example, e.g.
+2. Review source code of binary transformation for example in [src-payload-decoders/python/sample_device.py](src-payload-decoders/python/sample_device.py) or other decoders available [src-payload-decoders/python](src-payload-decoders/python) . Create a copy of the example, e.g.
 
-  ```
-  cp src-payload-decoders/sample_device.py src-payload-decoders/python/myydevice.py
-  ```
+    ```shell
+    cp src-payload-decoders/sample_device.py src-payload-decoders/python/mymanufacturer_mydevice.py
+    ```
+  
+3. Implement decoding logic in `src-payload-decoders/python/mymanufacturer_mydevice.py`
+
+   Please consider the following guidelines when implementing your binary decoder:
+    - Please ensure to keep the name and signature of dict_from_payload function stable and not to modify it. 
+    - In case of a failure in decoding, please raise an exception.
+    - In case of successfull decoding, please return a JSON object with decoded key/value pairs
+
+    The following example illustrates these guideines:
+    ```python
+    def dict_from_payload(base64_input: str, fport: int = None):
+      # Your code
+      if (error): 
+        raise Exception("Error description")
+      return {"key1":42, "key2": "43"}
+    ```
  
-3. Implement decoding logic in `src-payload-decoders/python/mydevice.py`
- 
-4. Modify `src-iotrule-transformation/app.py` by 
-    - Adding `import mydevice.py` 
-    - Adding "mydevice" value to VALID_PAYLOAD_DECODER_NAMES
+4. Edit `src-iotrule-transformation/app.py` and
+    1. Add `import mymanufacturer_mydevice.py` 
+    2. Add "mymanufacturer_mydevice" value to VALID_PAYLOAD_DECODER_NAMES
 
 5. This sample uses AWS SAM to build and deploy all necessary resources (e.g. AWS Lambda function, AWS IoT Rule, AWS IAM Roles) to your AWS account. Please perform the following commands to build the SAM artifacts:
 
@@ -487,10 +501,10 @@ Please perform following steps to implement your own binary transformation model
 6. Deploy the SAM template to your AWS account.
 
    ```shell
-   sam deploy --guided
+   sam deploy --guided --stack-name samplebinarytransform
    ```
 
-    Please note that `sam deploy --guided` should be only executed for a first deployment. To redeploy after that please use `sam deploy`.
+    Please note that `sam deploy --guided --stack-name samplebinarytransform` should be only executed for a first deployment. To redeploy after that please use `sam deploy`.
 
 
     Congratulations! You successfully deployed your binary transformation logic into your AWS account. Please follow [this guidelines](#step-3-integrating-with-aws-iot-core-for-lorawan) to integrate with AWS IoT Core for LoRaWAN
