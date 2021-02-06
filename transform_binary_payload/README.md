@@ -94,65 +94,69 @@ Please perform the following steps to deploy a sample application:
 
 ### Step 2: Testing binary transformation by simulating an ingestion from a LoRaWAN device
 
-Please use an MQTT Test Client to invoke the AWS IoT Rule `samplebinarytransform_TransformLoRaWANBinaryPayload_sample_device` by publishing the payload below to the MQTT topic `$aws/rules/samplebinarytransform_TransformLoRaWANBinaryPayloadFor_sample_device`. 
+1. Please open the MQTT Test Client in AWS Management console by using [this link](https://console.aws.amazon.com/iot/home?#/test). Please ensure to use the same AWS region that you selected in `sam --deploy-guided` command.
+2. Please subscribe to the topic `lorawantransformed`
+3. Please publish the payload as specified below to the MQTT topic `$aws/rules/samplebinarytransform_TransformLoRaWANBinaryPayloadFor_sample_device`. 
 
-```json
-{
-    "PayloadData": "y7QKRAGpAQnEf/8=",
-    "WirelessDeviceId": "57728ff8-5d1d-4130-9de2-f004d8722bc2",
-    "WirelessMetadata": {
-      "LoRaWAN": {
-        "DataRate": 0,
-        "DevEui": "a84041d55182720b",
-        "FPort": 2,
-        "Frequency": 867900000,
-        "Gateways": [
-          {
-            "GatewayEui": "dca632fffe45b3c0",
-            "Rssi": -76,
-            "Snr": 9.75
+    ```json
+    {
+        "PayloadData": "y7QKRAGpAQnEf/8=",
+        "WirelessDeviceId": "57728ff8-5d1d-4130-9de2-f004d8722bc2",
+        "WirelessMetadata": {
+          "LoRaWAN": {
+            "DataRate": 0,
+            "DevEui": "a84041d55182720b",
+            "FPort": 2,
+            "Frequency": 867900000,
+            "Gateways": [
+              {
+                "GatewayEui": "dca632fffe45b3c0",
+                "Rssi": -76,
+                "Snr": 9.75
+              }
+            ],
+            "Timestamp": "2020-12-07T14:41:48Z"
           }
-        ],
-        "Timestamp": "2020-12-07T14:41:48Z"
-      }
-    } 
-}
-```
+        } 
+    }
+    ```
 
-The expected output on the topic `lorawantransformed` will be:
+4. Please review the messages on the topic `lorawantransformed`
+  
+    The expected output on the topic `lorawantransformed` should be:
 
-```json
-{
-  "transformed_payload": {
-    "input_length": 11,
-    "input_hex": "CBB60ACB016D010A347FFF",
-    "status": 200,
-    "WirelessDeviceId": "57728ff8-5d1d-4130-9de2-f004d8722bc2",
-    "DevEui": "a84041d55182720b"
-  },
-  "lns_payload": {
-    "WirelessDeviceId": "57728ff8-5d1d-4130-9de2-f004d8722bc2",
-    "WirelessMetadata": {
-      "LoRaWAN": {
-        "DataRate": 0,
-        "DevEui": "a84041d55182720b",
-        "FPort": 2,
-        "Frequency": 867900000,
-        "Gateways": [
-          {
-            "GatewayEui": "dca632fffe45b3c0",
-            "Rssi": -76,
-            "Snr": 9.75
+    ```json
+    {
+      "transformed_payload": {
+        "input_length": 11,
+        "input_hex": "CBB60ACB016D010A347FFF",
+        "status": 200,
+        "WirelessDeviceId": "57728ff8-5d1d-4130-9de2-f004d8722bc2",
+        "DevEui": "a84041d55182720b"
+      },
+      "lns_payload": {
+        "WirelessDeviceId": "57728ff8-5d1d-4130-9de2-f004d8722bc2",
+        "WirelessMetadata": {
+          "LoRaWAN": {
+            "DataRate": 0,
+            "DevEui": "a84041d55182720b",
+            "FPort": 2,
+            "Frequency": 867900000,
+            "Gateways": [
+              {
+                "GatewayEui": "dca632fffe45b3c0",
+                "Rssi": -76,
+                "Snr": 9.75
+              }
+            ],
+            "Timestamp": "2020-12-07T14:41:48Z"
           }
-        ],
-        "Timestamp": "2020-12-07T14:41:48Z"
-      }
-    },
-    "PayloadData": "y7QKRAGpAQnEf/8="
-  },
-  "timestamp": 1607352177425
-}
-```
+        },
+        "PayloadData": "y7QKRAGpAQnEf/8="
+      },
+      "timestamp": 1607352177425
+    }
+    ```
 
 The "transformed_payload" part of the message contains artificialy created decoded payload data according to the instructions in the binary decoder you can find in `src-payload-decoders/python/sample_device.py`:
 ```python
@@ -160,7 +164,6 @@ The "transformed_payload" part of the message contains artificialy created decod
         "temperature": temperature,
         "humidity": humidity
     }
-
 ```
 
 ## Step 3: Integrating with AWS IoT Core for LoRaWAN
@@ -288,82 +291,85 @@ Please perform the following steps to deploy a sample application:
 
 ### Step 2: Testing binary transformation by simulating an ingestion from a LoRaWAN device
 
-Please use an MQTT Test Client to invoke the AWS IoT Rule `samplebinarytransform_TransformLoRaWANBinaryPayload_<Decoder name>` by publishing the payload below to the MQTT topic `$aws/rules/samplebinarytransform_TransformLoRaWANBinaryPayloadFor_<Decoder name>`.
+1. Please open the MQTT Test Client in AWS Management console by using [this link](https://console.aws.amazon.com/iot/home?#/test). Please ensure to use the same AWS region that you selected in `sam --deploy-guided` command.
+2. Please subscribe to the topic `lorawantransformed`
+3. Please publish the payload as specified below to the MQTT topic `$aws/rules/samplebinarytransform_TransformLoRaWANBinaryPayloadFor_<Decoder name>`. 
 
-**Note**: replace <Decoder name> with a value of the column "Decoder name" from the table above, e.g. samplebinarytransform_TransformLoRaWANBinaryPayload_axioma_w1.
+    **Note**: please replace \<Decoder name> in the topic name with a value of the column "Decoder name" from the table above, e.g. samplebinarytransform_TransformLoRaWANBinaryPayload_axioma_w1.
+          
+    | Manufacturer | Device name         | Sample "PayloadData"                                             |
+    | ------------ | ------------------- | ---------------------------------------------------------------- |
+    | Axioma       | W1                  | eoFaXxADAAAAwKRZXwMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= |
+    | Dragino      | LHT65               | DRoAAAAABNYBLAA=                                                 |
+    | Dragino      | LSE01               | AuHtlACmawQPVGM=                                                 |
+    | Dragino      | LGT92               | DSEAAAEVCMUGpAA=                                                 |
+    | Browan       | Tabs Object Locator | Ae48SPbhAgRupmA=                                                 |
+    | Elsys        | all                 | MDEwMEUyMDIyOTA0MDAyNzA1MDYwNjAzMDgwNzBENjIxOTAwRTIxOTAwQTM=     |
+    | Globalsat    | LT-100              | MDA4MjY0MDI2NERBRDlGQjg4RENENg==                                 |
 
-The payload is structured in a same way as it will be ingested by AWS IoT Core for LoRaWAN. Please replace the `<Sample PayloadData>` with the value of "Sample PayloadData>" from the following table:
-      
-| Manufacturer | Device name         | Sample "PayloadData"                                             |
-| ------------ | ------------------- | ---------------------------------------------------------------- |
-| Axioma       | W1                  | eoFaXxADAAAAwKRZXwMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= |
-| Dragino      | LHT65               | DRoAAAAABNYBLAA=                                                 |
-| Dragino      | LSE01               | AuHtlACmawQPVGM=                                                 |
-| Dragino      | LGT92               | DSEAAAEVCMUGpAA=                                                 |
-| Browan       | Tabs Object Locator | Ae48SPbhAgRupmA=                                                 |
-| Elsys        | all                 | MDEwMEUyMDIyOTA0MDAyNzA1MDYwNjAzMDgwNzBENjIxOTAwRTIxOTAwQTM=     |
-| Globalsat    | LT-100              | MDA4MjY0MDI2NERBRDlGQjg4RENENg==                                 |
+    The payload is structured in a same way as it will be ingested by AWS IoT Core for LoRaWAN. Please replace the `<Sample PayloadData>` with the value of "Sample PayloadData>" from the following table:
 
 
-
-```json
-{
-    "PayloadData": "<Sample PayloadData>",
-    "WirelessDeviceId": "57728ff8-5d1d-4130-9de2-f004d8722bc2",
-    "WirelessMetadata": {
-      "LoRaWAN": {
-        "DataRate": 0,
-        "DevEui": "a84041d55182720b",
-        "FPort": 2,
-        "Frequency": 867900000,
-        "Gateways": [
-          {
-            "GatewayEui": "dca632fffe45b3c0",
-            "Rssi": -76,
-            "Snr": 9.75
+    ```json
+    {
+        "PayloadData": "<Sample PayloadData>",
+        "WirelessDeviceId": "57728ff8-5d1d-4130-9de2-f004d8722bc2",
+        "WirelessMetadata": {
+          "LoRaWAN": {
+            "DataRate": 0,
+            "DevEui": "a84041d55182720b",
+            "FPort": 2,
+            "Frequency": 867900000,
+            "Gateways": [
+              {
+                "GatewayEui": "dca632fffe45b3c0",
+                "Rssi": -76,
+                "Snr": 9.75
+              }
+            ],
+            "Timestamp": "2020-12-07T14:41:48Z"
           }
-        ],
-        "Timestamp": "2020-12-07T14:41:48Z"
-      }
-    } 
-}
-```
+        } 
+    }
+    ```
+
+4. Please review the messages on the topic `lorawantransformed`
+  
+    The expected output on the topic `lorawantransformed` should be:
 
 
-The expected output on the topic `lorawantransformed` will be:
-
-```json
-{
-  "transformed_payload": {
-    ...
-    values depending on your LoRaWAN device
-    ...
-    "WirelessDeviceId": "57728ff8-5d1d-4130-9de2-f004d8722bc2",
-    "DevEui": "a84041d55182720b"
-  },
-  "lns_payload": {
-    "WirelessDeviceId": "57728ff8-5d1d-4130-9de2-f004d8722bc2",
-    "WirelessMetadata": {
-      "LoRaWAN": {
-        "DataRate": 0,
-        "DevEui": "a84041d55182720b",
-        "FPort": 2,
-        "Frequency": 867900000,
-        "Gateways": [
-          {
-            "GatewayEui": "dca632fffe45b3c0",
-            "Rssi": -76,
-            "Snr": 9.75
+    ```json
+    {
+      "transformed_payload": {
+        ...
+        values depending on your LoRaWAN device
+        ...
+        "WirelessDeviceId": "57728ff8-5d1d-4130-9de2-f004d8722bc2",
+        "DevEui": "a84041d55182720b"
+      },
+      "lns_payload": {
+        "WirelessDeviceId": "57728ff8-5d1d-4130-9de2-f004d8722bc2",
+        "WirelessMetadata": {
+          "LoRaWAN": {
+            "DataRate": 0,
+            "DevEui": "a84041d55182720b",
+            "FPort": 2,
+            "Frequency": 867900000,
+            "Gateways": [
+              {
+                "GatewayEui": "dca632fffe45b3c0",
+                "Rssi": -76,
+                "Snr": 9.75
+              }
+            ],
+            "Timestamp": "2020-12-07T14:41:48Z"
           }
-        ],
-        "Timestamp": "2020-12-07T14:41:48Z"
-      }
-    },
-    "PayloadData": "y7QKRAGpAQnEf/8="
-  },
-  "timestamp": 1607352177425
-}
-```
+        },
+        "PayloadData": "y7QKRAGpAQnEf/8="
+      },
+      "timestamp": 1607352177425
+    }
+    ```
 
 ### Step 3: Integrating with AWS IoT Core for LoRaWAN
 
