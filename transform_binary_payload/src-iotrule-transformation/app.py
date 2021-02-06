@@ -73,21 +73,43 @@ def lambda_handler(event, context):
     """ Transforms a binary payload by invoking "decode_{event.type}" function
         Parameters 
         ----------
-        WirelessDeviceId : str
-            Device Id
-        WirelessMetadata : json
-            Metadata
-        PayloadData : str
-            Base64 encoded input payload
-        PayloadDecoderName : string
+        PayloadData : str (obligatory parameter)
+            Base64 encoded input payload 
+
+        PayloadDecoderName : string (obligatory parameter)
             The value of this attribute defines the name of a Python module which will be used to perform binary decoding. If value of "type" is for example "sample_device", then this function will perform an invocation of "sample_device.dict_from_payload" function. For this approach to work, you  have to import the necessary modules, e.g. by performing a "import sample_device01" command in the beginning of this file.
+
+        WirelessDeviceId : str (optional parameter)
+            Wireless Device Id 
+
+        WirelessMetadata : json (obligatory parameter)
+            This parameter contains Metadata of transmission according to the example below.
+            Obligatory element is: LoRaWAN.FPort
+            All other elements are optional and ignored in the current implementation.
+
+            Sample input: 
+            {
+            "LoRaWAN": {
+                "DataRate": 0,
+                "DevEui": "a84041d55182720b",
+                "FPort": 21,
+                "Frequency": 867900000,
+                "Gateways": [
+                {
+                    "GatewayEui": "dca632fffe45b3c0",
+                    "Rssi": -76,
+                    "Snr": 9.75
+                }
+                ],
+                "Timestamp": "2020-12-07T14:41:48Z"
+            }
 
         Returns
         -------
         This function returns a JSON object with the following keys:
 
         - status: 200 or 500
-        - transformed_payload: result of calling "decode_{event.type}"      (only if status == 200)
+        - transformed_payload: output of function "decode_{event.type}"     (only if status == 200)
         - error_type                                                        (only if status == 500)
         - error_message                                                     (only if status == 500)
         - stackTrace                                                        (only if status == 500)
@@ -112,11 +134,24 @@ def lambda_handler(event, context):
 
     logger.info(f"Base64 input={input_base64}, Type={payload_decoder_name}")
 
-    # WirelessDeviceId and WirelessMetadata are not used in this example but included
-    # for the case you will need it in your project
-
-    # device_id = event.get("WirelessDeviceId")
-    # metadata = event.get("WirelessMetadata")
+    # Retrieve FPort from the metadata. In case FPort or surrounding attributes is missing,
+    # the function will intentionnaly not fail but proceed with fPort == None.
+    # The binary decoder function is expected to handle fPort == None.
+    fPort = None
+    if "WirelessMetadata" in event:
+        if "LoRaWAN" in event.get("WirelessMetadata"):
+            if "FPort" in event.get("WirelessMetadata").get("LoRaWAN"):
+                fPort = event.get("WirelessMetadata").get(
+                    "LoRaWAN").get("FPort")
+            else:
+                logger.warn(
+                    "Attribute 'WirelessMetadata.LoRaWAN' is missing. Will proceed with fPort == None.")
+        else:
+            logger.warn(
+                "Attribute 'WirelessMetadata.LoRaWAN' is missing. Will proceed with fPort == None.")
+    else:
+        logger.warn(
+            "Attribute 'WirelessMetadata' is missing. Will proceed with fPort == None.")
 
     # Derive a name of a payload conversion function based on the value of 'type' attribute
     conversion_function_name = f"{payload_decoder_name}.dict_from_payload"
@@ -124,7 +159,7 @@ def lambda_handler(event, context):
 
     # Invoke a payload conversion function and return a result
     try:
-        result = eval(conversion_function_name)(input_base64)
+        result = eval(conversion_function_name)(input_base64, fPort)
         result["status"] = 200
         logger.info(result)
         return result
