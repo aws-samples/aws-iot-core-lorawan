@@ -1,7 +1,8 @@
-# How to automate AWS IoT Core for LoRaWAN 
+# How to automate AWS IoT Core for LoRaWAN tasks
+
 ## Prerequisites
-The following examples require the following software:
-- AWS CLI
+The guidelines below require the following software:
+- AWS CLI 
 - jq
 
 **MacOS installation instructions**
@@ -37,8 +38,7 @@ CERTIFICATE_ID=$(aws iot create-keys-and-certificate \
                 --public-key-outfile gateway.public_key.pem \
                 --private-key-outfile gateway.private_key.pem \
                 --region us-east-1 | jq -r .certificateId)
-echo "Created certificate with id $CERTIFICATE_ID"                
-                                
+echo "Created certificate with id $CERTIFICATE_ID"                                              
 ```
 
 The output of this command will be the certificateId that you will need in step 3
