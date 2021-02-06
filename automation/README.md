@@ -22,8 +22,19 @@ The example below includes steps for creation of new gateway, creation and assoc
 
 **1. Create a gateway**  
 
+In the example below, please replace the examples values:
+
+-  GATEWAY_EUI with the Eui of your gateway you will find in gateway documentation or printed on the gateway 
+-  RF_REGION with either EU868 or US915 depending on the local regulations
+
 ```shell
-GATEWAY_ID=$(aws iotwireless create-wireless-gateway --name MyGateway --description "My Gateway description" --lorawan GatewayEui=1122334411224477,RfRegion=EU868 --region us-east-1 | jq -r .Id)
+GATEWAY_EUI=1122334455667788
+RF_REGION=EU868
+GATEWAY_ID=$(aws iotwireless create-wireless-gateway --name MyGateway \
+                                                     --description "My Gateway description" \
+                                                     --lorawan GatewayEui=$GATEWAY_EUI,RfRegion=$RF_REGION \
+                                                     --region us-east-1 | jq -r .Id
+            )
 echo "Created gateway with id $GATEWAY_ID"
 ```
 
@@ -46,7 +57,9 @@ The output of this command will be the certificateId that you will need in step 
 **3. Associate gateway with the certificate**
 
 ```shell
-aws iotwireless  associate-wireless-gateway-with-certificate --id $GATEWAY_ID --iot-certificate-id $CERTIFICATE_ID --region us-east-1
+aws iotwireless  associate-wireless-gateway-with-certificate --id $GATEWAY_ID \
+                                                             --iot-certificate-id $CERTIFICATE_ID \
+                                                             --region us-east-1
 ```
 
 The expected output should be:
