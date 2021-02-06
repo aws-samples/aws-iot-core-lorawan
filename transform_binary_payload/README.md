@@ -1,13 +1,13 @@
 # AWS IoT Core for LoRaWAN - transform a binary LoRaWAN payload into JSON
 
-LoRaWAN devices often encode transmitted data in a binary format. Doing so increases transmission efficiency and improves battery lifetime. However, as the data arrive in the cloud, many use cases require a structured format. Transforming the binary data into JSON, fo example, enables filtering and enrichment using [AWS IoT SQL](https://docs.aws.amazon.com/iot/latest/developerguide/iot-sql-reference.html) as well as acting on the data using [AWS IoT Rule Actions](https://docs.aws.amazon.com/iot/latest/developerguide/iot-rule-actions.html).
+LoRaWAN devices often encode transmitted data in a binary format, as it increases transmission efficiency and improves battery lifetime. However, as the data arrive in the cloud, many use cases require a structured format. Transforming the binary data into JSON, for example, enables filtering and enrichment using [AWS IoT SQL](https://docs.aws.amazon.com/iot/latest/developerguide/iot-sql-reference.html) as well as acting on the data using [AWS IoT Rule Actions](https://docs.aws.amazon.com/iot/latest/developerguide/iot-rule-actions.html).
 
 This repository contains resources for you to learn how to transform binary payloads for your LoRaWAN device. These resources include:
 
 - Binary decoders for a set of devices, which will be deployed in an [AWS Lambda layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html) so that it may be used in any of your Python lambda functions. Following binary decoders are included:
   - Decoder simulating a temperature and humidity sensor device. It enables you to test is sample without having a physical LoRaWAN device.
   - Browan Tabs Object Locator
-  - Dragino LHT65, LGT92, LSE01, LBT1
+  - Dragino LHT65, LGT92, LSE01, LBT1, LDS01
   - Axioma W1
   - Elsys
   - Globalsat LT-100
@@ -43,6 +43,7 @@ Example binary deocoders for the following devices are included in this sample:
 | Dragino      | LGT92               | dragino_lgt92      |
 | Dragino      | LSE01               | dragino_lse01      |
 | Dragino      | LBT1                | dragino_lbt1       |
+| Dragino      | LDS01               | dragino_lds01      |
 | Elsys        | all                 | elsys              |
 | Globalsat    | LT-100              | globalsat_lt100    |
 
@@ -280,6 +281,7 @@ Please perform the following steps to deploy a sample application:
     | Dragino      | LBT1                | dragino_lbt1       |
     | Dragino      | LSE01               | dragino_lse01      |
     | Dragino      | LGT92               | dragino_lgt92      |
+    | Dragino      | LDS01               | dragino_lds01      |
     | Browan       | Tabs Object Locator | tabs_objectlocator |
     | Elsys        | all                 | elsys              |
     | Globalsat    | LT-100              | globalsat_lt100    |

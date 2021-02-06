@@ -72,7 +72,7 @@ The expected output should be:
 
 **3. Retrieve server certificates for CUPS or LNS endpoints**
 
-The server certificates are used by Basics Station software that runs on a LoRaWAN gateway to verify the identify of the AWS IoT Core for LoRaWAN endpoints. Please note that if your LoRaWAN gateway supports the CUPS protocol, it should be sufficient to only configure the CUPS endpoint and your gateway will retrieve the LNS endpoint via the CUPS protocol. If your LoRaWAN does not support the CUPS protocol, you should download and configure the LNS endpoint certificate.   
+The server certificates are used by Basics Station software that runs on a LoRaWAN gateway.  Basics Station uses the server certificatews to verify the identify of the AWS IoT Core for LoRaWAN endpoints. Please note that if your LoRaWAN gateway supports the CUPS protocol, it should be sufficient to only configure the CUPS endpoint and your gateway will retrieve the LNS endpoint via the CUPS protocol. If your LoRaWAN does not support the CUPS protocol, you should retrieve and configure the LNS endpoint certificate.   
 
 To retrieve the CUPS endpoint certificate please run the following command:
 ```shell  
@@ -86,7 +86,7 @@ aws iotwireless get-service-endpoint --service-type LNS --region us-east-1 | jq 
 
 **4. Retrieve URIs of CUPS or LNS endpoint**
 
-Please note that if your LoRaWAN gateway supports the CUPS protocol, it should be sufficient to only configure the CUPS endpoint and your gateway will retrieve the LNS endpoint via the CUPS protocol. If your LoRaWAN does not support the CUPS protocol, you should configure the LNS endpoint
+Please note that if your LoRaWAN gateway supports the CUPS protocol, it should be sufficient to only configure the CUPS endpoint and your gateway will retrieve the LNS endpoint using the CUPS protocol. If your LoRaWAN does not support the CUPS protocol, you should configure the LNS endpoint.
 
 To retrieve the CUPS endpoint certificate please run the following command:
 ```shell  
@@ -100,7 +100,8 @@ aws iotwireless get-service-endpoint --service-type LNS --region us-east-1 | jq 
 
 
 **4. Perform gateway configuration**  
-After a successful completion of the steps above, please use the following information to configure your LoRaWAN gateway according the the gateway's user manual:
+
+After a successful completion of the steps above, please use the following information to configure your LoRaWAN gateway according to the gateway's user manual:
 - **Gateway certificate:** gateway.certificate.pem
 - **Gateway private key:** gateway.private_key.pem
 - **Serer trust certificates:** cups_server_trust.pem or lns_server_trust.pem

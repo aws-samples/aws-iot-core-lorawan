@@ -44,6 +44,7 @@ import globalsat_lt100
 import dragino_lgt92
 import dragino_lse01
 import dragino_lbt1
+import dragino_lds01
 
 
 # Allowed payload type values. This array will be used for validation of the "type" attribute for a
@@ -57,7 +58,7 @@ import dragino_lbt1
 # please add name of your binary decoder (e.g. "mylorawandevice") here (see "Step 4" above)
 VALID_PAYLOAD_DECODER_NAMES = ["sample_device",
                                "dragino_lht65", "axioma_w1", "tabs_objectlocator",
-                               "elsys", "globalsat_lt100", "dragino_lgt92", "dragino_lse01", "dragino_lbt1"]
+                               "elsys", "globalsat_lt100", "dragino_lgt92", "dragino_lse01", "dragino_lbt1", "dragino_lds01"]
 
 # Function name for logging
 FUNCTION_NAME = "ConvertBinaryPayload"

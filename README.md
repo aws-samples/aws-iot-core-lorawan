@@ -23,6 +23,33 @@ Please consider our [developer guide](https://docs.aws.amazon.com/iot/latest/dev
 - [Monitoring and alarming of soil moisture by using AWS IoT Core for LoRaWAN and AWS IoT Events](soilmoisture_alarming)  
     Detecting events based on telemetry data from connected devices is a common use case in IoT across many industries. This sample explains how to integrate AWS IoT Events with LoRaWAN for IoT Core. You can learn how to translate telemetry values from a LoRaWAN device into events and notify users about these events using E-Mail and SMS.
 
+## Included binary decoders
+LoRaWAN devices often encode transmitted data in a binary format, as it increases transmission efficiency and improves battery lifetime. However, as the data arrive in the cloud, many use cases require a structured format. Transforming the binary data into JSON, for example, enables filtering and enrichment using [AWS IoT SQL](https://docs.aws.amazon.com/iot/latest/developerguide/iot-sql-reference.html) as well as integration with further AWS services  using [AWS IoT Rule Actions](https://docs.aws.amazon.com/iot/latest/developerguide/iot-rule-actions.html).
+
+The sample[Decoding binary payloads from LoRaWAN devices](transform_binary_payload) repository contains the binary decoders for the following devices:
+
+- Air quality / CO2 / environment measurement
+  - Elsys ERS CO2
+- Door and window opening
+  - Elsys EMS Door
+  - Dragino LDS01
+- GNSS Tracking
+  - Dragino LGT92
+  - Globalsat LT-100
+  - Browan Tabs Object Locator
+- Presence and smart home
+  - Tektelic Smart Room Sensor
+- Sound level measurement
+  - Elsys ERS Sound
+- Temperature, humidity and moisture
+  - Dragino LHT65 (temperature and humidity)
+  - Dragino LSE01 (temperature and moisture)
+  - Elsys ERS Lite
+- Water Metering
+  - Axioma W1
+
+[Contributions](CONTRIBUTING.md) to example binary decoders are welcome.
+
 ## Getting help 
 
 - [API Reference](http://docs.aws.amazon.com/console/iot/wireless/intro/apiref)
