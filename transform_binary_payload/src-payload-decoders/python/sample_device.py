@@ -27,7 +27,9 @@ def dict_from_payload(base64_input: str, fport: int = None):
             base64_input : str
                 Base64-encoded binary payload
             fport: int
-                FPort as provided in the metadata. Please note the fport is optional and can have value "None", if not provided by the LNS or invoking function. If  fport is None and binary decoder can not proceed because of that, it should should raise an exception.
+                FPort as provided in the metadata. Please note the fport is optional and can have value "None", if not provided by the LNS or invoking function. 
+
+                If  fport is None and binary decoder can not proceed because of that, it should should raise an exception.
 
             Returns
             -------
