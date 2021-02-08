@@ -316,7 +316,8 @@ Please perform the following steps to deploy a sample application:
     | Browan       | Tabs Object Locator | Ae48SPbhAgRupmA=                                                 |
     | Elsys        | all                 | MDEwMEUyMDIyOTA0MDAyNzA1MDYwNjAzMDgwNzBENjIxOTAwRTIxOTAwQTM=     |
     | Globalsat    | LT-100              | MDA4MjY0MDI2NERBRDlGQjg4RENENg==                                 |
-    | NAS          | Pulse Reader UM3080 | NDNGNjFBNEIxMjAxMDAwMDAwMjBDNDA5MDAwMA==                         |
+    | NAS          | Pulse Reader UM3080 | (fPort 24) NDNGNjFBNEIxMjAxMDAwMDAwMjBDNDA5MDAwMA==              |
+    | NAS          | Pulse Reader UM3080 | (fPort 25) MDMxMjAxMDAwMDAwMTAwMDAwMDAwMA==                      |
 
     The payload is structured in a same way as it will be ingested by AWS IoT Core for LoRaWAN. Please replace the `<Sample PayloadData>` with the value of "Sample PayloadData>" from the following table:
 

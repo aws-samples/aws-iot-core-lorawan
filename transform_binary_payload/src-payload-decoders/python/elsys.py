@@ -26,7 +26,8 @@ import helpers
 
 DEBUG_OUTPUT = False
 
-TYPE_RESERVED = 0x00       # Reserved
+# Reserved
+TYPE_RESERVED = 0x00
 # 2 bytes  Temperature          [°C]       -3276.5  -       3276.5
 TYPE_TEMP = 0x01
 # 1 byte   Humidity             [%Rh]          0    -        100
@@ -81,11 +82,13 @@ TYPE_EXT_TEMP2 = 0x19
 TYPE_EXT_DIGITAL2 = 0x1A
 # 4 bytes  Ext analog uV        [µV] −2147483648    - 2147483647
 TYPE_EXT_ANALOG_UV = 0x1B
-TYPE_DEBUG = 0x3D  # 4 bytes  Debug
+# 4 bytes  Debug
+TYPE_DEBUG = 0x3D
 # n bytes  Sensor settings sent to server at startup (First package).
+#          Sent on Port+1. See sensor settings document for more information.
 TYPE_SETTINGS = 0x3E
-#           Sent on Port+1. See sensor settings document for more information.
-TYPE_RFU = 0x3F            # Reserved for future use
+# Reserved for future use
+TYPE_RFU = 0x3F
 
 
 def dict_from_payload(base64_input: str, fport: int = None):
@@ -96,7 +99,6 @@ def dict_from_payload(base64_input: str, fport: int = None):
 
     # Output
     result = {
-        'error': False
     }
 
     # Iterate over the payload
@@ -225,8 +227,7 @@ def dict_from_payload(base64_input: str, fport: int = None):
         elif decoded[i] == TYPE_SETTINGS:  # Sensor settings
             i = len(decoded)  # just ignore sensor settings packets
         else:  # something is wrong with the data
-            result['error'] = True
-            i = len(decoded)
+            raise Exception(f"Data field type {hex(decoded[i])} not known.")
 
     if DEBUG_OUTPUT:
         print(f"Output: {json.dumps(result,indent=2)}")
@@ -250,8 +251,7 @@ if __name__ == "__main__":
                 "extTemp2": [
                     22.6,
                     16.3
-                ],
-                "error": False
+                ]
             }
         }
     ]

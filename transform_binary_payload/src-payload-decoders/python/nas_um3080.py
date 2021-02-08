@@ -39,6 +39,15 @@ DEBUG_OUTPUT = False
 
 
 def dict_from_payload(base64_input: str, fport: int = None):
+    if fport == 24:
+        return decode_status_message(base64_input)
+    elif fport == 25:
+        return decode_usage_message(base64_input)
+    else:
+        raise Exception(f"fPort {fport} not implemented")
+
+
+def decode_status_message(base64_input: str):
     decoded = base64.b64decode(base64_input)
 
     if DEBUG_OUTPUT:
@@ -88,25 +97,71 @@ def dict_from_payload(base64_input: str, fport: int = None):
         "rssi": rssi,
     }
 
-    # Get first digital data starting from byte 4
-    # At least one of the digital inputs is on "sent" status
-    if digital1_status == "sent" or digital2_status == "sent":
-        if digital1_status == "sent":
-            digital_data = {'digital1': decode_digital_data(decoded, 4)}
-        else:
-            digital_data = {'digital2': decode_digital_data(decoded, 4)}
-        # Add the first digital data to the result
-        result.update(digital_data)
-
-    # Get seconds digital data starting from byte 9
-    # This is only needed if both digital inputs are on "sent" status
-    if digital1_status == "sent" and digital2_status == "sent":
-        digital_data = {'digital2': decode_digital_data(decoded, 9)}
-        # Add the second digital data to the result
-        result.update(digital_data)
+    # Get the data for the correct digital input sent with this message
+    digital_data = get_digital_data(decoded, digital1_status, digital2_status, 4)
+    result.update(digital_data)
 
     if DEBUG_OUTPUT:
         print(f"Output: {json.dumps(result,indent=2)}")
+
+    return result
+
+
+def decode_usage_message(base64_input: str):
+    decoded = base64.b64decode(base64_input)
+
+    if DEBUG_OUTPUT:
+        print(f"Input: {decoded.hex().upper()}")
+
+    # Get Interface map from byte 0
+    interface_map = decoded[0]
+    # Get status of digital1 from interface map
+    digital1_status_flag = (interface_map & 0b00000001)
+    digital1_status = "not sent"
+    if digital1_status_flag == 0b00000001:
+        digital1_status = "sent"
+    # Get status of digital2 from interface map
+    digital2_status_flag = (interface_map & 0b00000010)
+    digital2_status = "not sent"
+    if digital2_status_flag == 0b00000010:
+        digital2_status = "sent"
+
+    # Output
+    result = {
+        "digital1Status": digital1_status,
+        "digital2Status": digital2_status,
+    }
+
+    # Get the data for the correct digital input sent with this message
+    digital_data = get_digital_data(decoded, digital1_status, digital2_status, 1)
+    result.update(digital_data)
+
+    if DEBUG_OUTPUT:
+        print(f"Output: {json.dumps(result,indent=2)}")
+
+    return result
+
+
+def get_digital_data(decoded, digital1_status, digital2_status, start_byte):
+    # Init result
+    result = {}
+
+    # Get first digital data starting from start byte
+    # At least one of the digital inputs is on "sent" status
+    if digital1_status == "sent" or digital2_status == "sent":
+        if digital1_status == "sent":
+            digital_data = {'digital1': decode_digital_data(decoded, start_byte)}
+        else:
+            digital_data = {'digital2': decode_digital_data(decoded, start_byte)}
+        # Add the first digital data to the result
+        result.update(digital_data)
+
+    # Get seconds digital data starting from start byte + 5
+    # This is only needed if both digital inputs are on "sent" status
+    if digital1_status == "sent" and digital2_status == "sent":
+        digital_data = {'digital2': decode_digital_data(decoded, start_byte + 5)}
+        # Add the second digital data to the result
+        result.update(digital_data)
 
     return result
 
@@ -168,6 +223,7 @@ if __name__ == "__main__":
         {
             "input_encoding": "hex",
             "input_value": "43F61A4B120100000020C4090000",
+            "fPort": 24,
             "output": {
                 "digital1Status": "sent",
                 "digital2Status": "sent",
@@ -190,6 +246,29 @@ if __name__ == "__main__":
                     "counter": 2500
                 }
             }
+        },
+        {
+            "input_encoding": "hex",
+            "input_value": "0312010000001000000000",
+            "fPort": 25,
+            "output": {
+                "digital1Status": "sent",
+                "digital2Status": "sent",
+                "digital1": {
+                    "value": 0,
+                    "triggerMode": "enabled",
+                    "triggerAlert": "no",
+                    "mediumType": "Pulses",
+                    "counter": 1
+                },
+                "digital2": {
+                    "value": 0,
+                    "triggerMode": "disabled",
+                    "triggerAlert": "no",
+                    "mediumType": "Pulses",
+                    "counter": 0
+                }
+            }
         }
     ]
 
@@ -200,7 +279,8 @@ if __name__ == "__main__":
         elif testcase.get("input_encoding") == "hex":
             base64_input = base64.b64encode(
                 bytearray.fromhex(testcase.get("input_value"))).decode("utf-8")
-        output = dict_from_payload(base64_input)
+        fport = testcase.get("fPort")
+        output = dict_from_payload(base64_input, fport)
         for key in testcase.get("output"):
             if testcase.get("output").get(key) != output.get(key):
                 raise Exception(

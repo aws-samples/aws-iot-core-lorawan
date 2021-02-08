@@ -123,7 +123,7 @@ def decode_alarm_data(decoded_payload):
         alarm_status, 0x04, higher_alarm)
 
 
-def dict_from_payload(payload):
+def dict_from_payload(payload, fport: int = None):
     bytes = base64.b64decode(payload)
 
     decoded_payload = {}
