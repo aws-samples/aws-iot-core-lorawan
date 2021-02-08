@@ -61,7 +61,7 @@ DEBUG_OUTPUT = False
 #   |               | 20=Power off(temperature)             |
 
 
-def dict_from_payload(base64_input: str):
+def dict_from_payload(base64_input: str, fport: int = None):
     decoded = base64.b64decode(base64_input)
 
     if DEBUG_OUTPUT:
@@ -108,11 +108,13 @@ def dict_from_payload(base64_input: str):
     battery_capacity = int(decoded[2])
 
     # Get latitude from byte 3-6
-    lat = (decoded[3] << 24) | (decoded[4] << 16) | (decoded[5] << 8) | (decoded[6])
+    lat = ((decoded[3] << 24) | (decoded[4] << 16) |
+           (decoded[5] << 8) | (decoded[6]))
     lat = helpers.bin32dec(lat) / 1000000
 
     # Get longitude from byte 7-10
-    long = (decoded[7] << 24) | (decoded[8] << 16) | (decoded[9] << 8) | (decoded[10])
+    long = ((decoded[7] << 24) | (decoded[8] << 16) |
+            (decoded[9] << 8) | (decoded[10]))
     long = helpers.bin32dec(long) / 1000000
 
     # Output
@@ -157,7 +159,7 @@ if __name__ == "__main__":
                 bytearray.fromhex(testcase.get("input_value"))).decode("utf-8")
         output = dict_from_payload(base64_input)
         for key in testcase.get("output"):
-            if(testcase.get("output").get(key) != output.get(key)):
+            if testcase.get("output").get(key) != output.get(key):
                 raise Exception(
                     f'Assertion failed for input {testcase.get("input_value")}, key {key}, expected {testcase.get("output").get(key)}, got {output.get(key)}')
             else:

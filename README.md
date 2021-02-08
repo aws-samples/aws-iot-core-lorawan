@@ -2,7 +2,7 @@
 
 AWS IoT Core for LoRaWAN enables you to set up a private LoRaWAN network by connecting your devices and gateways with no LoRaWAN Network Server setup required. This repository contains resources to quickly get started developing solutions using AWS IoT Core for LoRaWAN. It includes samples for typical design patterns ([binary decoder](transform_binary_payload), [downlink messaging](send_downlink_payload), [Thing shadow update](iotthingshadow)) and fully functional applications ([dashboards](timestream), [condition monitoring and alarming](soilmoisture_alarming)).
 
-Please consider our [developer guide](https://docs.aws.amazon.com/iot/latest/developerguide/connect-iot-lorawan.html) to learn how to connect your wireless devices and gateways to AWS IoT Core for LoRaWAN.
+Please consider our [developer guide](https://docs.aws.amazon.com/iot/latest/developerguide/connect-iot-lorawan.html) to learn how to connect your wireless devices and gateways to AWS IoT Core for LoRaWAN.  Please also consider [automation guidelines](automation) to learn how to use AWS CLI to automate tasks (e.g. configuration of a new gateway).
 
 ## Samples for typical design patterns
 
@@ -22,6 +22,33 @@ Please consider our [developer guide](https://docs.aws.amazon.com/iot/latest/dev
 
 - [Monitoring and alarming of soil moisture by using AWS IoT Core for LoRaWAN and AWS IoT Events](soilmoisture_alarming)  
     Detecting events based on telemetry data from connected devices is a common use case in IoT across many industries. This sample explains how to integrate AWS IoT Events with LoRaWAN for IoT Core. You can learn how to translate telemetry values from a LoRaWAN device into events and notify users about these events using E-Mail and SMS.
+
+## Included binary decoders
+LoRaWAN devices often encode transmitted data in a binary format, as it increases transmission efficiency and improves battery lifetime. However, as the data arrive in the cloud, many use cases require a structured format. Transforming the binary data into JSON, for example, enables filtering and enrichment using [AWS IoT SQL](https://docs.aws.amazon.com/iot/latest/developerguide/iot-sql-reference.html) as well as integration with further AWS services using [AWS IoT Rule Actions](https://docs.aws.amazon.com/iot/latest/developerguide/iot-rule-actions.html).
+
+The sample [Decoding binary payloads from LoRaWAN devices](transform_binary_payload) repository contains examples of binary decoders. Please note that all decoders are provided without any guarantee to fit for any specific purpose and are only intended for use in a laboratory or prototyping environment. The list below is not to be understood as a recommendation of specific manufacturers or device models, and does not imply any compatibility with AWS IoT Core for LoRaWAN or other AWS services. Please consult [AWS Partner Device Catalog](https://devices.amazonaws.com) for an overview of qualified devices that work with AWS services to help build and deliver successful IoT solutions. Said that, please find an overview of examples below:
+
+- **Air quality / CO2 / environment measurement**
+  - Elsys ERS CO2
+- **Door and window opening**
+  - Elsys EMS Door
+  - Dragino LDS01
+- **GNSS tracking**
+  - Dragino LGT92
+  - Globalsat LT-100
+  - Browan Tabs Object Locator
+- **Presence and smart home**
+  - Tektelic Smart Room Sensor
+- **Sound level measurement**
+  - Elsys ERS Sound
+- **Temperature, humidity and moisture**
+  - Dragino LHT65 (temperature and humidity)
+  - Dragino LSE01 (temperature and moisture)
+  - Elsys ERS Lite
+- **Water Metering**
+  - Axioma W1
+
+[Contributions](CONTRIBUTING.md) to example binary decoders are welcome.
 
 ## Getting help 
 

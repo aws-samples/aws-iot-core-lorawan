@@ -27,40 +27,68 @@ import helpers
 DEBUG_OUTPUT = False
 
 TYPE_RESERVED = 0x00       # Reserved
-TYPE_TEMP = 0x01           #  2 bytes  Temperature          [°C]       -3276.5  -       3276.5
-TYPE_RH = 0x02             #  1 byte   Humidity             [%Rh]          0    -        100
-TYPE_ACC = 0x03            #  3 bytes  Acceleration X,Y,Z   [63=1G]     -127    -        127
-TYPE_LIGHT = 0x04          #  2 bytes  Light                [Lux]          0    -      65535
-TYPE_MOTION = 0x05         #  1 byte   Motion (PIR)         [n]            0    -        255
-TYPE_CO2 = 0x06            #  2 bytes  CO2                  [ppm]          0    -      10000
-TYPE_VDD = 0x07            #  2 bytes  Int battery voltage  [mV]           0    -      65535
-TYPE_ANALOG1 = 0x08        #  2 bytes  Analog input 1       [mV]           0    -      65535
-TYPE_GPS = 0x09            #  6 bytes  GPS lat & long       [binary]          3 lat + 3 long
-TYPE_PULSE1 = 0x0A         #  2 bytes  Pulse input 1 rel    [n]            0    -      65535
-TYPE_PULSE1_ABS = 0x0B     #  4 bytes  Pulse input 1 abs    [n]            0    - 4294967295
-TYPE_EXT_TEMP1 = 0x0C      #  2 bytes  Ext temp 1           [°C]       -3276.5  -       3276.5
-TYPE_EXT_DIGITAL = 0x0D    #  1 byte   Ext dig input 1      [bool]         0    -          1
-TYPE_EXT_DISTANCE = 0x0E   #  2 bytes  Ext distance         [mm]           0    -      65535
-TYPE_ACC_MOTION = 0x0F     #  1 byte   Motion (Acc mov)     [n]            0    -        255
-TYPE_IR_TEMP = 0x10        #  4 bytes  IR temp              [°C]     2 int temp + 2 ext temp
-TYPE_OCCUPANCY = 0x11      #  1 byte   Occupancy            [enum]         0    -          2
-TYPE_WATERLEAK = 0x12      #  1 byte   Ext water leak       [conductivity] 0    -        255
-TYPE_GRIDEYE = 0x13        # 65 bytes  Grideye data         []         1 ref + 64 pixel temp
-TYPE_PRESSURE = 0x14       #  4 byte   Pressure             [hPa]          0    -       ????
-TYPE_SOUND = 0x15          #  2 byte   Sound                [dB]              1 peak + 1 avg
-TYPE_PULSE2 = 0x16         #  2 bytes  Pulse input 2 rel    [n]            0    -      65535
-TYPE_PULSE2_ABS = 0x17     #  4 bytes  Pulse input 2 abs    [n]            0    - 4294967295
-TYPE_ANALOG2 = 0x18        #  2 bytes  Analog input 2       [mV]           0    -      65535
-TYPE_EXT_TEMP2 = 0x19      #  2 bytes  Ext temp 2           [°C]       -3276.5  -       3276.5
-TYPE_EXT_DIGITAL2 = 0x1A   #  1 byte   Ext dig input 2      [bool]         0    -          1
-TYPE_EXT_ANALOG_UV = 0x1B  #  4 bytes  Ext analog uV        [µV] −2147483648    - 2147483647
-TYPE_DEBUG = 0x3D          #  4 bytes  Debug
-TYPE_SETTINGS = 0x3E       #  n bytes  Sensor settings sent to server at startup (First package).
-                           #           Sent on Port+1. See sensor settings document for more information.
+# 2 bytes  Temperature          [°C]       -3276.5  -       3276.5
+TYPE_TEMP = 0x01
+# 1 byte   Humidity             [%Rh]          0    -        100
+TYPE_RH = 0x02
+# 3 bytes  Acceleration X,Y,Z   [63=1G]     -127    -        127
+TYPE_ACC = 0x03
+# 2 bytes  Light                [Lux]          0    -      65535
+TYPE_LIGHT = 0x04
+# 1 byte   Motion (PIR)         [n]            0    -        255
+TYPE_MOTION = 0x05
+# 2 bytes  CO2                  [ppm]          0    -      10000
+TYPE_CO2 = 0x06
+# 2 bytes  Int battery voltage  [mV]           0    -      65535
+TYPE_VDD = 0x07
+# 2 bytes  Analog input 1       [mV]           0    -      65535
+TYPE_ANALOG1 = 0x08
+# 6 bytes  GPS lat & long       [binary]          3 lat + 3 long
+TYPE_GPS = 0x09
+# 2 bytes  Pulse input 1 rel    [n]            0    -      65535
+TYPE_PULSE1 = 0x0A
+# 4 bytes  Pulse input 1 abs    [n]            0    - 4294967295
+TYPE_PULSE1_ABS = 0x0B
+# 2 bytes  Ext temp 1           [°C]       -3276.5  -       3276.5
+TYPE_EXT_TEMP1 = 0x0C
+# 1 byte   Ext dig input 1      [bool]         0    -          1
+TYPE_EXT_DIGITAL = 0x0D
+# 2 bytes  Ext distance         [mm]           0    -      65535
+TYPE_EXT_DISTANCE = 0x0E
+# 1 byte   Motion (Acc mov)     [n]            0    -        255
+TYPE_ACC_MOTION = 0x0F
+# 4 bytes  IR temp              [°C]     2 int temp + 2 ext temp
+TYPE_IR_TEMP = 0x10
+# 1 byte   Occupancy            [enum]         0    -          2
+TYPE_OCCUPANCY = 0x11
+# 1 byte   Ext water leak       [conductivity] 0    -        255
+TYPE_WATERLEAK = 0x12
+# 65 bytes  Grideye data         []         1 ref + 64 pixel temp
+TYPE_GRIDEYE = 0x13
+# 4 byte   Pressure             [hPa]          0    -       ????
+TYPE_PRESSURE = 0x14
+# 2 byte   Sound                [dB]              1 peak + 1 avg
+TYPE_SOUND = 0x15
+# 2 bytes  Pulse input 2 rel    [n]            0    -      65535
+TYPE_PULSE2 = 0x16
+# 4 bytes  Pulse input 2 abs    [n]            0    - 4294967295
+TYPE_PULSE2_ABS = 0x17
+# 2 bytes  Analog input 2       [mV]           0    -      65535
+TYPE_ANALOG2 = 0x18
+# 2 bytes  Ext temp 2           [°C]       -3276.5  -       3276.5
+TYPE_EXT_TEMP2 = 0x19
+# 1 byte   Ext dig input 2      [bool]         0    -          1
+TYPE_EXT_DIGITAL2 = 0x1A
+# 4 bytes  Ext analog uV        [µV] −2147483648    - 2147483647
+TYPE_EXT_ANALOG_UV = 0x1B
+TYPE_DEBUG = 0x3D  # 4 bytes  Debug
+# n bytes  Sensor settings sent to server at startup (First package).
+TYPE_SETTINGS = 0x3E
+#           Sent on Port+1. See sensor settings document for more information.
 TYPE_RFU = 0x3F            # Reserved for future use
 
 
-def dict_from_payload(base64_input: str):
+def dict_from_payload(base64_input: str, fport: int = None):
     decoded = base64.b64decode(base64_input)
 
     if DEBUG_OUTPUT:
@@ -114,8 +142,8 @@ def dict_from_payload(base64_input: str):
             result['pulse1'] = (decoded[i + 1] << 8) | (decoded[i + 2])
             i += 3
         elif decoded[i] == TYPE_PULSE1_ABS:  # Pulse input 1 abs
-            result['pulse1Abs'] = (decoded[i + 1] << 24) | (decoded[i + 2] << 16) | \
-                                 (decoded[i + 3] << 8) | (decoded[i + 4])
+            result['pulse1Abs'] = ((decoded[i + 1] << 24) | (decoded[i + 2] << 16) |
+                                   (decoded[i + 3] << 8) | (decoded[i + 4]))
             i += 5
         elif decoded[i] == TYPE_EXT_TEMP1:  # Ext temp 1
             temp = (decoded[i + 1] << 8) | (decoded[i + 2])
@@ -154,7 +182,8 @@ def dict_from_payload(base64_input: str):
             i += 65
             result['grideye'] = grideye
         elif decoded[i] == TYPE_PRESSURE:  # Pressure
-            temp = (decoded[i + 1] << 24) | (decoded[i + 2] << 16) | (decoded[i + 3] << 8) | (decoded[i + 4])
+            temp = ((decoded[i + 1] << 24) | (decoded[i + 2] << 16) |
+                    (decoded[i + 3] << 8) | (decoded[i + 4]))
             result['pressure'] = temp / 1000
             i += 5
         elif decoded[i] == TYPE_SOUND:  # Sound
@@ -165,8 +194,8 @@ def dict_from_payload(base64_input: str):
             result['pulse2'] = (decoded[i + 1] << 8) | (decoded[i + 2])
             i += 3
         elif decoded[i] == TYPE_PULSE2_ABS:  # Pulse input 2 abs
-            result['pulse2Abs'] = (decoded[i + 1] << 24) | (decoded[i + 2] << 16) | \
-                                  (decoded[i + 3] << 8) | (decoded[i + 4])
+            result['pulse2Abs'] = ((decoded[i + 1] << 24) | (decoded[i + 2] << 16) |
+                                   (decoded[i + 3] << 8) | (decoded[i + 4]))
             i += 5
         elif decoded[i] == TYPE_ANALOG2:  # Analog input 2
             result['analog2'] = (decoded[i + 1] << 8) | (decoded[i + 2])
@@ -186,12 +215,12 @@ def dict_from_payload(base64_input: str):
             result['extDigital2'] = (decoded[i + 1])
             i += 2
         elif decoded[i] == TYPE_EXT_ANALOG_UV:  # Ext analog uV
-            result['extAnalogUv'] = (decoded[i + 1] << 24) | (decoded[i + 2] << 16) | \
-                                    (decoded[i + 3] << 8) | (decoded[i + 4])
+            result['extAnalogUv'] = ((decoded[i + 1] << 24) | (decoded[i + 2] << 16) |
+                                     (decoded[i + 3] << 8) | (decoded[i + 4]))
             i += 5
         elif decoded[i] == TYPE_DEBUG:  # Debug
-            result['debug'] = (decoded[i + 1] << 24) | (decoded[i + 2] << 16) | \
-                              (decoded[i + 3] << 8) | (decoded[i + 4])
+            result['debug'] = ((decoded[i + 1] << 24) | (decoded[i + 2] << 16) |
+                               (decoded[i + 3] << 8) | (decoded[i + 4]))
             i += 5
         elif decoded[i] == TYPE_SETTINGS:  # Sensor settings
             i = len(decoded)  # just ignore sensor settings packets
@@ -236,7 +265,7 @@ if __name__ == "__main__":
                 bytearray.fromhex(testcase.get("input_value"))).decode("utf-8")
         output = dict_from_payload(base64_input)
         for key in testcase.get("output"):
-            if(testcase.get("output").get(key) != output.get(key)):
+            if testcase.get("output").get(key) != output.get(key):
                 raise Exception(
                     f'Assertion failed for input {testcase.get("input_value")}, key {key}, expected {testcase.get("output").get(key)}, got {output.get(key)}')
             else:

@@ -16,7 +16,6 @@
 
 
 import base64
-import binascii
 
 
 def dict_from_payload(base64_input: str, fport: int = None):
@@ -35,30 +34,47 @@ def dict_from_payload(base64_input: str, fport: int = None):
             JSON object with key/value pairs of decoded attributes
 
         """
+
     bytes = base64.b64decode(base64_input)
-    print(binascii.b2a_hex(bytes))
-    lat = (bytes[0] << 24 | bytes[1] << 16 |
-           bytes[2] << 8 | bytes[3]) / 1000000
+    battery = (bytes[0] << 8 | bytes[1]) & 0x3FFF
+    door_open_status = 0
 
-    long = (bytes[4] << 24 | bytes[5] << 16 |
-            bytes[6] << 8 | bytes[7]) / 1000000
+    if bytes[0] & 0x40:
+        water_leak_status = 1
 
-    alarm = (bytes[8] & 0x40) > 0
+    water_leak_status = 0
+    if bytes[0] & 0x80:
+        door_open_status = 1
 
-    battery = ((bytes[8] & 0x3f) << 8 | bytes[9]) / 1000
+    mod = bytes[2]
 
-    fw = 150+(bytes[10] & 0x1f)
+    if mod == 1:
+        open_times = bytes[3] << 16 | bytes[4] << 8 | bytes[5]
+        open_duration = bytes[6] << 16 | bytes[7] << 8 | bytes[8]
+        result = {
+            "mod": mod,
+            "battery": battery,
+            "door_open_status": door_open_status,
+            "open_times": open_times,
+            "open_duration": open_duration
+        }
+
+        return result
+
+    if mod == 2:
+        leak_times = bytes[3] << 16 | bytes[4] << 8 | bytes[5]
+        leak_duration = bytes[6] << 16 | bytes[7] << 8 | bytes[8]
+
+        result = {
+            "mod": mod,
+            "battery": battery,
+            "leak_times": leak_times,
+            "leak_duration": leak_duration
+        }
+
+        return result
+
     result = {
-        "latitude": lat,
-        "longitude": long,
-        "alarm": alarm,
         "battery": battery,
-        "firmware": fw
-
+        "mod": mod
     }
-    return result
-
-
-# result = dict_from_payload("AuHtlACmawQPVGM=")
-# print(str(result))
-# print(result)

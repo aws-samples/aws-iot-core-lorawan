@@ -18,7 +18,22 @@
 import base64
 
 
-def dict_from_payload(base64_input: str):
+def dict_from_payload(base64_input: str, fport: int = None):
+    """ Decodes a base64-encoded binary payload into JSON.
+            Parameters 
+            ----------
+            base64_input : str
+                Base64-encoded binary payload
+            fport: int
+                FPort as provided in the metadata. Please note the fport is optional and can have value "None", if not provided by the LNS or invoking function. 
+
+                If  fport is None and binary decoder can not proceed because of that, it should should raise an exception.
+
+            Returns
+            -------
+            JSON object with key/value pairs of decoded attributes
+
+        """
 
     decoded = base64.b64decode(base64_input)
 
@@ -42,7 +57,7 @@ def dict_from_payload(base64_input: str):
     battery_value = ((decoded[0] << 8 | decoded[1]) & 0x3FFF) / 1000
 
     # Internal sensor temperature
-    if (decoded[2] & 0b1000000):
+    if decoded[2] & 0b1000000:
         internal_temperature = ((decoded[2] << 8 | decoded[3]) - 0xFFFF)/100
     else:
         internal_temperature = (decoded[2] << 8 | decoded[3])/100
@@ -51,9 +66,8 @@ def dict_from_payload(base64_input: str):
     humidity = ((decoded[4] << 8 | decoded[5])/10)
 
     # External sensor temperature
-    if (decoded[7] & 0b1000000):
-        external_temperature = (
-            ((decoded[7] << 8 | decoded[8]) - 0xFFFF) / 100)
+    if decoded[7] & 0b1000000:
+        external_temperature = (((decoded[7] << 8 | decoded[8]) - 0xFFFF) / 100)
     else:
         external_temperature = ((decoded[7] << 8 | decoded[8]) / 100)
 
@@ -62,7 +76,10 @@ def dict_from_payload(base64_input: str):
         "battery_value": battery_value,
         "temperature_internal": internal_temperature,
         "humidity": humidity,
-        "temperature_external": external_temperature
+        "temperature_external": external_temperature,
+        # "debug": {
+        #     "fport": fport
+        # }
     }
 
     return result
@@ -100,6 +117,6 @@ if __name__ == "__main__":
             bytearray.fromhex(test.get("input"))).decode("utf-8")
         output = dict_from_payload(base64_input)
         for key in test.get("output"):
-            if(test.get("output").get(key) != output.get(key)):
+            if test.get("output").get(key) != output.get(key):
                 raise Exception(
                     f'Assertion failed for input {test.get("input")}, key {key}, expected {test.get("output").get(key)}, got {output.get(key)} ')

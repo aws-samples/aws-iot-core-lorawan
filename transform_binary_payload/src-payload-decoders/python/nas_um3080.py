@@ -38,7 +38,7 @@ import helpers
 DEBUG_OUTPUT = False
 
 
-def dict_from_payload(base64_input: str):
+def dict_from_payload(base64_input: str, fport: int = None):
     decoded = base64.b64decode(base64_input)
 
     if DEBUG_OUTPUT:
@@ -202,7 +202,7 @@ if __name__ == "__main__":
                 bytearray.fromhex(testcase.get("input_value"))).decode("utf-8")
         output = dict_from_payload(base64_input)
         for key in testcase.get("output"):
-            if(testcase.get("output").get(key) != output.get(key)):
+            if testcase.get("output").get(key) != output.get(key):
                 raise Exception(
                     f'Assertion failed for input {testcase.get("input_value")}, key {key}, expected {testcase.get("output").get(key)}, got {output.get(key)}')
             else:
