@@ -39,32 +39,26 @@ DEBUG_OUTPUT = False
 
 
 def dict_from_payload(base64_input: str, fport: int = None):
-    if fport == 24:
-        return decode_status_message(base64_input)
-    elif fport == 25:
-        return decode_usage_message(base64_input)
-    else:
-        raise Exception(f"fPort {fport} not implemented")
-
-
-def decode_status_message(base64_input: str):
     decoded = base64.b64decode(base64_input)
 
     if DEBUG_OUTPUT:
         print(f"Input: {decoded.hex().upper()}")
 
+    if fport == 24:
+        return decode_status_message(decoded)
+    elif fport == 25:
+        return decode_usage_message(decoded)
+    elif fport == 99:
+        return decode_boot_debug_message(decoded)
+    else:
+        raise Exception(f"fPort {fport} not implemented")
+
+
+def decode_status_message(decoded: bytes):
     # Get Interface map from byte 0
     interface_map = decoded[0]
-    # Get status of digital1 from interface map
-    digital1_status_flag = (interface_map & 0b00000001)
-    digital1_status = "not sent"
-    if digital1_status_flag == 0b00000001:
-        digital1_status = "sent"
-    # Get status of digital2 from interface map
-    digital2_status_flag = (interface_map & 0b00000010)
-    digital2_status = "not sent"
-    if digital2_status_flag == 0b00000010:
-        digital2_status = "sent"
+    # Get status of digital 1+2 from interface map
+    digital1_status, digital2_status = get_digital_status(interface_map)
     # Get status of user triggered from interface map
     user_triggered_flag = (interface_map & 0b01000000)
     user_triggered = "no"
@@ -107,24 +101,11 @@ def decode_status_message(base64_input: str):
     return result
 
 
-def decode_usage_message(base64_input: str):
-    decoded = base64.b64decode(base64_input)
-
-    if DEBUG_OUTPUT:
-        print(f"Input: {decoded.hex().upper()}")
-
+def decode_usage_message(decoded: bytes):
     # Get Interface map from byte 0
     interface_map = decoded[0]
-    # Get status of digital1 from interface map
-    digital1_status_flag = (interface_map & 0b00000001)
-    digital1_status = "not sent"
-    if digital1_status_flag == 0b00000001:
-        digital1_status = "sent"
-    # Get status of digital2 from interface map
-    digital2_status_flag = (interface_map & 0b00000010)
-    digital2_status = "not sent"
-    if digital2_status_flag == 0b00000010:
-        digital2_status = "sent"
+    # Get status of digital 1+2 from interface map
+    digital1_status, digital2_status = get_digital_status(interface_map)
 
     # Output
     result = {
@@ -140,6 +121,22 @@ def decode_usage_message(base64_input: str):
         print(f"Output: {json.dumps(result,indent=2)}")
 
     return result
+
+
+def get_digital_status(interface_map: int):
+    # Get status of digital1 from interface map
+    digital1_status_flag = (interface_map & 0b00000001)
+    digital1_status = "not sent"
+    if digital1_status_flag == 0b00000001:
+        digital1_status = "sent"
+
+    # Get status of digital2 from interface map
+    digital2_status_flag = (interface_map & 0b00000010)
+    digital2_status = "not sent"
+    if digital2_status_flag == 0b00000010:
+        digital2_status = "sent"
+
+    return digital1_status, digital2_status
 
 
 def get_digital_data(decoded, digital1_status, digital2_status, start_byte):
@@ -217,6 +214,84 @@ def decode_digital_data(decoded, start_byte):
     return result
 
 
+def decode_boot_debug_message(decoded: bytes):
+    # Get message type from byte 0
+    message_type = decoded[0]
+
+    if message_type == 0x00:
+        result = decode_boot_message(decoded)
+    elif message_type == 0x01:
+        result = decode_shutdown_message(decoded)
+    else:
+        raise Exception(f"Message type {hex(message_type)} not known.")
+
+    if DEBUG_OUTPUT:
+        print(f"Output: {json.dumps(result,indent=2)}")
+
+    return result
+
+
+def decode_boot_message(decoded: bytes):
+    # Get serial from byte 4 to 1
+    serial = (decoded[4] << 24) | (decoded[3] << 16) | (decoded[2] << 8) | (decoded[1])
+
+    # Get firmware version from byte 5 to 7
+    firmware_major = int(decoded[5])
+    firmware_minor = int(decoded[6])
+    firmware_path = int(decoded[7])
+    firmware_version = f"{firmware_major}.{firmware_minor}.{firmware_path}"
+
+    # Get reset reason from byte 8
+    reset_reason = "unknown"
+    if decoded[8] == 0x02:
+        reset_reason = "Watchdog reset"
+    elif decoded[8] == 0x04:
+        reset_reason = "Soft reset"
+    elif decoded[8] == 0x10:
+        reset_reason = "Normal startup by magnet"
+
+    # Get reset reason from byte 9
+    battery_info = "unknown"
+    if decoded[9] == 0x01:
+        battery_info = "3V"
+    elif decoded[9] == 0x02:
+        battery_info = "3.6V"
+
+    # Output
+    result = {
+        'messageType': "boot",
+        'serial': hex(serial),
+        'firmwareVersion': firmware_version,
+        'resetReason': reset_reason,
+        'batteryInfo': battery_info
+    }
+
+    return result
+
+
+def decode_shutdown_message(decoded: bytes):
+    # Get reason from byte 1
+    reason = "unknown"
+    if decoded[1] == 0x20:
+        reason = "Hardware error"
+    elif decoded[1] == 0x31:
+        reason = "Shutdown by user (magnet)"
+    elif decoded[1] == 0x32:
+        reason = "Shutdown by user (DFU)"
+
+    # Output
+    result = {
+        'messageType': "shutdown",
+        'reason': reason
+    }
+
+    # Get status message from byte 2 to max bytes
+    if len(decoded) > 2:
+        result.update(decode_status_message(decoded[2:]))
+
+    return result
+
+
 # Tests
 if __name__ == "__main__":
     test_definition = [
@@ -267,6 +342,47 @@ if __name__ == "__main__":
                     "triggerAlert": "no",
                     "mediumType": "Pulses",
                     "counter": 0
+                }
+            }
+        },
+        {
+            "input_encoding": "hex",
+            "input_value": "00C701164C0007081002",
+            "fPort": 99,
+            "output": {
+                "messageType": "boot",
+                "serial": "0x4c1601c7",
+                "firmwareVersion": "0.7.8",
+                "resetReason": "Normal startup by magnet",
+                "batteryInfo": "3.6V"
+            }
+        },
+        {
+            "input_encoding": "hex",
+            "input_value": "013143F61A4B120100000020C4090000",
+            "fPort": 99,
+            "output": {
+                "messageType": "shutdown",
+                "reason": "Shutdown by user (magnet)",
+                "digital1Status": "sent",
+                "digital2Status": "sent",
+                "userTriggered": "yes",
+                "battery": 246,
+                "temperature": 26,
+                "rssi": -75,
+                "digital1": {
+                    "value": 0,
+                    "triggerMode": "enabled",
+                    "triggerAlert": "no",
+                    "mediumType": "Pulses",
+                    "counter": 1
+                },
+                "digital2": {
+                    "value": 0,
+                    "triggerMode": "disabled",
+                    "triggerAlert": "no",
+                    "mediumType": "Water in L",
+                    "counter": 2500
                 }
             }
         }
