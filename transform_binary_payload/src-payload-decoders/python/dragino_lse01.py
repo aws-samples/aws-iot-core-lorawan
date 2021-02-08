@@ -41,7 +41,7 @@ def dict_from_payload(base64_input: str, fport: int = None):
     battery_value = value  # /Battery,units:V
 
     value = decoded[2] << 8 | decoded[3]
-    if(decoded[2] & 0x80):
+    if decoded[2] & 0x80:
         value |= 0xFFFF0000
 
     temp_DS18B20 = (value/10)  # /DS18B20,temperature,units:℃
@@ -51,9 +51,9 @@ def dict_from_payload(base64_input: str, fport: int = None):
 
     value = decoded[6] << 8 | decoded[7]
 
-    if((value & 0x8000) >> 15 == 0):
+    if ((value & 0x8000) >> 15) == 0:
         temp_SOIL = (value/100)  # /temp_SOIL,temperature,units:°C
-    elif((value & 0x8000) >> 15 == 1):
+    elif ((value & 0x8000) >> 15) == 1:
         temp_SOIL = ((value-0xFFFF)/100)
 
     value = decoded[8] << 8 | decoded[9]

@@ -24,7 +24,7 @@ def int_from_bytes_at_offset(bytes, block_offset, block_size):
     bit_shift = 8 * (block_size - 1)
 
     int_value = 0
-    while (offset >= block_offset):
+    while offset >= block_offset:
         byte = bytes[offset]
         offset -= 1
         int_value |= byte << bit_shift
@@ -78,7 +78,7 @@ def decode_log_data(bytes, offset, decoded_payload):
 
     log_index = 1
     payload_size = len(bytes)
-    while (offset < payload_size):
+    while offset < payload_size:
         # Add an hour - Change this to match the meter log storage period, default is 1 hour
         cumulative_timestamp += datetime.timedelta(hours=1)
 
@@ -86,8 +86,7 @@ def decode_log_data(bytes, offset, decoded_payload):
         cumulative_volume += int_from_bytes_at_offset(bytes, offset, size)
         offset += size
 
-        decoded_payload["log_data"][f"timestamp_{log_index}"] = cumulative_timestamp.isoformat(
-        )
+        decoded_payload["log_data"][f"timestamp_{log_index}"] = cumulative_timestamp.isoformat()
         decoded_payload["log_data"][f"volume_{log_index}"] = cumulative_volume
 
         log_index += 1
@@ -124,7 +123,7 @@ def decode_alarm_data(decoded_payload):
         alarm_status, 0x04, higher_alarm)
 
 
-def dict_from_payload(payload):
+def dict_from_payload(payload, fport: int = None):
     bytes = base64.b64decode(payload)
 
     decoded_payload = {}

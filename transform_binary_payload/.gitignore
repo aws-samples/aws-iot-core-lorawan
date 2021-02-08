@@ -246,6 +246,7 @@ $RECYCLE.BIN/
 
 # AWS
 .aws-sam
+/*.toml
 
 # Custom
 .idea
