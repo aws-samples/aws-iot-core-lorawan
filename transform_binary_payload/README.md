@@ -306,7 +306,7 @@ Please perform the following steps to deploy a sample application:
     | Manufacturer | Device name         | Sample "PayloadData"                                             |
     | ------------ | ------------------- | ---------------------------------------------------------------- |
     | Axioma       | W1                  | eoFaXxADAAAAwKRZXwMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= |
-    | Dragino      | LHT65               | DRoAAAAABNYBLAA=                                                 |
+    | Dragino      | LHT65               | y6QHxgG4AQhmf/8=                                                 |
     | Dragino      | LSE01               | AuHtlACmawQPVGM=                                                 |
     | Dragino      | LGT92               | DSEAAAEVCMUGpAA=                                                 |
     | Dragino      | LBT1                | DxwAAAIDQUJCQ0NEREVFRkYwMjcxMjFGNkFDMy0wNTk=                     |
