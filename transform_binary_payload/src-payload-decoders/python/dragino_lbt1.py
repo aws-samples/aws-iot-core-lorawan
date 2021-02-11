@@ -60,7 +60,7 @@ def dict_from_payload(base64_input: str, fport: int = None):
     decoded = base64.b64decode(base64_input)
     logger.debug(f"Input hex is {decoded.hex()}")
 
-    battery_value = ((decoded[0] << 8 | decoded[1])) / 1000
+    battery_value = (decoded[0] << 8 | decoded[1]) / 1000
     step_count = ((decoded[2] & 0x0F) << 16) | (decoded[3] << 8) | (decoded[4])
     mode = decoded[5]
 
@@ -145,7 +145,7 @@ if __name__ == "__main__":
 
         output = dict_from_payload(base64_input)
         for key in testcase.get("output"):
-            if(testcase.get("output").get(key) != output.get(key)):
+            if testcase.get("output").get(key) != output.get(key):
                 raise Exception(
                     f'Assertion failed for input {testcase.get("input_value")}, key {key}, expected {testcase.get("output").get(key)}, got {output.get(key)}')
             else:

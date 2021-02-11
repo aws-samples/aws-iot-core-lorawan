@@ -11,6 +11,7 @@ This repository contains resources for you to learn how to transform binary payl
   - Axioma W1
   - Elsys
   - Globalsat LT-100
+  - NAS Pulse Reader UM3080
 
 
 - An [AWS IoT Rule](#example-for-transforming-a-lorawan-binary-payload) for transforming incoming LoRaWAN binary payloads and acting on the resulting JSON. In this sample, the IoT Rule uses a [republish action](https://docs.aws.amazon.com/iot/latest/developerguide/republish-rule-action.html) to republish transformed payload to another MQTT topic. You can use a similar approach to customize the rule actions for the requirements of your application.
@@ -46,6 +47,7 @@ Example binary deocoders for the following devices are included in this sample:
 | Dragino      | LDS01               | dragino_lds01      |
 | Elsys        | all                 | elsys              |
 | Globalsat    | LT-100              | globalsat_lt100    |
+| NAS          | Pulse Reader UM3080 | nas_um3080         |
 
 
 Before you proceed, please select a preferred approach for using this sample:
@@ -285,6 +287,7 @@ Please perform the following steps to deploy a sample application:
     | Browan       | Tabs Object Locator | tabs_objectlocator |
     | Elsys        | all                 | elsys              |
     | Globalsat    | LT-100              | globalsat_lt100    |
+    | NAS          | Pulse Reader UM3080 | nas_um3080         |
     
 
   Please note that `sam deploy --guided` should be only executed for a first deployment. To redeploy after that please use `sam deploy`.
@@ -303,16 +306,20 @@ Please perform the following steps to deploy a sample application:
 
     **Note**: please replace \<Decoder name> in the topic name with a value of the column "Decoder name" from the table above, e.g. samplebinarytransform_TransformLoRaWANBinaryPayload_axioma_w1.
           
-    | Manufacturer | Device name         | Sample "PayloadData"                                             |
-    | ------------ | ------------------- | ---------------------------------------------------------------- |
-    | Axioma       | W1                  | eoFaXxADAAAAwKRZXwMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= |
-    | Dragino      | LHT65               | y6QHxgG4AQhmf/8=                                                 |
-    | Dragino      | LSE01               | AuHtlACmawQPVGM=                                                 |
-    | Dragino      | LGT92               | DSEAAAEVCMUGpAA=                                                 |
-    | Dragino      | LBT1                | DxwAAAIDQUJCQ0NEREVFRkYwMjcxMjFGNkFDMy0wNTk=                     |
-    | Browan       | Tabs Object Locator | Ae48SPbhAgRupmA=                                                 |
-    | Elsys        | all                 | MDEwMEUyMDIyOTA0MDAyNzA1MDYwNjAzMDgwNzBENjIxOTAwRTIxOTAwQTM=     |
-    | Globalsat    | LT-100              | MDA4MjY0MDI2NERBRDlGQjg4RENENg==                                 |
+    | Manufacturer | Device name         | Sample "PayloadData"                                              |
+    | ------------ | ------------------- | ----------------------------------------------------------------- |
+    | Axioma       | W1                  | eoFaXxADAAAAwKRZXwMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=  |
+    | Dragino      | LHT65               | y6QHxgG4AQhmf/8=                                                  |
+    | Dragino      | LSE01               | AuHtlACmawQPVGM=                                                  |
+    | Dragino      | LGT92               | DSEAAAEVCMUGpAA=                                                  |
+    | Dragino      | LBT1                | DxwAAAIDQUJCQ0NEREVFRkYwMjcxMjFGNkFDMy0wNTk=                      |
+    | Browan       | Tabs Object Locator | Ae48SPbhAgRupmA=                                                  |
+    | Elsys        | all                 | MDEwMEUyMDIyOTA0MDAyNzA1MDYwNjAzMDgwNzBENjIxOTAwRTIxOTAwQTM=      |
+    | Globalsat    | LT-100              | MDA4MjY0MDI2NERBRDlGQjg4RENENg==                                  |
+    | NAS          | Pulse Reader UM3080 | (fPort 24) NDNGNjFBNEIxMjAxMDAwMDAwMjBDNDA5MDAwMA==               |
+    | NAS          | Pulse Reader UM3080 | (fPort 25) MDMxMjAxMDAwMDAwMTAwMDAwMDAwMA==                       |
+    | NAS          | Pulse Reader UM3080 | (fPort 99, boot) MDBDNzAxMTY0QzAwMDcwODEwMDI=                     |
+    | NAS          | Pulse Reader UM3080 | (fPort 99, shutdown) MDEzMTQzRjYxQTRCMTIwMTAwMDAwMDIwQzQwOTAwMDA= |
 
     The payload is structured in a same way as it will be ingested by AWS IoT Core for LoRaWAN. Please replace the `<Sample PayloadData>` with the value of "Sample PayloadData>" from the following table:
 

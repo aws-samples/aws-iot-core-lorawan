@@ -45,6 +45,7 @@ import dragino_lgt92
 import dragino_lse01
 import dragino_lbt1
 import dragino_lds01
+import nas_um3080
 
 
 # Allowed payload type values. This array will be used for validation of the "type" attribute for a
@@ -56,9 +57,9 @@ import dragino_lds01
 #
 # If you want to implement additional binary decoders:
 # please add name of your binary decoder (e.g. "mylorawandevice") here (see "Step 4" above)
-VALID_PAYLOAD_DECODER_NAMES = ["sample_device",
-                               "dragino_lht65", "axioma_w1", "tabs_objectlocator",
-                               "elsys", "globalsat_lt100", "dragino_lgt92", "dragino_lse01", "dragino_lbt1", "dragino_lds01"]
+VALID_PAYLOAD_DECODER_NAMES = ["sample_device", "axioma_w1", "tabs_objectlocator",
+                               "dragino_lht65", "dragino_lgt92", "dragino_lse01", "dragino_lbt1", "dragino_lds01",
+                               "elsys", "globalsat_lt100", "nas_um3080"]
 
 # Function name for logging
 FUNCTION_NAME = "ConvertBinaryPayload"
@@ -79,20 +80,20 @@ def lambda_handler(event, context):
         Parameters 
         ----------
         PayloadData : str (obligatory parameter)
-            Base64 encoded input payload 
+            Base64 encoded input payload
 
         PayloadDecoderName : string (obligatory parameter)
             The value of this attribute defines the name of a Python module which will be used to perform binary decoding. If value of "type" is for example "sample_device", then this function will perform an invocation of "sample_device.dict_from_payload" function. For this approach to work, you  have to import the necessary modules, e.g. by performing a "import sample_device01" command in the beginning of this file.
 
         WirelessDeviceId : str (optional parameter)
-            Wireless Device Id 
+            Wireless Device Id
 
         WirelessMetadata : json (obligatory parameter)
             This parameter contains Metadata of transmission according to the example below.
             Obligatory element is: LoRaWAN.FPort
             All other elements are optional and ignored in the current implementation.
 
-            Sample input: 
+            Sample input:
             {
             "LoRaWAN": {
                 "DataRate": 0,
@@ -128,26 +129,25 @@ def lambda_handler(event, context):
     payload_decoder_name = event.get("PayloadDecoderName")
 
     # Validate existence of payload type
-    if (payload_decoder_name is None):
+    if payload_decoder_name is None:
         raise InvalidInputException(
             "PayloadDecoderName is not specified")
 
     # Validate  if payload type is in the list of allowed values
-    if (not payload_decoder_name in VALID_PAYLOAD_DECODER_NAMES):
+    if payload_decoder_name not in VALID_PAYLOAD_DECODER_NAMES:
         raise InvalidInputException(
             "PayloadDecoderName have one of the following values:"+(".".join(VALID_PAYLOAD_DECODER_NAMES)))
 
     logger.info(f"Base64 input={input_base64}, Type={payload_decoder_name}")
 
     # Retrieve FPort from the metadata. In case FPort or surrounding attributes is missing,
-    # the function will intentionnaly not fail but proceed with fPort == None.
+    # the function will intentionally not fail but proceed with fPort == None.
     # The binary decoder function is expected to handle fPort == None.
     fPort = None
     if "WirelessMetadata" in event:
         if "LoRaWAN" in event.get("WirelessMetadata"):
             if "FPort" in event.get("WirelessMetadata").get("LoRaWAN"):
-                fPort = event.get("WirelessMetadata").get(
-                    "LoRaWAN").get("FPort")
+                fPort = event.get("WirelessMetadata").get("LoRaWAN").get("FPort")
             else:
                 logger.warn(
                     "Attribute 'WirelessMetadata.LoRaWAN' is missing. Will proceed with fPort == None.")

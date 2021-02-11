@@ -22,10 +22,12 @@
 
 import base64
 import json
+import helpers
 
 DEBUG_OUTPUT = False
 
-TYPE_RESERVED = 0x00       # Reserved
+# Reserved
+TYPE_RESERVED = 0x00
 # 2 bytes  Temperature          [°C]       -3276.5  -       3276.5
 TYPE_TEMP = 0x01
 # 1 byte   Humidity             [%Rh]          0    -        100
@@ -80,25 +82,13 @@ TYPE_EXT_TEMP2 = 0x19
 TYPE_EXT_DIGITAL2 = 0x1A
 # 4 bytes  Ext analog uV        [µV] −2147483648    - 2147483647
 TYPE_EXT_ANALOG_UV = 0x1B
-TYPE_DEBUG = 0x3D  # 4 bytes  Debug
+# 4 bytes  Debug
+TYPE_DEBUG = 0x3D
 # n bytes  Sensor settings sent to server at startup (First package).
+#          Sent on Port+1. See sensor settings document for more information.
 TYPE_SETTINGS = 0x3E
-#           Sent on Port+1. See sensor settings document for more information.
-TYPE_RFU = 0x3F            # Reserved for future use
-
-
-def bin16dec(binary):
-    number = binary & 0xFFFF
-    if 0x8000 & number:
-        number = -(0x010000 - number)
-    return number
-
-
-def bin8dec(binary):
-    number = binary & 0xFF
-    if 0x80 & number:
-        number = -(0x0100 - number)
-    return number
+# Reserved for future use
+TYPE_RFU = 0x3F
 
 
 def dict_from_payload(base64_input: str, fport: int = None):
@@ -109,7 +99,6 @@ def dict_from_payload(base64_input: str, fport: int = None):
 
     # Output
     result = {
-        'error': False
     }
 
     # Iterate over the payload
@@ -117,7 +106,7 @@ def dict_from_payload(base64_input: str, fport: int = None):
     while i < len(decoded):
         if decoded[i] == TYPE_TEMP:  # Temperature
             temp = (decoded[i + 1] << 8) | (decoded[i + 2])
-            temp = bin16dec(temp)
+            temp = helpers.bin16dec(temp)
             result['temperature'] = temp / 10
             i += 3
         elif decoded[i] == TYPE_RH:  # Humidity
@@ -125,9 +114,9 @@ def dict_from_payload(base64_input: str, fport: int = None):
             result['humidity'] = rh
             i += 2
         elif decoded[i] == TYPE_ACC:  # Acceleration X,Y,Z
-            result['accX'] = bin8dec(decoded[i + 1])
-            result['accY'] = bin8dec(decoded[i + 2])
-            result['accZ'] = bin8dec(decoded[i + 3])
+            result['accX'] = helpers.bin8dec(decoded[i + 1])
+            result['accY'] = helpers.bin8dec(decoded[i + 2])
+            result['accZ'] = helpers.bin8dec(decoded[i + 3])
             i += 4
         elif decoded[i] == TYPE_LIGHT:  # Light
             result['light'] = (decoded[i + 1] << 8) | (decoded[i + 2])
@@ -155,12 +144,12 @@ def dict_from_payload(base64_input: str, fport: int = None):
             result['pulse1'] = (decoded[i + 1] << 8) | (decoded[i + 2])
             i += 3
         elif decoded[i] == TYPE_PULSE1_ABS:  # Pulse input 1 abs
-            result['pulse1Abs'] = (decoded[i + 1] << 24) | (decoded[i + 2] << 16) | \
-                (decoded[i + 3] << 8) | (decoded[i + 4])
+            result['pulse1Abs'] = ((decoded[i + 1] << 24) | (decoded[i + 2] << 16) |
+                                   (decoded[i + 3] << 8) | (decoded[i + 4]))
             i += 5
         elif decoded[i] == TYPE_EXT_TEMP1:  # Ext temp 1
             temp = (decoded[i + 1] << 8) | (decoded[i + 2])
-            temp = bin16dec(temp)
+            temp = helpers.bin16dec(temp)
             result['extTemp1'] = temp / 10
             i += 3
         elif decoded[i] == TYPE_EXT_DIGITAL:  # Ext dig input 1
@@ -174,9 +163,9 @@ def dict_from_payload(base64_input: str, fport: int = None):
             i += 2
         elif decoded[i] == TYPE_IR_TEMP:  # IR temp
             iTemp = (decoded[i + 1] << 8) | (decoded[i + 2])
-            iTemp = bin16dec(iTemp)
+            iTemp = helpers.bin16dec(iTemp)
             eTemp = (decoded[i + 3] << 8) | (decoded[i + 4])
-            eTemp = bin16dec(eTemp)
+            eTemp = helpers.bin16dec(eTemp)
             result['irTempInt'] = iTemp / 10
             result['irTempExt'] = eTemp / 10
             i += 5
@@ -195,8 +184,8 @@ def dict_from_payload(base64_input: str, fport: int = None):
             i += 65
             result['grideye'] = grideye
         elif decoded[i] == TYPE_PRESSURE:  # Pressure
-            temp = (decoded[i + 1] << 24) | (decoded[i + 2] <<
-                                             16) | (decoded[i + 3] << 8) | (decoded[i + 4])
+            temp = ((decoded[i + 1] << 24) | (decoded[i + 2] << 16) |
+                    (decoded[i + 3] << 8) | (decoded[i + 4]))
             result['pressure'] = temp / 1000
             i += 5
         elif decoded[i] == TYPE_SOUND:  # Sound
@@ -207,15 +196,15 @@ def dict_from_payload(base64_input: str, fport: int = None):
             result['pulse2'] = (decoded[i + 1] << 8) | (decoded[i + 2])
             i += 3
         elif decoded[i] == TYPE_PULSE2_ABS:  # Pulse input 2 abs
-            result['pulse2Abs'] = (decoded[i + 1] << 24) | (decoded[i + 2] << 16) | \
-                                  (decoded[i + 3] << 8) | (decoded[i + 4])
+            result['pulse2Abs'] = ((decoded[i + 1] << 24) | (decoded[i + 2] << 16) |
+                                   (decoded[i + 3] << 8) | (decoded[i + 4]))
             i += 5
         elif decoded[i] == TYPE_ANALOG2:  # Analog input 2
             result['analog2'] = (decoded[i + 1] << 8) | (decoded[i + 2])
             i += 3
         elif decoded[i] == TYPE_EXT_TEMP2:  # Ext temp 2
             temp = (decoded[i + 1] << 8) | (decoded[i + 2])
-            temp = bin16dec(temp)
+            temp = helpers.bin16dec(temp)
             if 'extTemp2' in result:
                 if type(result['extTemp2']) is float:
                     result['extTemp2'] = [result['extTemp2']]
@@ -228,18 +217,17 @@ def dict_from_payload(base64_input: str, fport: int = None):
             result['extDigital2'] = (decoded[i + 1])
             i += 2
         elif decoded[i] == TYPE_EXT_ANALOG_UV:  # Ext analog uV
-            result['extAnalogUv'] = (decoded[i + 1] << 24) | (decoded[i + 2] << 16) | \
-                                    (decoded[i + 3] << 8) | (decoded[i + 4])
+            result['extAnalogUv'] = ((decoded[i + 1] << 24) | (decoded[i + 2] << 16) |
+                                     (decoded[i + 3] << 8) | (decoded[i + 4]))
             i += 5
         elif decoded[i] == TYPE_DEBUG:  # Debug
-            result['debug'] = (decoded[i + 1] << 24) | (decoded[i + 2] << 16) | \
-                              (decoded[i + 3] << 8) | (decoded[i + 4])
+            result['debug'] = ((decoded[i + 1] << 24) | (decoded[i + 2] << 16) |
+                               (decoded[i + 3] << 8) | (decoded[i + 4]))
             i += 5
         elif decoded[i] == TYPE_SETTINGS:  # Sensor settings
             i = len(decoded)  # just ignore sensor settings packets
         else:  # something is wrong with the data
-            result['error'] = True
-            i = len(decoded)
+            raise Exception(f"Data field type {hex(decoded[i])} not known.")
 
     if DEBUG_OUTPUT:
         print(f"Output: {json.dumps(result,indent=2)}")
@@ -263,8 +251,7 @@ if __name__ == "__main__":
                 "extTemp2": [
                     22.6,
                     16.3
-                ],
-                "error": False
+                ]
             }
         }
     ]
@@ -278,7 +265,7 @@ if __name__ == "__main__":
                 bytearray.fromhex(testcase.get("input_value"))).decode("utf-8")
         output = dict_from_payload(base64_input)
         for key in testcase.get("output"):
-            if(testcase.get("output").get(key) != output.get(key)):
+            if testcase.get("output").get(key) != output.get(key):
                 raise Exception(
                     f'Assertion failed for input {testcase.get("input_value")}, key {key}, expected {testcase.get("output").get(key)}, got {output.get(key)}')
             else:

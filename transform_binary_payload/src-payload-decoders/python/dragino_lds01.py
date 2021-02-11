@@ -48,7 +48,7 @@ def dict_from_payload(base64_input: str, fport: int = None):
 
     mod = bytes[2]
 
-    if(mod == 1):
+    if mod == 1:
         open_times = bytes[3] << 16 | bytes[4] << 8 | bytes[5]
         open_duration = bytes[6] << 16 | bytes[7] << 8 | bytes[8]
         result = {
@@ -61,7 +61,7 @@ def dict_from_payload(base64_input: str, fport: int = None):
 
         return result
 
-    if(mod == 2):
+    if mod == 2:
         leak_times = bytes[3] << 16 | bytes[4] << 8 | bytes[5]
         leak_duration = bytes[6] << 16 | bytes[7] << 8 | bytes[8]
 
