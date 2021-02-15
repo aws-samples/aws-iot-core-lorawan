@@ -36,12 +36,9 @@ def dict_from_payload(base64_input: str, fport: int = None):
 
         """
     bytes = base64.b64decode(base64_input)
-    print(binascii.b2a_hex(bytes))
-    lat = (bytes[0] << 24 | bytes[1] << 16 |
-           bytes[2] << 8 | bytes[3]) / 1000000
 
-    long = (bytes[4] << 24 | bytes[5] << 16 |
-            bytes[6] << 8 | bytes[7]) / 1000000
+    lat = int.from_bytes(bytes[0:4], byteorder='big', signed=True)/1000000
+    long = int.from_bytes(bytes[4:8], byteorder='big', signed=True)/1000000
 
     alarm = (bytes[8] & 0x40) > 0
 
@@ -57,8 +54,3 @@ def dict_from_payload(base64_input: str, fport: int = None):
 
     }
     return result
-
-
-# result = dict_from_payload("AuHtlACmawQPVGM=")
-# print(str(result))
-# print(result)
