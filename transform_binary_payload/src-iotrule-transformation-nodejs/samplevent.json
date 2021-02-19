@@ -1,0 +1,22 @@
+// $aws/rules/mygithubstack_TransformLoRaWANBinaryPayloadNode_dragino_lht65
+{
+    "PayloadData": "y6QHxgG4AQhmf/8=",
+    "PayloadDecoderName": "dragino_lht65",
+    "WirelessDeviceId": "57728ff8-5d1d-4130-9de2-f004d8722bc2",
+    "WirelessMetadata": {
+        "LoRaWAN": {
+            "DataRate": 0,
+            "DevEui": "a84041d55182720b",
+            "FPort": 2,
+            "Frequency": 867900000,
+            "Gateways": [
+                {
+                    "GatewayEui": "dca632fffe45b3c0",
+                    "Rssi": -76,
+                    "Snr": 9.75
+                }
+            ],
+            "Timestamp": "2020-12-07T14:41:48Z"
+        }
+    }
+}
