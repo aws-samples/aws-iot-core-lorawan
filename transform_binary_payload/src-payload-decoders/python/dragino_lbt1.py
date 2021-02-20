@@ -111,13 +111,14 @@ def dict_from_payload(base64_input: str, fport: int = None):
 
 
 # Tests
-if __name__ == "__main__":
+def test_uplink_decoding():
+
     test_definition = [
         {
 
             "input_value": "DyAAAAACMDExMjIzMzQ0NTU2Njc3ODg5OUFBQkJDQ0RERUVGRjBFREYwOUM1QjVCNDc=",
             "input_encoding": "base64",
-            "output": {"battery_value": 3.872, "step_count": 0, "mode": 2, "uuid": "0112233445566778899AABBCCDDEEFF0", "addr": "DF09C5B5B47"}
+            "output": {"battery_value": 3.872, "step_count": 0, "mode": 2, "uuid": "0112233445566778899AABBCCDDEEFF0", "addr": "EDF09C5B5B47"}
         },
         {
 
@@ -145,9 +146,8 @@ if __name__ == "__main__":
 
         output = dict_from_payload(base64_input)
         for key in testcase.get("output"):
-            if testcase.get("output").get(key) != output.get(key):
-                raise Exception(
-                    f'Assertion failed for input {testcase.get("input_value")}, key {key}, expected {testcase.get("output").get(key)}, got {output.get(key)}')
-            else:
-                print(
-                    f'"{testcase.get("input_value")}" : Successfull test for key "{key}", value "{testcase.get("output").get(key)}"')
+            assert testcase.get("output").get(key) == output.get(key)
+
+
+if __name__ == "__main__":
+    test_uplink_decoding()

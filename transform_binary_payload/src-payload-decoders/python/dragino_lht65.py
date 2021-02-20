@@ -67,7 +67,8 @@ def dict_from_payload(base64_input: str, fport: int = None):
 
     # External sensor temperature
     if decoded[7] & 0b1000000:
-        external_temperature = (((decoded[7] << 8 | decoded[8]) - 0xFFFF) / 100)
+        external_temperature = (
+            ((decoded[7] << 8 | decoded[8]) - 0xFFFF) / 100)
     else:
         external_temperature = ((decoded[7] << 8 | decoded[8]) / 100)
 
@@ -85,8 +86,7 @@ def dict_from_payload(base64_input: str, fport: int = None):
     return result
 
 
-# Tests
-if __name__ == "__main__":
+def test_uplink_decoding():
     test_definition = [
         {
             "input": "CBF60B0D0376010ADD7FFF",
@@ -117,6 +117,8 @@ if __name__ == "__main__":
             bytearray.fromhex(test.get("input"))).decode("utf-8")
         output = dict_from_payload(base64_input)
         for key in test.get("output"):
-            if test.get("output").get(key) != output.get(key):
-                raise Exception(
-                    f'Assertion failed for input {test.get("input")}, key {key}, expected {test.get("output").get(key)}, got {output.get(key)} ')
+            assert test.get("output").get(key) == output.get(key)
+
+
+if __name__ == "__main__":
+    test_uplink_decoding()

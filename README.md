@@ -57,3 +57,9 @@ The sample [Decoding binary payloads from LoRaWAN devices](transform_binary_payl
 - [FAQs](https://aws.amazon.com/iot-core/faqs/#AWS_IoT_Core_for_LoRaWAN)
 - [Support forums](https://forums.aws.amazon.com/forum.jspa?forumID=210)
 - [Partner catalog](https://devices.amazonaws.com/search?page=1&sv=iotclorawan)
+
+## Test results 
+
+| Branch | Result                                                                                                                                                                                                                                                                                                    |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| main   | ![](https://codebuild.us-west-2.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiNlVuVG9hVVEyUytLOC9icWVVWFY5eXAreFJLSlUvUnd3anBmSmRxVkpkbHFsVG9VVFJKRlZvQlkyaXRzNW05dUR4aFUxNmhxZE5UZEUwc05HMmJUMUZNPSIsIml2UGFyYW1ldGVyU3BlYyI6InR5L1psR1VlNjhjVkdSWHMiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=main) |
