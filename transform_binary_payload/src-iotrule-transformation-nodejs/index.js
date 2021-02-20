@@ -14,11 +14,28 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-decoders = {}
+// Set default parametersv
+var DECODER_PATH = "/opt/node/"
+const DECODER_SUFFUX = ".js"
 
-const DECODER_PATH = "/opt/node/"
-// Uncomment the next line to execute tests
-//const DECODER_PATH = "../src-payload-decoders/node/"
+// Read command line parameters
+var command_line_args = process.argv.slice(2);
+
+// Allow to override decoder path to run local tests
+if (command_line_args.length == 1 && command_line_args[0] == "local") {
+    DECODER_PATH = "../src-payload-decoders/node/"
+}
+
+
+global.decoders = new Map()
+
+var fs = require('fs');
+var vm = require('vm');
+var includeInThisContext = function (path) {
+    var code = fs.readFileSync(path);
+    vm.runInThisContext(code, path);
+}.bind(this);
+
 exports.handler = async function (event, context) {
     console.log('## EVENT: ' + JSON.stringify(event))
 
@@ -28,26 +45,31 @@ exports.handler = async function (event, context) {
     device_id =
         fport = event.WirelessMetadata.LoRaWAN.FPort;
 
+    // Logging
     console.log("Decoding payload " + input_base64 + " with fport " + fport + " using decoder " + payload_decoder_name)
 
-    // Check if decoder is in cache and load the decoder into cache if neccessary
-    if (decoders[payload_decoder_name] == null) {
-        decoders[payload_decoder_name] = require(DECODER_PATH + payload_decoder_name + ".js")
-    }
 
-
-    // Conver base64 payload into bytes
+    // Convert base64 payload into bytes
     let bytes = Uint8Array.from(Buffer.from(input_base64, 'base64'))
 
+
     try {
-        // Invoke the decoder
-        decoded = decoders[payload_decoder_name].decodeUplink({
+
+        // Cache the decoder function if not done yet
+        if (!global.decoders.has(payload_decoder_name)) {
+            includeInThisContext(DECODER_PATH + payload_decoder_name + DECODER_SUFFUX);
+            global.decoders.set(payload_decoder_name, decodeUplink)
+        }
+
+        // Execute the decoder
+        decoded = (global.decoders.get(payload_decoder_name))({
             "fPort": fport,
             "bytes": bytes
         })
 
         console.log("Decoded payload is " + JSON.stringify(decoded))
 
+        // Check if decoder has returned any errors
         if (decoded.hasOwnProperty("errors")) {
             console.log("Error decoding :" + decoded.errors)
             throw ("Error decoding:" + decoded.errors)

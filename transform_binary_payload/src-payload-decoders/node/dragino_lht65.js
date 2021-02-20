@@ -51,4 +51,3 @@ function decodeUplink(input) {
     };
 }
 
-module.exports = { decodeUplink }

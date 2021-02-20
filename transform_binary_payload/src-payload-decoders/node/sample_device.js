@@ -65,5 +65,5 @@ function decodeDownlink(input) {
     }
 }
 
-module.exports = { decodeUplink }
+
 

@@ -11,6 +11,17 @@ test_definition = [
             "speed": 2
 
         }
+    },
+    {
+        "description": "Test 1",
+        "input": "AwI=",
+        "fport": 1,
+        "PayloadDecoderName": "sample_device",
+        "expected_output": {
+            "direction": "W",
+            "speed": 2
+
+        }
     }
 ]
 
@@ -65,6 +76,7 @@ for (var i = 0; i < test_definition.length; i++) {
 
 
     app(test_definition, i)
+
 
 
 }

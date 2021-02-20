@@ -302,7 +302,7 @@ Please perform the following steps to deploy a sample application:
       | NAS          | Pulse Reader UM3080 | nas_um3080         | x        |         |
     
 
-  Please note that `sam deploy --guided` should be only executed for a first deployment. To redeploy after that please use `sam deploy`.
+    Please note that `sam deploy --guided` should be only executed for a first deployment. To redeploy after that please use `sam deploy`.
 
 4. Please wait few minutes to complete the deployment
 
@@ -318,7 +318,7 @@ Please perform the following steps to deploy a sample application:
     - If you want to invoke a Python decoder, please use topic `$aws/rules/samplebinarytransform_TransformLoRaWANBinaryPayloadPython_<Decoder name>`
     - If you want to invoke a Node.js decoder, please use topic `$aws/rules/samplebinarytransform_TransformLoRaWANBinaryPayloadNose_<Decoder name>`
 
-  Please replace \<Decoder name> in the topic name with a value of the column "Decoder name" from the table above, e.g. samplebinarytransform_TransformLoRaWANBinaryPayload_axioma_w1.
+    Please replace \<Decoder name> in the topic name with a value of the column "Decoder name" from the table above, e.g. samplebinarytransform_TransformLoRaWANBinaryPayload_axioma_w1.
     
 4. Select the example payload
 
