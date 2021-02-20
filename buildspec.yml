@@ -11,7 +11,7 @@ phases:
       - python3 -m venv test_venv
       - . test_venv/bin/activate
       - pip install --upgrade pip
-      - pip install -r src/requirements.txt
+      - pip install -r transform_binary_payload/src-payload-decoders/python/requirements.txt
       - rm -rf dspt
       - rm -rf test-reports
       - mkdir test-reports
