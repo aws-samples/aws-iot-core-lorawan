@@ -4,7 +4,7 @@ LoRaWAN devices encode transmitted data in a binary format, as it increases tran
 
 This repository can help you to accelerate development of your LoRaWAN-based IoT solutions by providing a deployable reference architecture with examples. Please select an option which fits your demands best:
 
-1. If you are looking for a hands-introduction into implementing a binary decoder for a LoRaWAN device and integrating it with AWS IoT services, please continue [here](#introduction).
+1. If you are looking for a hands-on introduction into implementing a binary decoder for a LoRaWAN device and integrating it with AWS IoT services, please continue [here](#introduction).
 2. If you have a Node.js or Python binary decoder code for a specific LoRaWAN device and want to quickly integrate it with AWS IoT Core for LoRaWAN and further AWS services, please continue [here](#how-to-deploy-an-existing-nodejs-binary-decoder).
 3. If you want to learn how to build a new binary decoder in Node.js or Python and integrate the decoder with AWS IoT Core for LoRaWAN and further AWS services, please continue [here](#how-to-build-and-deploy-a-new-binary-decoder-for-your-lorawan-device).
 
@@ -492,6 +492,23 @@ Please open AWS CloudFormation console, select the stack and click on "Delete"
 
 ## How to deploy an existing Node.js binary decoder 
 
+### TL;DR
+
+If you are in a hurry, run the following commands to download and deploy a binary decoder. Otherwise please find the detailed instructions [below](#check-prerequisites).
+
+```shell
+# Clone this repo
+git clone https://github.com/aws-samples/aws-iot-core-lorawan 
+# Change the dirctory
+cd aws-iot-core-lorawan/transform_binary_payload
+# Download the binary decoder (must have decodeUplink(input) function, with input like {"fPort": 1, "bytes:" [0x00,0x01,0x02]})
+wget <https://Path to binaray decoder> -o src-payload-decoders/node/mydecoder.js
+# Build and deploy the stack
+sam build && sam deploy --guided --stack-name decoderexample --parameter-overrides "ParamBinaryDecoderName=mydecoder EnableNodeJSSupport=true EnablePythonSupport=false"
+# Update the AWS IoT Core for LoRaWAN destination
+aws iotwireless update-destination --name <Select name of existing AWS IoT Core for LoRaWAN Destination> --expression-type RuleName  --expression=<Insert value of IoTRuleNameNode output>
+```
+
 ### Check prerequisites
 
 Following software is required on your workstation:
@@ -512,7 +529,9 @@ Please ensure that your decoder code contains the function `decodeUplink` with a
 
 ### Deployment guideline
 
-Please perform the following steps to deploy an existing binary decoder. The following explanations assume that your decoder is in file ~/mydecoder.js, please adjust the path and the name accordingly.
+Please perform the following steps to deploy an existing binary decoder. 
+
+**Note: the following explanations assume that your decoder is in file ~/mydecoder.js or is available online, please adjust the path and the name accordingly.**
 
 1. Clone this repository on your workstation
 
@@ -526,21 +545,15 @@ Please perform the following steps to deploy an existing binary decoder. The fol
     cp ~/mydecoder.js aws-iot-core-lorawan/transform_binary_payload/src-payload-decoders/node
     ```
 
-3. Whitelist the binary decoder file
-
-    As a security measure, each binary decoder file needs to be whitelisted in the code of AWS Lambda function. To achieve that, please edit the file `aws-iot-core-lorawan/transform_binary_payload/src-iotrule-transformation-nodejs/index.js`. and it's name to `DECODER_NAME_WHITELIST` array. Please note that the name of decoder shell be the name of the file without ".js" string.
+    You can also download the decoder file it's available online via https:
 
     ```shell
-    nano aws-iot-core-lorawan/transform_binary_payload/src-iotrule-transformation-nodejs/index.js
+    wget <https://Path to binaray decoder> -o aws-iot-core-lorawan/transform_binary_payload/src-payload-decoders/node/mydecoder.js
     ```
 
-    For example, to whitelist file `mydecoder.js` please add the `"mydecoder"` to DECODER_NAME_WHITELIST 
+3. Build and deploy the stack
 
-    ```javascript
-    const DECODER_NAME_WHITELIST = [..., "mydecoder"]
-    ```
-
-4. Build and deploy the stack
+  Please replace `mydecoder` below with the name of your decoder.
 
    ```shell
    cd aws-iot-core-lorawan/transform_binary_payload
@@ -553,7 +566,7 @@ Please perform the following steps to deploy an existing binary decoder. The fol
     
     Please note that `sam deploy --guided` should be only executed for a first deployment. To redeploy after that please use `sam build && sam deploy`.
 
-5. Please wait few minutes to complete the deployment.  
+4. Please wait few minutes to complete the deployment.  
    
    After deployment completion you will see several outputs, e.g.:
 
