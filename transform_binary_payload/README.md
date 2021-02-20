@@ -494,20 +494,23 @@ Please open AWS CloudFormation console, select the stack and click on "Delete"
 
 ### TL;DR
 
-If you are in a hurry, run the following commands to download and deploy a binary decoder. Otherwise please find the detailed instructions [below](#check-prerequisites).
+If you are in a hurry, run the following commands to download and deploy a binary decoder. Otherwise, please find the detailed instructions [below](#check-prerequisites).
 
 ```shell
-# Clone this repo
+# 1. Clone this repo
 git clone https://github.com/aws-samples/aws-iot-core-lorawan 
-# Change the dirctory
+# 2. Change the directory
 cd aws-iot-core-lorawan/transform_binary_payload
-# Download the binary decoder (must have decodeUplink(input) function, with input like {"fPort": 1, "bytes:" [0x00,0x01,0x02]})
-wget <https://Path to binaray decoder> -o src-payload-decoders/node/mydecoder.js
-# Build and deploy the stack
+# 3. Download the binary decoder (must contain a function 'decodeUplink(input)' where 
+# input is like {"fPort": 1, "bytes:" [0x00,0x01,0x02]})
+wget <https://URL of the binary decoder> -o src-payload-decoders/node/mydecoder.js
+# 4. Build and deploy the stack
 sam build && sam deploy --guided --stack-name decoderexample --parameter-overrides "ParamBinaryDecoderName=mydecoder EnableNodeJSSupport=true EnablePythonSupport=false"
-# Update the AWS IoT Core for LoRaWAN destination
-aws iotwireless update-destination --name <Select name of existing AWS IoT Core for LoRaWAN Destination> --expression-type RuleName  --expression=<Insert value of IoTRuleNameNode output>
+# 5. Update the AWS IoT Core for LoRaWAN destination
+aws iotwireless update-destination --name <Select name of existing AWS IoT Core for LoRaWAN Destination> --expression-type RuleName  --expression=<Insert value of the stack IoTRuleNameNode output>
 ```
+
+You can (but don't have to) replace `mydecoder` in the above example in items 3 and 4 with any other decoder name you prefer.
 
 ### Check prerequisites
 
@@ -553,18 +556,18 @@ Please perform the following steps to deploy an existing binary decoder.
 
 3. Build and deploy the stack
 
-  Please replace `mydecoder` below with the name of your decoder.
+    Please replace `mydecoder` below with the name of your decoder.
 
-   ```shell
-   cd aws-iot-core-lorawan/transform_binary_payload
-   sam build && sam deploy --guided --stack-name samplebinarytransform --parameter-overrides "ParamBinaryDecoderName=mydecoder EnableNodeJSSupport=true"
-   ```
-
-    Please select the default values of parameters by typing "Enter", with the following exceptions:
-    - **AWS Region:** select a region supporting AWS IoT Core for LoRaWAN
-    - **DecoderName:** please select the name of decoder you whitelisted in step 3, e.g. `mydecoder`
+    ```shell
+    cd aws-iot-core-lorawan/transform_binary_payload
+    sam build && sam deploy --guided --stack-name samplebinarytransform --parameter-overrides "ParamBinaryDecoderName=mydecoder EnableNodeJSSupport=true"
+    ```
     
-    Please note that `sam deploy --guided` should be only executed for a first deployment. To redeploy after that please use `sam build && sam deploy`.
+    Please select the default values of parameters by typing "Enter", with the following exceptions:
+      - **AWS Region:** select a region supporting AWS IoT Core for LoRaWAN
+      - **DecoderName:** please select the name of decoder you whitelisted in step 3, e.g. `mydecoder`
+      
+      Please note that `sam deploy --guided` should be only executed for a first deployment. To redeploy after that please use `sam build && sam deploy`.
 
 4. Please wait few minutes to complete the deployment.  
    
@@ -635,7 +638,7 @@ Please perform following steps to implement your own binary transformation model
    sam build
    ```
 
-   As a results, the artifacts for the deployment will be placed in a an `.aws-sam` directory.
+   As a result, the artifacts for the deployment will be placed in a an `.aws-sam` directory.
 
 6. Deploy the SAM template to your AWS account.
 
