@@ -22,7 +22,7 @@ Parameters:
   EnableNodeJSSupport:
     Description: If set to true, will deploy AWS Lambda NodeJS function and AWS IoT Rule to perform binary decoding using NodeJS
     Type: String
-    Default: false
+    Default: true
     AllowedValues:
       - true
       - false
@@ -30,7 +30,7 @@ Parameters:
   EnablePythonSupport:
     Description: If set to true, will deploy AWS Lambda Python function and respective AWS IoT Rule to perform binary decoding using NodeJS
     Type: String
-    Default: false
+    Default: true
     AllowedValues:
       - true
       - false

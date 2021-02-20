@@ -4,3 +4,5 @@ tools/*
 **/.aws-sam/*
 **/samconfig.toml
 **/**.pem
+.coverage
+test-reports/**

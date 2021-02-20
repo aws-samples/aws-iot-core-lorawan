@@ -1,7 +1,14 @@
-# AWS IoT Core for LoRaWAN - transform a binary LoRaWAN payload into JSON
+# AWS IoT Core for LoRaWAN - deployable reference architecture for binary decoding with examples
 
-LoRaWAN devices often encode transmitted data in a binary format, as it increases transmission efficiency and improves battery lifetime. However, as the data arrive in the cloud, many use cases require a structured format. Transforming the binary data into JSON, for example, enables filtering and enrichment using [AWS IoT SQL](https://docs.aws.amazon.com/iot/latest/developerguide/iot-sql-reference.html) as well as acting on the data using [AWS IoT Rule Actions](https://docs.aws.amazon.com/iot/latest/developerguide/iot-rule-actions.html).
+LoRaWAN devices encode transmitted data in a binary format, as it increases transmission efficiency and improves battery lifetime. However, as the data arrive in the cloud, many use cases require a structured format. Transforming the binary data into JSON, for example, enables filtering and enrichment using [AWS IoT SQL](https://docs.aws.amazon.com/iot/latest/developerguide/iot-sql-reference.html) as well as acting on the data using [AWS IoT Rule Actions](https://docs.aws.amazon.com/iot/latest/developerguide/iot-rule-actions.html).
 
+This repository can help you to accelerate development of your LoRaWAN-based IoT solutions by providing a deployable reference architecture with examples. Please select an option which fits your demands best:
+
+1. If you are looking for a hands-introduction into implementing a binary decoder for a LoRaWAN device and integrating it with AWS IoT services, please continue [here](#introduction).
+2. If you have a Node.js or Python binary decoder code for a specific LoRaWAN device and want to quickly integrate it with AWS IoT Core for LoRaWAN and further AWS services, please continue [here](#how-to-deploy-an-existing-nodejs-binary-decoder).
+3. If you want to learn how to build a new binary decoder in Node.js or Python and integrate the decoder with AWS IoT Core for LoRaWAN and further AWS services, please continue [here](#how-to-build-and-deploy-a-new-binary-decoder-for-your-lorawan-device).
+
+## Introduction
 This repository contains resources to quickly onboard included LoRaWAN devices or learn how to build your own binary payloads in Python or Node.js.  These resources include:
 
 - Examples of binary decoders for a set of devices. These examples are in Python 3 or Node.js and will be deployed in an [AWS Lambda layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html). Following devices are included:
@@ -15,7 +22,7 @@ This repository contains resources to quickly onboard included LoRaWAN devices o
 
 - AWS Lambda functions in [Python 3](transform_binary_payload/src-iotrule-transformation) and [Node.js](transform_binary_payload/src-iotrule-transformation-node) that will be invoked by the AWS IoT Rule to perform binary decoding
 
-- [AWS IoT Rules](#example-for-transforming-a-lorawan-binary-payload) that will be neccessary to integrate the binary decoding with AWS IoT Core for LoRaWAN (please see [documentation](https://docs.aws.amazon.com/iot/latest/developerguide/connect-iot-lorawan-destination-rules.html) for details). In this sample, the IoT Rule uses a [republish action](https://docs.aws.amazon.com/iot/latest/developerguide/republish-rule-action.html) to republish transformed payload to another MQTT topic. You can use more than 20 other [AWS IoT Rule actions](https://docs.aws.amazon.com/iot/latest/developerguide/iot-rule-actions.html) to adjust the rule for the requirements of your use case. This sample includes two IoT Rules: one for invocation of Python 3 decoders, another one for invocation of Node.js decoders.
+- [AWS IoT Rules](#example-for-transforming-a-lorawan-binary-payload) that will be necessary to integrate the binary decoding with AWS IoT Core for LoRaWAN (please see [documentation](https://docs.aws.amazon.com/iot/latest/developerguide/connect-iot-lorawan-destination-rules.html) for details). In this sample, the IoT Rule uses a [republish action](https://docs.aws.amazon.com/iot/latest/developerguide/republish-rule-action.html) to republish transformed payload to another MQTT topic. You can use more than 20 other [AWS IoT Rule actions](https://docs.aws.amazon.com/iot/latest/developerguide/iot-rule-actions.html) to adjust the rule for the requirements of your use case. This sample includes two IoT Rules: one for invocation of Python 3 decoders, another one for invocation of Node.js decoders.
 
 ## Quick start
 You can quickly test this sample by [deploying the before mentioned resources using AWS SAM](#step-1-check-prerequisites). If you prefer to build your own binary transformation decoder for a LoRaWAN device, please follow this [step-by-step guidance](#how-to-build-and-deploy-a-binary-decoder-for-your-lorawan-device).
@@ -64,17 +71,17 @@ Example binary decoders for the following devices are included in this sample:
 ### Step 1: Check prerequisites
 
 - The sample requires AWS SAM CLI, you can find installation instructions [here](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html). If you use [AWS CloudShell](https://aws.amazon.com/cloudshell/) or [AWS Cloud9](https://aws.amazon.com/cloud9/), SAM is already preinstalled.
-- If you plan to deploy an example for Node.js decoder, please ensure that Node.js 12.x is installed. Otherwise please disable the deployment of Node.js examples.
+- If you plan to deploy an example for Node.js decoder, please ensure that Node.js 12.x is installed. Otherwise, please disable the deployment of Node.js examples.
   
 ### Step 2: Deploy the sample for a simulated decoder in your AWS account
 
 Please perform the following steps to deploy a sample application:
 
-1. Check out this repository on your computer
+1. Clone this repository on your workstation
 
     ```shell
     git clone https://github.com/aws-samples/aws-iot-core-lorawan 
-    cd aws-iot-core-lorawan/integration/transform_binary_payload
+    cd aws-iot-core-lorawan/transform_binary_payload
     ```
 
 2. Perform the following command to build the SAM artifacts:
@@ -265,7 +272,7 @@ After you have completed working with this sample, you can proceed to [Cleaning 
 
 Please perform the following steps to deploy a sample application:
 
-1. Check out this repository on your computer
+1. Clone this repository on your workstation
 
     ```shell
     git clone https://github.com/aws-samples/aws-iot-core-lorawan 
@@ -482,7 +489,88 @@ Now you can configure the processing of the decoded data by adding further actio
 
 Please open AWS CloudFormation console, select the stack and click on "Delete"
 
-## How to build and deploy a binary decoder for your LoRaWAN device
+
+## How to deploy an existing Node.js binary decoder 
+
+### Check prerequisites
+
+Following software is required on your workstation:
+
+- AWS SAM CLI (you can find installation instructions [here](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html))
+- Node.js 12.x 
+- git
+
+The necessary software will be already preinstalled if you use [AWS CloudShell](https://console.aws.amazon.com/cloudshell/home) or [AWS Cloud9](https://console.aws.amazon.com/cloud9/home).
+
+### Verify expected decoder signature and output
+
+Please ensure that your decoder code contains the function `decodeUplink` with a compatible signature:
+
+1) Function signature must be `decodeUplink(input)`, where `input` is an object containing attributes `bytes` (byte array) and `fPort` (integer). For example,  `input = {"fPort": 1, "bytes:" [0x00,0x01,0x02]}`. See an example of the function code [here](transform_binary_payload/src-payload-decoders/node/sample_device.js).
+2) In case of success, the function `decodeUplink` must return a valid JSON object with a `data` attribute, e.g.  `return {"data": {"temperature":42,"mode":"4711",..}}`
+3) In case of error, the function `decodeUplink` must return a valid JSON object with a `errors` attribute of type array, e.g. `return {"errors":["error 1 description","error 2 description"]}`
+
+### Deployment guideline
+
+Please perform the following steps to deploy an existing binary decoder. The following explanations assume that your decoder is in file ~/mydecoder.js, please adjust the path and the name accordingly.
+
+1. Clone this repository on your workstation
+
+    ```shell
+    git clone https://github.com/aws-samples/aws-iot-core-lorawan 
+    ```
+
+2. Copy the decoder file into folder `aws-iot-core-lorawan/transform_binary_payload/src-payload-decoders/node`
+   
+    ```shell
+    cp ~/mydecoder.js aws-iot-core-lorawan/transform_binary_payload/src-payload-decoders/node
+    ```
+
+3. Whitelist the binary decoder file
+
+    As a security measure, each binary decoder file needs to be whitelisted in the code of AWS Lambda function. To achieve that, please edit the file `aws-iot-core-lorawan/transform_binary_payload/src-iotrule-transformation-nodejs/index.js`. and it's name to `DECODER_NAME_WHITELIST` array. Please note that the name of decoder shell be the name of the file without ".js" string.
+
+    ```shell
+    nano aws-iot-core-lorawan/transform_binary_payload/src-iotrule-transformation-nodejs/index.js
+    ```
+
+    For example, to whitelist file `mydecoder.js` please add the `"mydecoder"` to DECODER_NAME_WHITELIST 
+
+    ```javascript
+    const DECODER_NAME_WHITELIST = [..., "mydecoder"]
+    ```
+
+4. Build and deploy the stack
+
+   ```shell
+   cd aws-iot-core-lorawan/transform_binary_payload
+   sam build && sam deploy --guided --stack-name samplebinarytransform --parameter-overrides "ParamBinaryDecoderName=mydecoder EnableNodeJSSupport=true"
+   ```
+
+    Please select the default values of parameters by typing "Enter", with the following exceptions:
+    - **AWS Region:** select a region supporting AWS IoT Core for LoRaWAN
+    - **DecoderName:** please select the name of decoder you whitelisted in step 3, e.g. `mydecoder`
+    
+    Please note that `sam deploy --guided` should be only executed for a first deployment. To redeploy after that please use `sam build && sam deploy`.
+
+5. Please wait few minutes to complete the deployment.  
+   
+   After deployment completion you will see several outputs, e.g.:
+
+    ```bash
+    ...
+    Key                 IoTRuleNameNode   
+    Description         Please add this AWS IoT Rule name as a Destination to AWS IoT Core for LoRaWAN  
+    Value               samplebinarytransform_TransformLoRaWANBinaryPayloadNode_mydecoder 
+    Successfully created/updated stack - samplebinarytransform in <region>
+    ```
+
+    Please note the value of **IoTRuleNameNode** parameter, as it represents the name of AWS IoT Rule that perform a binary decoding . The name of IoT Rule will be necessary to create or update an AWS IoT Core for LoRaWAN destination in the next step. After creating or updating the Destination with that IoT rule name, all messages from LoRaWAN devices assigned to that destination will be processed by that IoT rule. Please review the [reference architecture](#solution-architecture) for details.
+
+Congratulations, you have deployed the binary decoder! Please proceed with the integration with AWS IoT Core for LoRaWAN as described [here](#step-4-integrating-with-aws-iot-core-for-lorawan). You can also consult the [developer documentation](https://docs.aws.amazon.com/iot/latest/developerguide/connect-iot-lorawan-create-destinations.html).
+
+
+## How to build and deploy a new binary decoder for your LoRaWAN device
 
 ### Prerequisites
 
@@ -493,7 +581,7 @@ Please open AWS CloudFormation console, select the stack and click on "Delete"
 
 Please perform following steps to implement your own binary transformation model:
 
-1. Check out this repository on your computer
+1. Clone this repository on your workstation
 
     ```shell
     git clone https://github.com/aws-samples/aws-iot-core-lorawan 
@@ -509,11 +597,13 @@ Please perform following steps to implement your own binary transformation model
 3. Implement decoding logic in `src-payload-decoders/python/mymanufacturer_mydevice.py`
 
    Please consider the following guidelines when implementing your binary decoder:
+
     - Please ensure to keep the name and signature of dict_from_payload function stable and not to modify it. 
     - In case of a failure in decoding, please raise an exception.
-    - In case of successfull decoding, please return a JSON object with decoded key/value pairs
+    - In case of successful decoding, please return a JSON object with decoded key/value pairs
 
-    The following example illustrates these guideines:
+    The following example illustrates these guidelines:
+
     ```python
     def dict_from_payload(base64_input: str, fport: int = None):
       # Your code
