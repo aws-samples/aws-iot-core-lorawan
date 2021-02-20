@@ -23,7 +23,7 @@ phases:
         -s
         -v
         --cov=transform_binary_payload/src-payload-decoders/python
-        --cov-report=html:test-reports/coverage
+        --cov-report=xml:test-reports/coverage/coverage.xml
         --junitxml=test-reports/junit.xml
         --log-file=test-reports/logs.txt
   post_build:
@@ -32,11 +32,13 @@ phases:
 
 reports:
   coverage:
+    report-group-name-or-arn: coverage
     files:
-      - "coverage/*"
-    base-directory: "test-reports"
+      - "test-reports/coverage/coverage.xml"
+    file-format: "COBERTURAXML"
     discard-paths: yes
-  report:
+  unittest:
+    report-group-name-or-arn: unittesrt
     files:
       - "junit.xml"
       - "report.html"
