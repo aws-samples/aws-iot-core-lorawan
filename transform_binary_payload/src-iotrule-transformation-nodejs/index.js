@@ -18,7 +18,10 @@
 var DECODER_PATH = "/opt/node/"
 const DECODER_SUFFUX = ".js"
 
-// Read command line parameters
+// As a security measure we explicitly name all the decoder that are allowed to be executed
+const DECODER_NAME_WHITELIST = ["dragino_lht65", "sample_device"]
+// Read command line parameters. You can provide parameter "local" to override path for decoder libraries,
+// as specified below
 var command_line_args = process.argv.slice(2);
 
 // Allow to override decoder path to run local tests
@@ -26,9 +29,10 @@ if (command_line_args.length == 1 && command_line_args[0] == "local") {
     DECODER_PATH = "../src-payload-decoders/node/"
 }
 
-
+// Global variable to cache decoder functions
 global.decoders = new Map()
 
+// Function to dynamically load decoders
 var fs = require('fs');
 var vm = require('vm');
 var includeInThisContext = function (path) {
@@ -45,6 +49,10 @@ exports.handler = async function (event, context) {
     device_id =
         fport = event.WirelessMetadata.LoRaWAN.FPort;
 
+    // Check if decoder is whitelisted
+    if (DECODER_NAME_WHITELIST.indexOf(payload_decoder_name) == -1) {
+        throw ("Decoder " + payload_decoder_name + " is not whitelisted, please add the name to the variable DECODER_NAME_WHITELIST")
+    }
     // Logging
     console.log("Decoding payload " + input_base64 + " with fport " + fport + " using decoder " + payload_decoder_name)
 
