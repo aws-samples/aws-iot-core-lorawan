@@ -505,7 +505,12 @@ cd aws-iot-core-lorawan/transform_binary_payload
 # input is like {"fPort": 1, "bytes:" [0x00,0x01,0x02]})
 wget <https://URL of the binary decoder> -o src-payload-decoders/node/mydecoder.js
 # 4. Build and deploy the stack
-sam build && sam deploy --guided --stack-name decoderexample --parameter-overrides "ParamBinaryDecoderName=mydecoder EnableNodeJSSupport=true EnablePythonSupport=false"
+sam build 
+sam deploy --guided \
+          --stack-name decoderexample \
+          --parameter-overrides "ParamBinaryDecoderName=mydecoder \
+                                EnableNodeJSSupport=true \
+                                EnablePythonSupport=false"
 # 5. Update the AWS IoT Core for LoRaWAN destination
 aws iotwireless update-destination --name <Select name of existing AWS IoT Core for LoRaWAN Destination> --expression-type RuleName  --expression=<Insert value of the stack IoTRuleNameNode output>
 ```
