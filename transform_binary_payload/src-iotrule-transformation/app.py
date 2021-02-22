@@ -147,7 +147,8 @@ def lambda_handler(event, context):
     if "WirelessMetadata" in event:
         if "LoRaWAN" in event.get("WirelessMetadata"):
             if "FPort" in event.get("WirelessMetadata").get("LoRaWAN"):
-                fPort = event.get("WirelessMetadata").get("LoRaWAN").get("FPort")
+                fPort = event.get("WirelessMetadata").get(
+                    "LoRaWAN").get("FPort")
             else:
                 logger.warn(
                     "Attribute 'WirelessMetadata.LoRaWAN' is missing. Will proceed with fPort == None.")
@@ -166,6 +167,7 @@ def lambda_handler(event, context):
     try:
         result = eval(conversion_function_name)(input_base64, fPort)
         result["status"] = 200
+        result["decoder_name"] = payload_decoder_name
         logger.info(result)
         return result
 
@@ -175,6 +177,7 @@ def lambda_handler(event, context):
             exception_type, exception_value, exception_traceback)
         result = {
             "status": 500,
+            "decoder_name": payload_decoder_name,
             "errorType": exception_type.__name__,
             "errorMessage": str(exception_value),
             "stackTrace": traceback_string

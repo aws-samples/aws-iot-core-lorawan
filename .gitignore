@@ -6,3 +6,4 @@ tools/*
 **/**.pem
 .coverage
 test-reports/**
+transform_binary_payload/scripts/deploy_lorawan_decoder.sh
