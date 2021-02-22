@@ -21,6 +21,9 @@ const DECODER_SUFFUX = ".js"
 /* The handler of this Lambda function will derive the name of the file with a binary decoder
 by adding ".js" to the value of input parameter event.PayloadDecoderName (e.g. "/opt/node/mydecoder.js" 
 for "event.PayloadDecoderName==mydecoder" ).
+
+Please note, that the whole file (e.g. "/opt/node/mydecoder.js") will be evaluated in the context of this function.
+
 Two measures will be taken to restrict values of allowed binary decoder files:
 1. Regex check (enabled by default) 
 2. Whitelisting(disabled by default , recommended to enable for non-prototyping usage)*/
