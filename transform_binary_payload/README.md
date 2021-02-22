@@ -494,7 +494,7 @@ Please open AWS CloudFormation console, select the stack and click on "Delete"
 
 ### TL;DR
 
-If you are in a hurry, run the following commands to download and deploy a binary decoder. Otherwise, please find the detailed instructions [below](#check-prerequisites).
+If you are in a hurry, run the following commands e.g. in [AWS CloudShell](https://console.aws.amazon.com/cloudshell/home) to download and deploy a binary decoder. Otherwise, please find the detailed instructions [below](#check-prerequisites).
 
 ```shell
 # 1. Clone this repo
@@ -503,7 +503,7 @@ git clone https://github.com/aws-samples/aws-iot-core-lorawan
 cd aws-iot-core-lorawan/transform_binary_payload
 # 3. Download the binary decoder (must contain a function 'decodeUplink(input)' where 
 # input is like {"fPort": 1, "bytes:" [0x00,0x01,0x02]})
-wget <https://URL of the binary decoder> -o src-payload-decoders/node/mydecoder.js
+wget -O src-payload-decoders/node/mydecoder.js <https://URL of the binary decoder> 
 # 4. Build and deploy the stack
 sam build 
 sam deploy --guided \
@@ -517,9 +517,9 @@ aws iotwireless update-destination --name <Select name of existing AWS IoT Core 
                                    --expression=<Insert value of the stack IoTRuleNameNode output>
 
 Example:
-aws iotwireless update-destination --name MyDestination \
+aws iotwireless update-destination --name MyDecoderDestination \
                                    --expression-type RuleName \
-                                   --expression=
+                                   --expression=decoderexample_TransformLoRaWANBinaryPayloadNode_mydecoder 
 ```
 
 You can (but don't have to) replace `mydecoder` in the above example in items 3 and 4 with any other decoder name you prefer.
@@ -563,7 +563,7 @@ Please perform the following steps to deploy an existing binary decoder.
     You can also download the decoder file it's available online via https:
 
     ```shell
-    wget <https://Path to binaray decoder> -o aws-iot-core-lorawan/transform_binary_payload/src-payload-decoders/node/mydecoder.js
+    wget <https://Path to binaray decoder> -O aws-iot-core-lorawan/transform_binary_payload/src-payload-decoders/node/mydecoder.js
     ```
 
 3. Build and deploy the stack
