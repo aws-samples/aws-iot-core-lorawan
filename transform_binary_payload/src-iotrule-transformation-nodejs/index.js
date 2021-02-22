@@ -18,8 +18,17 @@
 var DECODER_PATH = "/opt/node/"
 const DECODER_SUFFUX = ".js"
 
-// As a security measure we define a regex for the allowed decoder names
-const DECODER_NAME_WHITELIST_REGEX = /^[A-Za-z\_01-9]+$/;
+/* The handler of this Lambda function will derive the name of the file with a binary decoder
+by adding ".js" to the value of input parameter event.PayloadDecoderName (e.g. "/opt/node/mydecoder.js" 
+for "event.PayloadDecoderName==mydecoder" ).
+Two measures will be taken to restrict values of allowed binary decoder files:
+1. Regex check (enabled by default) 
+2. Whitelisting(disabled by default , recommended to enable for non-prototyping usage)*/
+const ALLOWED_DECODER_NAME_REGEX = /^[A-Za-z\_01-9]+$/;
+const ENABLE_DECODER_NAME_WHITELIST = false;
+const ALLOWED_DECODER_NAME_WHITELIST = ["sample_device"]
+
+
 // Read command line parameters. You can provide parameter "local" to override path for decoder libraries,
 // as specified below
 var command_line_args = process.argv.slice(2);
@@ -41,23 +50,62 @@ var includeInThisContext = function (path) {
 }.bind(this);
 
 exports.handler = async function (event, context) {
+    /* Transforms a binary payload by invoking "decode_{event.type}" function
+            Parameters 
+            ----------
+            event.PayloadData : str (obligatory parameter)
+                Base64 encoded input payload
+    
+            event.PayloadDecoderName : string (obligatory parameter)
+                The value of this attribute defines the name of a a Javasceript file which will be used to perform binary decoding. If value of "PayloadDecoderName" is for example "sample_device", then this function will evaluate file "sample_device.js" and perform an invocation of "decodeUplink" function from this file. 
+                
+                A prerequisite for this is that the file sample_device.js is stored in the path specified by
+                DECODER_PATH. Per default we assume that sample_device.js will be stored in an AWS Lambda layer, so that it accessible via /opt/node
+    
+            event.WirelessMetadata.LoRaWAN.FPort : int (obligatory parameter)
+                LoRaWAN FPort 
+    
+    
+            Returns
+            -------
+            This function returns a JSON object with the following keys:
+    
+            - status: 200 or 500
+            - decoder_name: value of input parameter event.PayloadDecoderName
+            - transformed_payload: result of  "decodeUpLink().data" invocation  (only if status == 200)
+            - error_message                                                     (only if status == 500)
+    
+    */
+
+
     console.log('## EVENT: ' + JSON.stringify(event))
 
     // Read input parameters
     input_base64 = event.PayloadData
     payload_decoder_name = event.PayloadDecoderName
-    device_id =
-        fport = event.WirelessMetadata.LoRaWAN.FPort;
+    fport = event.WirelessMetadata.LoRaWAN.FPort;
 
     // Check if decoder name mathes the regex
-    if (!payload_decoder_name.match(DECODER_NAME_WHITELIST_REGEX)) {
+    if (!payload_decoder_name.match(ALLOWED_DECODER_NAME_REGEX)) {
         result = {
             "status": 500,
-            "errorMessage": "Name of decoder " + payload_decoder_name + " does not match the regex in the variable DECODER_NAME_WHITELIST",
+            "errorMessage": "Name of decoder " + payload_decoder_name + " does not match the regex in the variable ALLOWED_DECODER_NAME_REGEX",
             "decoder_name": payload_decoder_name
         }
         return result;
     }
+
+    // Check if decoder name matches the whitelist (disabled by default , recommended to enable for non-prototyping usage)
+    if (ENABLE_DECODER_NAME_WHITELIST && (ALLOWED_DECODER_NAME_WHITELIST.indexOf(payload_decoder_name) == -1)) {
+        result = {
+            "status": 500,
+            "errorMessage": "Name of decoder " + payload_decoder_name + " does not match the list in the variable ALLOWED_DECODER_NAME_WHITELIST",
+            "decoder_name": payload_decoder_name
+        }
+        return result;
+    }
+
+
     // Logging
     console.log("Decoding payload " + input_base64 + " with fport " + fport + " using decoder " + payload_decoder_name)
 

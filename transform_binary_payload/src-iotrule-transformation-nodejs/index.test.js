@@ -31,7 +31,7 @@ test_definition = [
         "fport": 1,
         "PayloadDecoderName": "../sample_device",
         "expected_status": 500,
-        "expected_error_message": "Name of decoder ../sample_device does not match the regex in the variable DECODER_NAME_WHITELIST"
+        "expected_error_message": "Name of decoder ../sample_device does not match the regex in the variable ALLOWED_DECODER_NAME_REGEX"
     },
 
     {
@@ -40,7 +40,7 @@ test_definition = [
         "fport": 1,
         "PayloadDecoderName": "*sample_device",
         "expected_status": 500,
-        "expected_error_message": "Name of decoder *sample_device does not match the regex in the variable DECODER_NAME_WHITELIST"
+        "expected_error_message": "Name of decoder *sample_device does not match the regex in the variable ALLOWED_DECODER_NAME_REGEX"
     }
 
 
