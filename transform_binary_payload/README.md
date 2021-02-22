@@ -512,7 +512,14 @@ sam deploy --guided \
                                 EnableNodeJSSupport=true \
                                 EnablePythonSupport=false"
 # 5. Update the AWS IoT Core for LoRaWAN destination
-aws iotwireless update-destination --name <Select name of existing AWS IoT Core for LoRaWAN Destination> --expression-type RuleName  --expression=<Insert value of the stack IoTRuleNameNode output>
+aws iotwireless update-destination --name <Select name of existing AWS IoT Core for LoRaWAN Destination> \
+                                   --expression-type RuleName \
+                                   --expression=<Insert value of the stack IoTRuleNameNode output>
+
+Example:
+aws iotwireless update-destination --name MyDestination \
+                                   --expression-type RuleName \
+                                   --expression=
 ```
 
 You can (but don't have to) replace `mydecoder` in the above example in items 3 and 4 with any other decoder name you prefer.
@@ -565,7 +572,10 @@ Please perform the following steps to deploy an existing binary decoder.
 
     ```shell
     cd aws-iot-core-lorawan/transform_binary_payload
-    sam build && sam deploy --guided --stack-name samplebinarytransform --parameter-overrides "ParamBinaryDecoderName=mydecoder EnableNodeJSSupport=true"
+    sam build 
+    sam deploy --guided --stack-name samplebinarytransform \ 
+               --parameter-overrides  "ParamBinaryDecoderName=mydecoder \
+                                       EnableNodeJSSupport=true"
     ```
     
     Please select the default values of parameters by typing "Enter", with the following exceptions:
