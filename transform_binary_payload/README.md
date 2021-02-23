@@ -497,21 +497,24 @@ Please open AWS CloudFormation console, select the stack and click on "Delete"
 If you are in a hurry, run the following commands e.g. in [AWS CloudShell](https://console.aws.amazon.com/cloudshell/home) to download and deploy a binary decoder. Otherwise, please find the detailed instructions [below](#check-prerequisites).
 
 ```shell
-# 1. Clone this repo
+# 1. Clone this repo and change the directory
 git clone https://github.com/aws-samples/aws-iot-core-lorawan 
-# 2. Change the directory
 cd aws-iot-core-lorawan/transform_binary_payload
-# 3. Download the binary decoder (must contain a function 'decodeUplink(input)' where 
+# 2. Download the binary decoder (must contain a function 'decodeUplink(input)' where 
 # input is like {"fPort": 1, "bytes:" [0x00,0x01,0x02]})
 wget -O src-payload-decoders/node/mydecoder.js <https://URL of the binary decoder> 
-# 4. Build and deploy the stack
+# 3. Please be aware that the binary decoder file will be loaded and evaluated in context of the 
+# AWS Lambda function running in your AWS account. Please review the downloaded file to evaluate
+# a fit to your security, functional and other requirements.
+cat src-payload-decoders/node/mydecoder.js
+# 4. After a succcssfull review of the decoder source code, build and deploy the stack
 sam build 
 sam deploy --guided \
           --stack-name decoderexample \
           --parameter-overrides "ParamBinaryDecoderName=mydecoder \
                                 EnableNodeJSSupport=true \
                                 EnablePythonSupport=false"
-# 5. Update the AWS IoT Core for LoRaWAN destination
+# 5. Stack will provide the name of created IoT Rule as an ouput "IoTRuleNameNode". Please update the AWS IoT Core for LoRaWAN destination with this rule name
 aws iotwireless update-destination --name <Select name of existing AWS IoT Core for LoRaWAN Destination> \
                                    --expression-type RuleName \
                                    --expression=<Insert value of the stack IoTRuleNameNode output>
@@ -538,7 +541,7 @@ The necessary software will be already preinstalled if you use [AWS CloudShell](
 
 Please ensure that your decoder code contains the function `decodeUplink` with a compatible signature:
 
-1) Function signature must be `decodeUplink(input)`, where `input` is an object containing attributes `bytes` (byte array) and `fPort` (integer). For example,  `input = {"fPort": 1, "bytes:" [0x00,0x01,0x02]}`. See an example of the function code [here](transform_binary_payload/src-payload-decoders/node/sample_device.js).
+1) Function signature must be `decodeUplink(input)`, where `input` is an object containing attributes `bytes` (byte array) and `fPort` (integer). For example,  `input = {"fPort": 1, "bytes:" [0x00,0x01,0x02]}`. See an example of the function code [here](src-payload-decoders/node/sample_device.js).
 2) In case of success, the function `decodeUplink` must return a valid JSON object with a `data` attribute, e.g.  `return {"data": {"temperature":42,"mode":"4711",..}}`
 3) In case of error, the function `decodeUplink` must return a valid JSON object with a `errors` attribute of type array, e.g. `return {"errors":["error 1 description","error 2 description"]}`
 
