@@ -7,7 +7,10 @@ Please consider our [developer guide](https://docs.aws.amazon.com/iot/latest/dev
 ## Samples for typical design patterns
 
 - [Decoding binary payloads from LoRaWAN devices with Python and Node.js](transform_binary_payload)  
-    LoRaWAN devices typically send uplink payloads as binary encoded messages. In this sample you will learn how to decode a binary message from your LoRaWAN device using Python or Node.js and integrate the decoded payload with more than 17 AWS services using AWS IoT Rules. Guidelines for an integration of existing decoder code in Node.js and Python and building your own decoders are included.  See a list of >12 included examples decoders [here](#included-binary-decoders), new [contributions](CONTRIBUTING.md) are welcome.
+    LoRaWAN devices typically send uplink payloads as binary encoded messages. In this sample you will learn how to decode a binary message from your LoRaWAN device using Python or Node.js and integrate the decoded payload with more than 17 AWS services using AWS IoT Rules. Guidelines for an integration of existing decoder code in Node.js and Python and building your own decoders are included.  See a list of >12 included examples decoders [here](#included-binary-decoders), new [contributions](CONTRIBUTING.md) are welcome.  
+
+- [Decoding Cayenne Low Power Payload (LPP)](cayenneLPPDecoder)  
+    Cayenne LPP format allows the device to send multiple sensor data at one time. Different kinds of sensor data are sent in the individual frames and each sensor data is prefixed with two bytes: data channel (a unique sensor identifier) and one of predefined data types (e.g. analog input, humidity or GPS location).
 
 - [Sending downlink payload to a LoRaWAN device](send_downlink_payload)  
     In this sample you will learn how to implement different options for sending downlink payload to your LoRaWAN devices. It includes examples for AWS SDK, AWS CLI and AWS IoT Core message broker.
@@ -15,7 +18,7 @@ Please consider our [developer guide](https://docs.aws.amazon.com/iot/latest/dev
 - [Updating IoT Thing shadow with decoded device payload](iotthingshadow)  
     AWS IoT Thing [Shadows](https://docs.aws.amazon.com/iot/latest/developerguide/iot-device-shadows.html) can make a device’s state available to apps and other services whether the device is connected to AWS IoT or not. In this sample you will learn how to update the shadow of an AWS IoT Thing with the telemetry from a LoRaWAN device. 
 
-## Fully functionable sample applications
+## Deployable sample applications
 
 - [Visualizing telemetry and transmission metadata from LoRaWAN devices with Amazon Timestream and Grafana plugin](timestream)  
     In this sample you will learn how to store telemetry from your LoRaWAN Devices as well as transmission metadata (e.g. RSSI and SNR per gateway) into Amazon Timestream. Afterwards you will learn how to visualize time series data in Grafana using a [Grafana plugin for Amazon Timestream](https://grafana.com/grafana/plugins/grafana-timestream-datasource/installation). 
@@ -47,6 +50,7 @@ The sample [Decoding binary payloads from LoRaWAN devices](transform_binary_payl
   - Elsys ERS Lite
 - **Water Metering**
   - Axioma W1
+- **Cayenne Low Power Payload (LPP)**
 
 [Contributions](CONTRIBUTING.md) to example binary decoders are welcome.
 
