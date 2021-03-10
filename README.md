@@ -51,6 +51,8 @@ The sample [Decoding binary payloads from LoRaWAN devices](transform_binary_payl
 - **Water Metering**
   - Axioma W1
 - **Cayenne Low Power Payload (LPP)**
+- **Network tester**
+  - Adeunis FTD2
 
 [Contributions](CONTRIBUTING.md) to example binary decoders are welcome.
 
