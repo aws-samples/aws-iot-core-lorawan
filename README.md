@@ -53,6 +53,8 @@ The sample [Decoding binary payloads from LoRaWAN devices](transform_binary_payl
 - **Cayenne Low Power Payload (LPP)**
 - **Network tester**
   - Adeunis FTD2
+- **Monitoring 0/1 states**
+  - Adeunis Dry Contacts
 
 [Contributions](CONTRIBUTING.md) to example binary decoders are welcome.
 

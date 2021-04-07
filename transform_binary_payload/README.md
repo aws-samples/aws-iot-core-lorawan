@@ -20,6 +20,7 @@ This repository contains resources to quickly onboard included LoRaWAN devices o
   - Globalsat LT-100
   - NAS Pulse Reader UM3080
   - Adeunis FTD2
+  - Adeunis Dry Contacts
 
 - AWS Lambda functions in [Python 3](transform_binary_payload/src-iotrule-transformation) and [Node.js](transform_binary_payload/src-iotrule-transformation-node) that will be invoked by the AWS IoT Rule to perform binary decoding
 
@@ -65,6 +66,7 @@ Example binary decoders for the following devices are included in this sample:
 | Globalsat    | LT-100              | globalsat_lt100    | x        |         |
 | NAS          | Pulse Reader UM3080 | nas_um3080         | x        |         |
 | Adeunis      | FTD2                | adeunis_ftd2       | x        |         |
+| Adeunis      | Dry Contacts        | adeunis_dc_v2      | x        |         |
 
 
 
@@ -310,7 +312,8 @@ Please perform the following steps to deploy a sample application:
       | Globalsat    | LT-100              | globalsat_lt100    | x        |         |
       | NAS          | Pulse Reader UM3080 | nas_um3080         | x        |         |
       | Adeunis      | FTD2                | adeunis_ftd2       | x        |         |
-    
+      | Adeunis      | Dry Contacts        | adeunis_dc_v2      | x        |         |
+
 
     Please note that `sam deploy --guided` should be only executed for a first deployment. To redeploy after that please use `sam deploy`.
 
@@ -349,6 +352,7 @@ Please perform the following steps to deploy a sample application:
     | NAS          | Pulse Reader UM3080 | (fPort 99, boot) MDBDNzAxMTY0QzAwMDcwODEwMDI=                     |
     | NAS          | Pulse Reader UM3080 | (fPort 99, shutdown) MDEzMTQzRjYxQTRCMTIwMTAwMDAwMDIwQzQwOTAwMDA= |
     | Adeunis      | FTD2                | QkYxQjQ1MTU5NjkwMDA1MzQ1MDAyNzIwMjAwRkM5NTIwNw==                  |                              
+    | Adeunis      | Dry Contacts        | QMAAAQACAAMABKU=                                                  |
 
     The payload is structured in a same way as it will be ingested by AWS IoT Core for LoRaWAN. Please replace the `<Sample PayloadData>` with the value of "Sample PayloadData>" from the following table:
 
