@@ -22,7 +22,7 @@
 import base64
 
 # DEBUG MODE
-DEBUG_OUTPUT = True
+DEBUG_OUTPUT = False
 
 
 #    Data frame (0x40)
