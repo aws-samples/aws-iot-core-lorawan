@@ -48,6 +48,8 @@ import dragino_lds01
 import nas_um3080
 import adeunis_ftd2
 import adeunis_dc_v2
+import sentrius_rs1xx
+import meteo_helix
 
 # Allowed payload type values. This array will be used for validation of the "type" attribute for a
 # handle of a Lambda function. For each value in the list below, you should import a module with the
@@ -60,7 +62,8 @@ import adeunis_dc_v2
 # please add name of your binary decoder (e.g. "mylorawandevice") here (see "Step 4" above)
 VALID_PAYLOAD_DECODER_NAMES = ["sample_device", "axioma_w1", "tabs_objectlocator",
                                "dragino_lht65", "dragino_lgt92", "dragino_lse01", "dragino_lbt1", "dragino_lds01",
-                               "elsys", "globalsat_lt100", "nas_um3080", "adeunis_ftd2", "adeunis_dc_v2"]
+                               "elsys", "globalsat_lt100", "nas_um3080", "adeunis_ftd2", "adeunis_dc_v2",
+                               "sentrius_rs1xx", "meteo_helix"]
 
 # Function name for logging
 FUNCTION_NAME = "ConvertBinaryPayload"
