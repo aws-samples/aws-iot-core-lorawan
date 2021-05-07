@@ -96,7 +96,7 @@ Resources:
         - python3.6
         - nodejs14.x
         - nodejs12.x
-        - nodejs10.x
+        - nodejs14.x
       RetentionPolicy: Retain
 
   ############################################################################################
