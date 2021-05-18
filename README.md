@@ -48,9 +48,16 @@ The sample [Decoding binary payloads from LoRaWAN devices](transform_binary_payl
   - Dragino LHT65 (temperature and humidity)
   - Dragino LSE01 (temperature and moisture)
   - Elsys ERS Lite
+  - Laird Senstrius RS1xx
 - **Water Metering**
   - Axioma W1
 - **Cayenne Low Power Payload (LPP)**
+- **Network tester**
+  - Adeunis FTD2
+- **Digital Contact Sensor**
+  - Adeunis Dry Contacts
+- **Weather station**
+  - MeteoHelix Iot Pro
 
 [Contributions](CONTRIBUTING.md) to example binary decoders are welcome.
 
