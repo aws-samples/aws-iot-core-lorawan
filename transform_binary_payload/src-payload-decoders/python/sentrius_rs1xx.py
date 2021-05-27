@@ -20,6 +20,8 @@
 # https://www.lairdconnect.com/documentation/application-note-rs1xx-lora-protocol
 
 import base64
+import json
+
 import helpers
 
 # DEBUG MODE
@@ -46,7 +48,7 @@ DEBUG_OUTPUT = False
 #   |   7  |   AlarmMsg Count                                          |
 #   |   8  |                                                           |
 #   |------|-----------------------------------------------------------|
-#   |   9  |  BacklogMsg Count                                         |
+#   |   9  |   BacklogMsg Count                                        |
 #   |  10  |                                                           |
 
 #   Send Battery Voltage
@@ -83,14 +85,15 @@ def dict_from_payload(base64_input: str, fport: int = None):
         print(f"Input: {decoded.hex().upper()}")
 
     if len(decoded):
-        # dict for result
+        # Dict for result
         result = {}
 
-        # type of message
+        # Type of message
         msg_type = decoded[0]
 
-        # sensor to server message options
+        # Sensor to server message options
         options = decoded[1]
+        result["options"] = "Undefined"
 
         sensor_req_server_time = options & 0b00000001
         if sensor_req_server_time == 0b1:
@@ -112,75 +115,182 @@ def dict_from_payload(base64_input: str, fport: int = None):
         if sensor_fault_flag == 0b1:
             result["options"] = "Sensor fault flag"
 
+        # Dispatch on the message type
         if msg_type == 0x01:
-            # message type
-            result["msg_type"] = "SendTempRHData"
-
-            # Fractional portion of humidity measurement in %
-            humidity_fract = decoded[2]
-
-            # Integer portion of humidity measurement in %
-            humidity_int = decoded[3]
-
-            #  Each byte needs to be decoded separately then the fractional data divided by 100.
-            #  The sum of the two gives the resultant value.
-            humidity = humidity_int + (humidity_fract / 100)
-            result["humidity"] = humidity
-
-            # Fractional portion of temperature measurement in C
-            temp_fract = helpers.bin8dec(decoded[4])
-
-            # Integer portion of temperature measurement in C
-            temp_int = helpers.bin8dec(decoded[5])
-
-            #  Each byte needs to be decoded separately then the fractional data divided by 100.
-            #  The sum of the two gives the resultant value.
-            temperature = temp_int + (temp_fract / 100)
-            result["temperature"] = temperature
-
-            # battery capacity
-            batt_cap = decoded[6]
-
-            # Index for percentage of  battery capacity remaining
-            if batt_cap == 0:
-                result["battery_capacity"] = "0-5%"
-            elif batt_cap == 1:
-                result["battery_capacity"] = "5-20%"
-            elif batt_cap == 2:
-                result["battery_capacity"] = "20-40%"
-            elif batt_cap == 3:
-                result["battery_capacity"] = "40-60%"
-            elif batt_cap == 4:
-                result["battery_capacity"] = "60-80%"
-            elif batt_cap == 5:
-                result["battery_capacity"] = "80-100%"
-            else:
-                result["battery_capacity"] = "unsupported value"
-
-            # Number of backlog alarm messages in sensor FLASH
-            alarm_msg_cnt = decoded[7] << 8 | decoded[8]
-            result["alarm_msg_count"] = alarm_msg_cnt
-
-            # Number of backlog non-alarm messages in sensor FLASH
-            backlog_msg_cnt = decoded[9] << 8 | decoded[10]
-            result["backlog_msg_count"] = backlog_msg_cnt
-
-            return result
-        # message type SendBatteryVoltage = 0x0A
+            result.update(decode_temp_rh_data(decoded))
+        elif msg_type == 0x07:
+            result.update(decode_fw_version(decoded))
         elif msg_type == 0x0A:
-            # set message type
-            result["msg_type"] = "SendBatteryVoltage"
-            # Fractional part of the last measured battery voltage
-            volt_fract = helpers.bin8dec(decoded[2])
-            # Integer part of the last measured battery voltage
-            volt_int = helpers.bin8dec(decoded[3])
-            #  Each byte needs to be decoded separately then the fractional data divided by 100.
-            #  The sum of the two gives the resultant value.
-            volt = volt_int + (volt_fract / 100)
-            result["voltage"] = volt
-            return result
+            result.update(decode_battery_voltage(decoded))
+        elif msg_type == 0x0B:
+            result.update(decode_rtd_data(decoded))
         else:
-            raise Exception(f"message type {msg_type} not implemented")
+            raise Exception(f"Message type {msg_type} not implemented")
+
+        if DEBUG_OUTPUT:
+            print(f"Output: {json.dumps(result, indent=2)}")
+
+        return result
+
+
+def decode_temp_rh_data(decoded):
+    # Dict for result
+    result = {}
+
+    # Message type
+    result["msg_type"] = "SendTempRHData"
+
+    # Fractional portion of humidity measurement in %
+    humidity_fract = decoded[2]
+    # Integer portion of humidity measurement in %
+    humidity_int = decoded[3]
+    # Each byte needs to be decoded separately then the fractional data divided by 100.
+    # The sum of the two gives the resultant value.
+    humidity = humidity_int + (humidity_fract / 100)
+    result["humidity"] = humidity
+
+    # Fractional portion of temperature measurement in C
+    temp_fract = helpers.bin8dec(decoded[4])
+    # Integer portion of temperature measurement in C
+    temp_int = helpers.bin8dec(decoded[5])
+    # Each byte needs to be decoded separately then the fractional data divided by 100.
+    # The sum of the two gives the resultant value.
+    temperature = temp_int + (temp_fract / 100)
+    result["temperature"] = temperature
+
+    # Battery capacity
+    batt_cap = decoded[6]
+
+    # Index for percentage of battery capacity remaining
+    if batt_cap == 0:
+        result["battery_capacity"] = "0-5%"
+    elif batt_cap == 1:
+        result["battery_capacity"] = "5-20%"
+    elif batt_cap == 2:
+        result["battery_capacity"] = "20-40%"
+    elif batt_cap == 3:
+        result["battery_capacity"] = "40-60%"
+    elif batt_cap == 4:
+        result["battery_capacity"] = "60-80%"
+    elif batt_cap == 5:
+        result["battery_capacity"] = "80-100%"
+    else:
+        result["battery_capacity"] = "unsupported value"
+
+    # Number of backlog alarm messages in sensor FLASH
+    alarm_msg_cnt = decoded[7] << 8 | decoded[8]
+    result["alarm_msg_count"] = alarm_msg_cnt
+
+    # Number of backlog non-alarm messages in sensor FLASH
+    backlog_msg_cnt = decoded[9] << 8 | decoded[10]
+    result["backlog_msg_count"] = backlog_msg_cnt
+
+    if DEBUG_OUTPUT:
+        print(f"Output: {json.dumps(result,indent=2)}")
+
+    return result
+
+
+def decode_fw_version(decoded):
+    # Dict for result
+    result = {}
+
+    # Set message type
+    result["msg_type"] = "SendFWVersion"
+
+    # Version year
+    result["year"] = decoded[2]
+    # Version month
+    result["month"] = decoded[3]
+    # Version day
+    result["day"] = decoded[4]
+
+    # Version major
+    result["version_major"] = decoded[5]
+    # Version minor
+    result["version_minor"] = decoded[6]
+
+    # Part number of firmware
+    part_number = decoded[7] << 24 | decoded[8] << 16 | decoded[9] << 8 | decoded[10]
+    result["part_number"] = helpers.bin32dec(part_number)
+
+    if DEBUG_OUTPUT:
+        print(f"Output: {json.dumps(result,indent=2)}")
+
+    return result
+
+
+def decode_battery_voltage(decoded):
+    # Dict for result
+    result = {}
+
+    # Set message type
+    result["msg_type"] = "SendBatteryVoltage"
+
+    # Fractional part of the last measured battery voltage
+    volt_fract = helpers.bin8dec(decoded[2])
+    # Integer part of the last measured battery voltage
+    volt_int = helpers.bin8dec(decoded[3])
+    # Each byte needs to be decoded separately then the fractional data divided by 100.
+    # The sum of the two gives the resultant value.
+    volt = volt_int + (volt_fract / 100)
+    result["voltage"] = volt
+
+    if DEBUG_OUTPUT:
+        print(f"Output: {json.dumps(result,indent=2)}")
+
+    return result
+
+
+def decode_rtd_data(decoded):
+    # Dict for result
+    result = {}
+
+    # Message type
+    result["msg_type"] = "SendRTDData"
+
+    # Fractional portion of temperature measurement in C
+    temp_fract = decoded[2] << 8 | decoded[3]
+    temp_fract = helpers.bin16dec(temp_fract)
+    # Integer portion of temperature measurement in C
+    temp_int = decoded[4] << 8 | decoded[5]
+    temp_int = helpers.bin16dec(temp_int)
+    # Each bytes needs to be decoded separately then the fractional data divided by 100.
+    # The sum of the two gives the resultant value.
+    temperature = temp_int + (temp_fract / 100)
+    result["temperature"] = temperature
+
+    # Battery capacity
+    batt_cap = decoded[6]
+
+    # Index for percentage of  battery capacity remaining
+    if batt_cap == 0:
+        result["battery_capacity"] = "0-5%"
+    elif batt_cap == 1:
+        result["battery_capacity"] = "5-20%"
+    elif batt_cap == 2:
+        result["battery_capacity"] = "20-40%"
+    elif batt_cap == 3:
+        result["battery_capacity"] = "40-60%"
+    elif batt_cap == 4:
+        result["battery_capacity"] = "60-80%"
+    elif batt_cap == 5:
+        result["battery_capacity"] = "80-100%"
+    else:
+        result["battery_capacity"] = "unsupported value"
+
+    # Number of backlog alarm messages in sensor FLASH
+    alarm_msg_cnt = decoded[7] << 8 | decoded[8]
+    result["alarm_msg_count"] = alarm_msg_cnt
+
+    # Number of backlog non-alarm messages in sensor FLASH
+    backlog_msg_cnt = decoded[9] << 8 | decoded[10]
+    result["backlog_msg_count"] = backlog_msg_cnt
+
+    if DEBUG_OUTPUT:
+        print(f"Output: {json.dumps(result,indent=2)}")
+
+    return result
 
 
 # Tests
@@ -191,6 +301,7 @@ if __name__ == "__main__":
             "input_value": "01001E0141190200000000",
             "output": {
                 "msg_type": "SendTempRHData",
+                "options": "Undefined",
                 "humidity": 1.3,
                 "temperature": 25.65,
                 "battery_capacity": "20-40%",
@@ -199,22 +310,75 @@ if __name__ == "__main__":
             }
         },
         {
+            "input_encoding": "base64",
+            "input_value": "BwkUAxoGAABJPnI=",
+            "output": {
+                "msg_type": "SendFWVersion",
+                "options": "Sensor reset flag",
+                "year": 20,
+                "month": 3,
+                "day": 26,
+                "version_major": 6,
+                "version_minor": 0,
+                "part_number": 4800114
+            }
+        },
+        {
             "input_encoding": "hex",
             "input_value": "0A000A03",
             "output": {
                 "msg_type": "SendBatteryVoltage",
-                "voltage": 3.1,
+                "options": "Undefined",
+                "voltage": 3.1
             }
         },
         {
             "input_encoding": "hex",
             "input_value": "0A010A03",
             "output": {
-                "options": "Sensor request for server time",
                 "msg_type": "SendBatteryVoltage",
-                "voltage": 3.1,
+                "options": "Sensor request for server time",
+                "voltage": 3.1
             }
-        }
+        },
+        {
+            "input_encoding": "base64",
+            "input_value": "CxEAAAAABAAAAAA=",
+            "output": {
+                "msg_type": "SendRTDData",
+                "options": "Sensor fault flag",
+                "temperature": 0.0,
+                "battery_capacity": "60-80%",
+                "alarm_msg_count": 0,
+                "backlog_msg_count": 0
+            }
+        },
+        {
+            "input_encoding": "hex",
+            "input_value": "07 00 00 01 01 00 00 00 49 3E 6F",
+            "output": {
+                "msg_type": "SendFWVersion",
+                "options": "Undefined",
+                "year": 0,
+                "month": 1,
+                "day": 1,
+                "version_major": 0,
+                "version_minor": 0,
+                "part_number": 4800111
+            }
+        },
+        {
+            "input_encoding": "hex",
+            "input_value": "0B 01 00 00 00 10 02 00 00 00 00",
+            "output": {
+                "msg_type": "SendRTDData",
+                "options": "Sensor request for server time",
+                "temperature": 16.0,
+                "battery_capacity": "20-40%",
+                "alarm_msg_count": 0,
+                "backlog_msg_count": 0
+            }
+        },
     ]
 
     for testcase in test_definition:
