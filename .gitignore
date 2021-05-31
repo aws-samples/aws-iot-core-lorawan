@@ -8,3 +8,4 @@ tools/*
 test-reports/**
 transform_binary_payload/scripts/deploy_lorawan_decoder.sh
 .idea
+node_modules
