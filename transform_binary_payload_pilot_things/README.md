@@ -4,6 +4,8 @@ LoRaWAN devices encode transmitted data in a binary format, as it increases tran
 
 This repository can help you to accelerate development of your LoRaWAN-based IoT solutions by providing a deployable reference architecture which will decode binary data using the Pilot Things Sensor Library.
 
+The Pilot Things Sensor Library is a SaaS offering that can be [purchased from the AWS marketplace](https://aws.amazon.com/marketplace/pp/B08W5BCWT5)
+
 ## Introduction
 This repository contains resources to quickly onboard [supported LoRaWAN devices](https://www.pilot-things.com/smart-platform/sensor-library).  These resources include:
 
@@ -68,7 +70,7 @@ Please perform the following steps to deploy a sample application:
 
     Please select the default values of parameters by typing "Enter", with the following exceptions:
     - **AWS Region**: select a region supporting AWS IoT Core for LoRaWAN
-    - **ParamServiceApiKey**: enter your API key for the Sensor Library here.
+    - **ParamServiceApiKey**: enter the API key you received after subscribing to the Sensor library service.
     - **ParamGuidProductId**: enter `69714577-5c18-4931-866a-1026b55c603d`.
     - **EnableNodeJSSupport**: please select **false** if you don't want to deploy the Node.JS examples for binary decoding.
     - **EnablePythonSupport**: please select **false** if you don't want to deploy the Python examples for binary decoding.
@@ -163,9 +165,7 @@ After you have completed working with this sample, you can proceed to [Cleaning 
 - The sample requires AWS SAM CLI, you can find installation instructions [here](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html). If you use [AWS CloudShell](https://aws.amazon.com/cloudshell/) or [AWS Cloud9](https://aws.amazon.com/cloud9/), SAM is already preinstalled.
 - If you plan to deploy an example for Node.js decoder, please ensure that Node.js 12.x is installed. Otherwise please disable the deployment of Node.js examples.
 
-### Step 2: Deploy the sample 
-
-**Note:** The sample requires AWS SAM CLI, you can find installation instructions [here](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html). If you use [AWS CloudShell](https://aws.amazon.com/cloudshell/) or [AWS Cloud9](https://aws.amazon.com/cloud9/), SAM is already preinstalled.
+### Step 2: Deploy the sample
 
 Please perform the following steps to deploy a sample application:
 
@@ -190,7 +190,7 @@ Please perform the following steps to deploy a sample application:
 
     Please select the default values of parameters by typing "Enter", with the following exceptions:
     - **AWS Region**: select a region supporting AWS IoT Core for LoRaWAN
-    - **ParamServiceApiKey**: enter your API key for the Sensor Library here.
+    - **ParamServiceApiKey**: enter the API key you received after subscribing to the Sensor library service.
     - **ParamGuidProductId**: one of the GUIDs from the [list of supported devices](https://www.pilot-things.com/smart-platform/sensor-library).
 
     Please note that `sam deploy --guided` should be only executed for a first deployment. To redeploy after that please use `sam deploy`.
@@ -213,7 +213,7 @@ Please perform the following steps to deploy a sample application:
     
 4. Select the example payload
 
-    The catalog is too big to give an example payload for every device, so will have to use an existing payload from your device (Base64-encoded) or skip the testing step.
+    The catalog is too big to give an example payload for every device, so you will have to use an existing payload from your device (Base64-encoded) or skip the testing step.
 
     The payload is structured in a same way as it will be ingested by AWS IoT Core for LoRaWAN. Please replace `<Sample PayloadData>` with your sample data:
 
