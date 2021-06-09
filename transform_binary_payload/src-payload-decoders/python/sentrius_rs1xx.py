@@ -27,40 +27,82 @@ import helpers
 # DEBUG MODE
 DEBUG_OUTPUT = False
 
-
 #   Send Temp RH Data Notification
 #   | byte |  bit7  |  bit6  | bit5 | bit4 | bit3 | bit2 | bit1 | bit0 |
 #   |------|--------|--------|------|------|------|------|------|------|
-#   |   0  |   MsgType                                                 |
+#   |   0  |   MsgType - uint8_t                                       |
 #   |------|-----------------------------------------------------------|
-#   |   1  |   Options                                                 |
+#   |   1  |   Options - bitfield                                      |
 #   |------|-----------------------------------------------------------|
-#   |   2  |   Humidity Fractional                                     |
+#   |   2  |   Humidity Fractional - uint8_t                           |
 #   |------|-----------------------------------------------------------|
-#   |   3  |   Humidity Integer                                        |
+#   |   3  |   Humidity Integer - uint8_t                              |
 #   |------|-----------------------------------------------------------|
-#   |   4  |   Temp Fractional                                         |
+#   |   4  |   Temp Fractional - int8_t                                |
 #   |------|-----------------------------------------------------------|
-#   |   5  |   Temp Integer                                            |
+#   |   5  |   Temp Integer - int8_t                                   |
 #   |------|-----------------------------------------------------------|
-#   |   6  |   Battery Capacity                                        |
+#   |   6  |   Battery Capacity - uint8_t                              |
 #   |------|-----------------------------------------------------------|
-#   |   7  |   AlarmMsg Count                                          |
+#   |   7  |   AlarmMsg Count - uint16_t                               |
 #   |   8  |                                                           |
 #   |------|-----------------------------------------------------------|
-#   |   9  |   BacklogMsg Count                                        |
+#   |   9  |   BacklogMsg Count - uint8_t                              |
+#   |  10  |                                                           |
+
+#   Send FW Version Notification
+#   | byte |  bit7  |  bit6  | bit5 | bit4 | bit3 | bit2 | bit1 | bit0 |
+#   |------|--------|--------|------|------|------|------|------|------|
+#   |   0  |   MsgType - uint8_t                                       |
+#   |------|-----------------------------------------------------------|
+#   |   1  |   Options - bitfield                                      |
+#   |------|-----------------------------------------------------------|
+#   |   2  |   Year - 0x00                                             |
+#   |------|-----------------------------------------------------------|
+#   |   3  |   Month - 0x00                                            |
+#   |------|-----------------------------------------------------------|
+#   |   4  |   Day - 0x00                                              |
+#   |------|-----------------------------------------------------------|
+#   |   5  |   Version Major - 0x00                                    |
+#   |------|-----------------------------------------------------------|
+#   |   6  |   Version Minor - 0x00                                    |
+#   |------|-----------------------------------------------------------|
+#   |   7  |   Part Number - uint32_t                                  |
+#   |   8  |                                                           |
+#   |   9  |                                                           |
 #   |  10  |                                                           |
 
 #   Send Battery Voltage
 #   | byte |  bit7  |  bit6  | bit5 | bit4 | bit3 | bit2 | bit1 | bit0 |
 #   |------|--------|--------|------|------|------|------|------|------|
-#   |   0  |   MsgType                                                 |
+#   |   0  |   MsgType - uint8_t                                       |
 #   |------|-----------------------------------------------------------|
-#   |   1  |   Options                                                 |
+#   |   1  |   Options - enum                                          |
 #   |------|-----------------------------------------------------------|
-#   |   2  |   Voltage Fractional                                      |
+#   |   2  |   Voltage Fractional - int8_t                             |
 #   |------|-----------------------------------------------------------|
-#   |   3  |   Voltage Integer                                         |
+#   |   3  |   Voltage Integer  - int8_t                               |
+
+#   Send RTD Data Notification
+#   | byte |  bit7  |  bit6  | bit5 | bit4 | bit3 | bit2 | bit1 | bit0 |
+#   |------|--------|--------|------|------|------|------|------|------|
+#   |   0  |   MsgType - uint8_t                                       |
+#   |------|-----------------------------------------------------------|
+#   |   1  |   Options - bitfield                                      |
+#   |------|-----------------------------------------------------------|
+#   |   2  |   Temp Fractional - int16_t                               |
+#   |   3  |                                                           |
+#   |------|-----------------------------------------------------------|
+#   |   4  |   Temp Integer - int16_t                                  |
+#   |   5  |                                                           |
+#   |------|-----------------------------------------------------------|
+#   |   6  |   Battery Capacity - uint8_t                              |
+#   |------|-----------------------------------------------------------|
+#   |   7  |   AlarmMsg Count - uint16_t                               |
+#   |   8  |                                                           |
+#   |------|-----------------------------------------------------------|
+#   |   9  |   BacklogMsg Count - uint16_t                             |
+#   |  10  |                                                           |
 
 
 def dict_from_payload(base64_input: str, fport: int = None):
@@ -84,46 +126,20 @@ def dict_from_payload(base64_input: str, fport: int = None):
     if DEBUG_OUTPUT:
         print(f"Input: {decoded.hex().upper()}")
 
+    # when payload is available
     if len(decoded):
-        # Dict for result
-        result = {}
-
         # Type of message
         msg_type = decoded[0]
 
-        # Sensor to server message options
-        options = decoded[1]
-        result["options"] = "Undefined"
-
-        sensor_req_server_time = options & 0b00000001
-        if sensor_req_server_time == 0b1:
-            result["options"] = "Sensor request for server time"
-
-        sensor_config_error = (options & 0b00000010) >> 1
-        if sensor_config_error == 0b1:
-            result["options"] = "Sensor configuration error"
-
-        sensor_alarm_flag = (options & 0b00000100) >> 2
-        if sensor_alarm_flag == 0b1:
-            result["options"] = "Sensor alarm flag"
-
-        sensor_reset_flag = (options & 0b00001000) >> 3
-        if sensor_reset_flag == 0b1:
-            result["options"] = "Sensor reset flag"
-
-        sensor_fault_flag = (options & 0b00010000) >> 4
-        if sensor_fault_flag == 0b1:
-            result["options"] = "Sensor fault flag"
-
         # Dispatch on the message type
         if msg_type == 0x01:
-            result.update(decode_temp_rh_data(decoded))
+            result = decode_temp_rh_data(decoded)
         elif msg_type == 0x07:
-            result.update(decode_fw_version(decoded))
+            result = decode_fw_version(decoded)
         elif msg_type == 0x0A:
-            result.update(decode_battery_voltage(decoded))
+            result = decode_battery_voltage(decoded)
         elif msg_type == 0x0B:
-            result.update(decode_rtd_data(decoded))
+            result = decode_rtd_data(decoded)
         else:
             raise Exception(f"Message type {msg_type} not implemented")
 
@@ -135,162 +151,110 @@ def dict_from_payload(base64_input: str, fport: int = None):
 
 def decode_temp_rh_data(decoded):
     # Dict for result
-    result = {}
-
-    # Message type
-    result["msg_type"] = "SendTempRHData"
-
-    # Fractional portion of humidity measurement in %
-    humidity_fract = decoded[2]
-    # Integer portion of humidity measurement in %
-    humidity_int = decoded[3]
-    # Each byte needs to be decoded separately then the fractional data divided by 100.
-    # The sum of the two gives the resultant value.
-    humidity = humidity_int + (humidity_fract / 100)
-    result["humidity"] = humidity
-
-    # Fractional portion of temperature measurement in C
-    temp_fract = helpers.bin8dec(decoded[4])
-    # Integer portion of temperature measurement in C
-    temp_int = helpers.bin8dec(decoded[5])
-    # Each byte needs to be decoded separately then the fractional data divided by 100.
-    # The sum of the two gives the resultant value.
-    temperature = temp_int + (temp_fract / 100)
-    result["temperature"] = temperature
-
-    # Battery capacity
-    batt_cap = decoded[6]
-
-    # Index for percentage of battery capacity remaining
-    if batt_cap == 0:
-        result["battery_capacity"] = "0-5%"
-    elif batt_cap == 1:
-        result["battery_capacity"] = "5-20%"
-    elif batt_cap == 2:
-        result["battery_capacity"] = "20-40%"
-    elif batt_cap == 3:
-        result["battery_capacity"] = "40-60%"
-    elif batt_cap == 4:
-        result["battery_capacity"] = "60-80%"
-    elif batt_cap == 5:
-        result["battery_capacity"] = "80-100%"
-    else:
-        result["battery_capacity"] = "unsupported value"
-
-    # Number of backlog alarm messages in sensor FLASH
-    alarm_msg_cnt = decoded[7] << 8 | decoded[8]
-    result["alarm_msg_count"] = alarm_msg_cnt
-
-    # Number of backlog non-alarm messages in sensor FLASH
-    backlog_msg_cnt = decoded[9] << 8 | decoded[10]
-    result["backlog_msg_count"] = backlog_msg_cnt
+    result = {
+        "msg_type": "SendTempRHData",
+        "options": opt_sens2serv(decoded[1]),
+        "humidity": helpers.bytes_to_float(decoded, 2, 2),
+        "temperature": helpers.bytes_to_float(decoded, 4, 2),
+        "battery_capacity": battery_capacity(decoded[6]),
+        "alarm_msg_count": decoded[7] << 8 | decoded[8],  # Number of backlog alarm messages in sensor FLASH
+        "backlog_msg_count": decoded[9] << 8 | decoded[10]  # Number of backlog non-alarm messages in sensor FLASH
+    }
 
     if DEBUG_OUTPUT:
-        print(f"Output: {json.dumps(result,indent=2)}")
+        print(f"Output: {json.dumps(result, indent=2)}")
 
     return result
 
 
 def decode_fw_version(decoded):
     # Dict for result
-    result = {}
-
-    # Set message type
-    result["msg_type"] = "SendFWVersion"
-
-    # Version year
-    result["year"] = decoded[2]
-    # Version month
-    result["month"] = decoded[3]
-    # Version day
-    result["day"] = decoded[4]
-
-    # Version major
-    result["version_major"] = decoded[5]
-    # Version minor
-    result["version_minor"] = decoded[6]
-
-    # Part number of firmware
-    part_number = decoded[7] << 24 | decoded[8] << 16 | decoded[9] << 8 | decoded[10]
-    result["part_number"] = helpers.bin32dec(part_number)
+    result = {
+        "msg_type": "SendFWVersion",
+        "options": opt_sens2serv(decoded[1]),
+        "year": decoded[2],
+        "month": decoded[3],
+        "day": decoded[4],
+        "version_major": decoded[5],
+        "version_minor": decoded[6],
+        "part_number": decoded[7] << 24 | decoded[8] << 16 | decoded[9] << 8 | decoded[10]
+    }
 
     if DEBUG_OUTPUT:
-        print(f"Output: {json.dumps(result,indent=2)}")
+        print(f"Output: {json.dumps(result, indent=2)}")
 
     return result
 
 
 def decode_battery_voltage(decoded):
     # Dict for result
-    result = {}
-
-    # Set message type
-    result["msg_type"] = "SendBatteryVoltage"
-
-    # Fractional part of the last measured battery voltage
-    volt_fract = helpers.bin8dec(decoded[2])
-    # Integer part of the last measured battery voltage
-    volt_int = helpers.bin8dec(decoded[3])
-    # Each byte needs to be decoded separately then the fractional data divided by 100.
-    # The sum of the two gives the resultant value.
-    volt = volt_int + (volt_fract / 100)
-    result["voltage"] = volt
+    result = {
+        "msg_type": "SendBatteryVoltage",
+        "options": opt_sens2serv(decoded[1]),
+        "voltage": helpers.bytes_to_float(decoded, 2, 2)
+    }
 
     if DEBUG_OUTPUT:
-        print(f"Output: {json.dumps(result,indent=2)}")
+        print(f"Output: {json.dumps(result, indent=2)}")
 
     return result
 
 
+# SendRTDData
 def decode_rtd_data(decoded):
     # Dict for result
-    result = {}
-
-    # Message type
-    result["msg_type"] = "SendRTDData"
-
-    # Fractional portion of temperature measurement in C
-    temp_fract = decoded[2] << 8 | decoded[3]
-    temp_fract = helpers.bin16dec(temp_fract)
-    # Integer portion of temperature measurement in C
-    temp_int = decoded[4] << 8 | decoded[5]
-    temp_int = helpers.bin16dec(temp_int)
-    # Each bytes needs to be decoded separately then the fractional data divided by 100.
-    # The sum of the two gives the resultant value.
-    temperature = temp_int + (temp_fract / 100)
-    result["temperature"] = temperature
-
-    # Battery capacity
-    batt_cap = decoded[6]
-
-    # Index for percentage of  battery capacity remaining
-    if batt_cap == 0:
-        result["battery_capacity"] = "0-5%"
-    elif batt_cap == 1:
-        result["battery_capacity"] = "5-20%"
-    elif batt_cap == 2:
-        result["battery_capacity"] = "20-40%"
-    elif batt_cap == 3:
-        result["battery_capacity"] = "40-60%"
-    elif batt_cap == 4:
-        result["battery_capacity"] = "60-80%"
-    elif batt_cap == 5:
-        result["battery_capacity"] = "80-100%"
-    else:
-        result["battery_capacity"] = "unsupported value"
-
-    # Number of backlog alarm messages in sensor FLASH
-    alarm_msg_cnt = decoded[7] << 8 | decoded[8]
-    result["alarm_msg_count"] = alarm_msg_cnt
-
-    # Number of backlog non-alarm messages in sensor FLASH
-    backlog_msg_cnt = decoded[9] << 8 | decoded[10]
-    result["backlog_msg_count"] = backlog_msg_cnt
+    result = {
+        "msg_type": "SendRTDData",
+        "options": opt_sens2serv(decoded[1]),
+        "temperature": helpers.bytes_to_float(decoded, 2, 4),
+        "battery_capacity": battery_capacity(decoded[6]),
+        "alarm_msg_count": decoded[7] << 8 | decoded[8],  # Number of backlog alarm messages in sensor FLASH
+        "backlog_msg_count": decoded[9] << 8 | decoded[10]  # Number of backlog non-alarm messages in sensor FLASH
+    }
 
     if DEBUG_OUTPUT:
-        print(f"Output: {json.dumps(result,indent=2)}")
+        print(f"Output: {json.dumps(result, indent=2)}")
 
     return result
+
+
+# Returns battery capacity as int
+def battery_capacity(bat_byte):
+    # Index for percentage of  battery capacity remaining
+    if bat_byte == 0:
+        return 0  # 0-5%
+    elif bat_byte == 1:
+        return 5  # 5-20%
+    elif bat_byte == 2:
+        return 20  # 20-40%
+    elif bat_byte == 3:
+        return 40  # 40-60%
+    elif bat_byte == 4:
+        return 60  # 60-80%
+    elif bat_byte == 5:
+        return 80  # 80-100%
+    else:
+        return 999  # unsupported value
+
+
+# results option flag
+def opt_sens2serv(opt_byte):
+    if helpers.is_single_bit_set(opt_byte):
+        # Sensor to server message options
+        if (opt_byte & 0b00000001) == 0b1:
+            return "Sensor request for server time"
+        elif ((opt_byte & 0b00000010) >> 1) == 0b1:
+            return "Sensor configuration error"
+        elif ((opt_byte & 0b00000100) >> 2) == 0b1:
+            return "Sensor alarm flag"
+        elif ((opt_byte & 0b00001000) >> 3) == 0b1:
+            return "Sensor reset flag"
+        elif ((opt_byte & 0b00010000) >> 4) == 0b1:
+            return "Sensor fault flag"
+        else:
+            return "Undefined option"
+    else:
+        return "Undefined option"
 
 
 # Tests
@@ -301,10 +265,10 @@ if __name__ == "__main__":
             "input_value": "01001E0141190200000000",
             "output": {
                 "msg_type": "SendTempRHData",
-                "options": "Undefined",
+                "options": "Undefined option",
                 "humidity": 1.3,
                 "temperature": 25.65,
-                "battery_capacity": "20-40%",
+                "battery_capacity": 20,
                 "alarm_msg_count": 0,
                 "backlog_msg_count": 0
             }
@@ -314,7 +278,7 @@ if __name__ == "__main__":
             "input_value": "BwkUAxoGAABJPnI=",
             "output": {
                 "msg_type": "SendFWVersion",
-                "options": "Sensor reset flag",
+                "options": "Undefined option",
                 "year": 20,
                 "month": 3,
                 "day": 26,
@@ -328,16 +292,7 @@ if __name__ == "__main__":
             "input_value": "0A000A03",
             "output": {
                 "msg_type": "SendBatteryVoltage",
-                "options": "Undefined",
-                "voltage": 3.1
-            }
-        },
-        {
-            "input_encoding": "hex",
-            "input_value": "0A010A03",
-            "output": {
-                "msg_type": "SendBatteryVoltage",
-                "options": "Sensor request for server time",
+                "options": "Undefined option",
                 "voltage": 3.1
             }
         },
@@ -346,9 +301,9 @@ if __name__ == "__main__":
             "input_value": "CxEAAAAABAAAAAA=",
             "output": {
                 "msg_type": "SendRTDData",
-                "options": "Sensor fault flag",
+                "options": "Undefined option",
                 "temperature": 0.0,
-                "battery_capacity": "60-80%",
+                "battery_capacity": 60,
                 "alarm_msg_count": 0,
                 "backlog_msg_count": 0
             }
@@ -358,7 +313,7 @@ if __name__ == "__main__":
             "input_value": "07 00 00 01 01 00 00 00 49 3E 6F",
             "output": {
                 "msg_type": "SendFWVersion",
-                "options": "Undefined",
+                "options": "Undefined option",
                 "year": 0,
                 "month": 1,
                 "day": 1,
@@ -374,7 +329,7 @@ if __name__ == "__main__":
                 "msg_type": "SendRTDData",
                 "options": "Sensor request for server time",
                 "temperature": 16.0,
-                "battery_capacity": "20-40%",
+                "battery_capacity": 20,
                 "alarm_msg_count": 0,
                 "backlog_msg_count": 0
             }
