@@ -9,6 +9,10 @@ Please consider our [developer guide](https://docs.aws.amazon.com/iot/latest/dev
 - [Decoding binary payloads from LoRaWAN devices with Python and Node.js](transform_binary_payload)  
     LoRaWAN devices typically send uplink payloads as binary encoded messages. In this sample you will learn how to decode a binary message from your LoRaWAN device using Python or Node.js and integrate the decoded payload with more than 17 AWS services using AWS IoT Rules. Guidelines for an integration of existing decoder code in Node.js and Python and building your own decoders are included.  See a list of >12 included examples decoders [here](#included-binary-decoders), new [contributions](CONTRIBUTING.md) are welcome.  
 
+- [Decoding binary payloads from LoRaWAN devices using Pilot Things Sensor Library](transform_binary_payload_pilot_things)  
+    This repository can help you to accelerate development of your LoRaWAN-based IoT solutions by providing a deployable reference architecture which will decode binary data using the Pilot Things Sensor Library. The Pilot Things Sensor Library is a SaaS offering that can be [purchased from the AWS marketplace](https://aws.amazon.com/marketplace/pp/B08W5BCWT5)
+
+
 - [Decoding Cayenne Low Power Payload (LPP)](cayenneLPPDecoder)  
     Cayenne LPP format allows the device to send multiple sensor data at one time. Different kinds of sensor data are sent in the individual frames and each sensor data is prefixed with two bytes: data channel (a unique sensor identifier) and one of predefined data types (e.g. analog input, humidity or GPS location).
 
