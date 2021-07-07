@@ -1,0 +1,242 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Transformation of LoRaWAN binary payloads using Pilot Things Sensor Library decoder service
+
+Parameters:
+  ParamServiceApiKey:
+    Type: String
+    Description: API key for the Pilot Things Sensor Library decoding service
+
+  ParamGuidProductId:
+    Type: String
+    Description: ID of the product for which the payload will be decoded. Check https://www.pilot-things.com/smart-platform/sensor-library for a complete list.
+    AllowedPattern: ^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$
+
+  TopicOutgoingErrors:
+    Type: String
+    Default: lorawanerror
+    Description: Topic for errors
+
+  TopicOutgoingTransformedMessages:
+    Type: String
+    Default: lorawantransformed
+    Description: Prefix for outgoing transformed messages
+
+  EnableNodeJSSupport:
+    Description: If set to true, will deploy AWS Lambda NodeJS function and AWS IoT Rule to perform binary decoding using NodeJS
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+
+  EnablePythonSupport:
+    Description: If set to true, will deploy AWS Lambda Python function and respective AWS IoT Rule to perform binary decoding using Python
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+
+Conditions:
+  IsNodeSupportEnabled: !Equals
+    - !Ref EnableNodeJSSupport
+    - true
+  IsPythonSupportEnabled: !Equals
+    - !Ref EnablePythonSupport
+    - true
+
+Resources:
+  ############################################################################################
+  # Payload transformation Lambda function to be called from AWS IoT Core.
+  ############################################################################################
+
+  TransformLoRaWANBinaryPayloadUsingPilotThingsFunctionPython:
+    Type: AWS::Serverless::Function
+    Name: !Sub "${AWS::StackName}-TransformLoRaWANBinaryPayloadUsingPilotThingsFunctionPython"
+    Properties:
+      CodeUri: src-iotrule-transformation
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Environment:
+        Variables:
+          PILOT_THINGS_SERVICE_API_KEY: !Ref ParamServiceApiKey
+          RETURN_RAW_DATA: True
+
+  ############################################################################################
+  # Payload transformation Lambda function to be called from AWS IoT Core.
+  ############################################################################################
+
+  TransformLoRaWANBinaryPayloadUsingPilotThingsFunctionNode:
+    Type: AWS::Serverless::Function
+    Condition: IsNodeSupportEnabled
+    Name: !Sub "${AWS::StackName}-TransformLoRaWANBinaryPayloadUsingPilotThingsFunctionNode"
+    Properties:
+      CodeUri: src-iotrule-transformation-nodejs
+      Handler: index.handler
+      Runtime: nodejs12.x
+      Environment:
+        Variables:
+          PILOT_THINGS_SERVICE_API_KEY: !Ref ParamServiceApiKey
+          RETURN_RAW_DATA: True
+
+  ############################################################################################
+  # This IoT Rule converts a binary message to a JSON message using the decoder service, and
+  # then republishes the JSON message.
+  # After transformation, the rule will republish the JSON payload to:
+  # dt/lorawantransformed
+  ############################################################################################
+
+  TransformLoRaWANBinaryPayloadUsingPilotThingsPythonRule:
+    Type: "AWS::IoT::TopicRule"
+    Condition: IsPythonSupportEnabled
+    Properties:
+      RuleName: !Sub
+        - "${AWS::StackName}_TransformLoRaWANBinaryPayloadUsingPilotThingsPython_${ParamGuidProductIdSub}"
+        - {
+            ParamGuidProductIdSub: !Join [ "_", !Split [ "-", !Ref ParamGuidProductId ]]
+          }
+      TopicRulePayload:
+        AwsIotSqlVersion: "2016-03-23"
+        RuleDisabled: false
+
+        Sql: !Sub
+          - |
+            SELECT aws_lambda("${LambdaARN}",
+                              {"PayloadDecoderProductId": "${ParamGuidProductId}", 
+                              "PayloadData":PayloadData}) as transformed_payload, 
+                    WirelessDeviceId as transformed_payload.WirelessDeviceId,                                   
+                    WirelessMetadata.LoRaWAN.DevEui as transformed_payload.DevEui,
+                    WirelessDeviceId as lns_payload.WirelessDeviceId, 
+                    WirelessMetadata as lns_payload.WirelessMetadata,
+                    PayloadData as lns_payload.PayloadData,
+                    timestamp() as timestamp
+          - {
+              LambdaARN: !GetAtt TransformLoRaWANBinaryPayloadUsingPilotThingsFunctionPython.Arn,
+            }
+        Actions:
+          - Republish:
+              RoleArn: !GetAtt TransformLoRaWANBinaryPayloadUsingPilotThingsRuleActionRole.Arn
+              Topic: !Join ["", [!Ref TopicOutgoingTransformedMessages]]
+              Qos: 0
+        ErrorAction:
+          Republish:
+            RoleArn: !GetAtt TransformLoRaWANBinaryPayloadUsingPilotThingsRuleActionRole.Arn
+            Topic: !Ref TopicOutgoingErrors
+            Qos: 0
+
+  ############################################################################################
+  # This IoT Rule converts a binary message to a JSON message using the decoder service, and
+  # then republishes the JSON message.
+  # After transformation, the rule will republish the JSON payload to:
+  # dt/lorawantransformed
+  ############################################################################################
+
+  TransformLoRaWANBinaryPayloadUsingPilotThingsNodeRule:
+    Type: "AWS::IoT::TopicRule"
+    Condition: IsNodeSupportEnabled
+    Properties:
+      RuleName: !Sub
+        - "${AWS::StackName}_TransformLoRaWANBinaryPayloadUsingPilotThingsNode_${ParamGuidProductIdSub}"
+        - {
+            ParamGuidProductIdSub: !Join [ "_", !Split [ "-", !Ref ParamGuidProductId ]]
+          }
+      TopicRulePayload:
+        AwsIotSqlVersion: "2016-03-23"
+        RuleDisabled: false
+
+        Sql: !Sub
+          - |
+            SELECT aws_lambda("${LambdaARN}",
+                              {"PayloadDecoderProductId": "${ParamGuidProductId}", 
+                              "PayloadData":PayloadData}) as transformed_payload, 
+                    WirelessDeviceId as transformed_payload.WirelessDeviceId,                                   
+                    WirelessMetadata.LoRaWAN.DevEui as transformed_payload.DevEui,
+                    WirelessDeviceId as lns_payload.WirelessDeviceId, 
+                    WirelessMetadata as lns_payload.WirelessMetadata,
+                    PayloadData as lns_payload.PayloadData,
+                    timestamp() as timestamp
+          - { LambdaARN: !GetAtt TransformLoRaWANBinaryPayloadUsingPilotThingsFunctionNode.Arn }
+        Actions:
+          - Republish:
+              RoleArn: !GetAtt TransformLoRaWANBinaryPayloadUsingPilotThingsRuleActionRole.Arn
+              Topic: !Join ["", [!Ref TopicOutgoingTransformedMessages]]
+              Qos: 0
+        ErrorAction:
+          Republish:
+            RoleArn: !GetAtt TransformLoRaWANBinaryPayloadUsingPilotThingsRuleActionRole.Arn
+            Topic: !Ref TopicOutgoingErrors
+            Qos: 0
+
+  TransformLoRaWANBinaryPayloadUsingPilotThingsFunctionPythonPermission:
+    Type: AWS::Lambda::Permission
+    Condition: IsPythonSupportEnabled
+    Properties:
+      FunctionName: !GetAtt TransformLoRaWANBinaryPayloadUsingPilotThingsFunctionPython.Arn
+      Action: lambda:InvokeFunction
+      Principal: iot.amazonaws.com
+
+  TransformLoRaWANBinaryPayloadUsingPilotThingsFunctionNodePermission:
+    Type: AWS::Lambda::Permission
+    Condition: IsNodeSupportEnabled
+    Properties:
+      FunctionName: !GetAtt TransformLoRaWANBinaryPayloadUsingPilotThingsFunctionNode.Arn
+      Action: lambda:InvokeFunction
+      Principal: iot.amazonaws.com
+
+  TransformLoRaWANBinaryPayloadUsingPilotThingsRuleActionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - iot.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: iot:Publish
+                Resource:
+                  !Join [
+                    "",
+                    [
+                      "arn:aws:iot:",
+                      !Ref "AWS::Region",
+                      ":",
+                      !Ref "AWS::AccountId",
+                      ":topic/*",
+                    ],
+                  ]
+
+Outputs:
+  IoTRuleNamePython:
+    Condition: IsPythonSupportEnabled
+    Description: "Please add this AWS IoT Rule name as a Destination to AWS IoT Core for LoRaWAN "
+    Value: !Ref TransformLoRaWANBinaryPayloadUsingPilotThingsPythonRule
+
+  IoTRuleNameNode:
+    Description: "Please add this AWS IoT Rule name as a Destination to AWS IoT Core for LoRaWAN "
+    Condition: IsNodeSupportEnabled
+    Value: !Ref TransformLoRaWANBinaryPayloadUsingPilotThingsNodeRule
+
+  TransformPayloadUsingPilotThingsFunctionFunctionPython:
+    Condition: IsPythonSupportEnabled
+    Description: "Lambda Function ARN python"
+    Value: !GetAtt TransformLoRaWANBinaryPayloadUsingPilotThingsFunctionPython.Arn
+
+  TransformPayloadUsingPilotThingsFunctionFunctionNode:
+    Description: "Lambda Function ARN node"
+    Condition: IsNodeSupportEnabled
+    Value: !GetAtt TransformLoRaWANBinaryPayloadUsingPilotThingsFunctionNode.Arn
+
+  TransformPayloadUsingPilotThingsFunctionIamRole:
+    Description: "Implicit IAM Role created for Lambda function"
+    Value: !GetAtt TransformLoRaWANBinaryPayloadUsingPilotThingsRuleActionRole.Arn
