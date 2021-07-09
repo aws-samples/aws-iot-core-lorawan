@@ -2,12 +2,13 @@
 
 AWS IoT Core for LoRaWAN enables you to set up a private LoRaWAN network by connecting your devices and gateways with no LoRaWAN Network Server setup required. This repository contains resources to quickly get started developing solutions using AWS IoT Core for LoRaWAN. It includes samples for typical design patterns ([binary decoder](transform_binary_payload), [downlink messaging](send_downlink_payload), [Thing shadow update](iotthingshadow)) and fully functional applications ([dashboards](timestream), [condition monitoring and alarming](soilmoisture_alarming)).
 
-Please consider our [developer guide](https://docs.aws.amazon.com/iot/latest/developerguide/connect-iot-lorawan.html) to learn how to connect your wireless devices and gateways to AWS IoT Core for LoRaWAN.  Please also consider [automation guidelines](automation) to learn how to use AWS CLI to automate tasks (e.g. configuration of a new gateway).
+Please consider our [developer guide](https://docs.aws.amazon.com/iot/latest/developerguide/connect-iot-lorawan.html) to learn how to connect your wireless devices and gateways to AWS IoT Core for LoRaWAN.  Please also consider [automation guidelines](automation) and [observability implementation guidelines](observability).
 
-## Samples for typical design patterns
+## Decoding binary payloads
+LoRaWAN devices typically send uplink payloads as binary encoded messages. Below you will find various options for an implementation of binary payload decoding.
 
 - [Decoding binary payloads from LoRaWAN devices with Python and Node.js](transform_binary_payload)  
-    LoRaWAN devices typically send uplink payloads as binary encoded messages. In this sample you will learn how to decode a binary message from your LoRaWAN device using Python or Node.js and integrate the decoded payload with more than 17 AWS services using AWS IoT Rules. Guidelines for an integration of existing decoder code in Node.js and Python and building your own decoders are included.  See a list of >12 included examples decoders [here](#included-binary-decoders), new [contributions](CONTRIBUTING.md) are welcome.  
+    In this sample you will learn how to decode a binary message from your LoRaWAN device using Python or Node.js and integrate the decoded payload with more than 17 AWS services using AWS IoT Rules. Guidelines for an integration of existing decoder code in Node.js and Python and building your own decoders are included.  See a list of >12 included examples decoders [here](#included-binary-decoders), new [contributions](CONTRIBUTING.md) are welcome.  
 
 - [Decoding binary payloads from LoRaWAN devices using Pilot Things Sensor Library](transform_binary_payload_pilot_things)  
     This repository can help you to accelerate development of your LoRaWAN-based IoT solutions by providing a deployable reference architecture which will decode binary data using the Pilot Things Sensor Library. The Pilot Things Sensor Library is a SaaS offering that can be [purchased from the AWS marketplace](https://aws.amazon.com/marketplace/pp/B08W5BCWT5)
@@ -15,6 +16,8 @@ Please consider our [developer guide](https://docs.aws.amazon.com/iot/latest/dev
 
 - [Decoding Cayenne Low Power Payload (LPP)](cayenneLPPDecoder)  
     Cayenne LPP format allows the device to send multiple sensor data at one time. Different kinds of sensor data are sent in the individual frames and each sensor data is prefixed with two bytes: data channel (a unique sensor identifier) and one of predefined data types (e.g. analog input, humidity or GPS location).
+
+## Samples for typical design patterns
 
 - [Sending downlink payload to a LoRaWAN device](send_downlink_payload)  
     In this sample you will learn how to implement different options for sending downlink payload to your LoRaWAN devices. It includes examples for AWS SDK, AWS CLI and AWS IoT Core message broker.
@@ -29,6 +32,12 @@ Please consider our [developer guide](https://docs.aws.amazon.com/iot/latest/dev
 
 - [Monitoring and alarming of soil moisture by using AWS IoT Core for LoRaWAN and AWS IoT Events](soilmoisture_alarming)  
     Detecting events based on telemetry data from connected devices is a common use case in IoT across many industries. This sample explains how to integrate AWS IoT Events with LoRaWAN for IoT Core. You can learn how to translate telemetry values from a LoRaWAN device into events and notify users about these events using E-Mail and SMS.
+
+
+## Useful guidelines
+- [Automation guidelines](automation) explain how to use AWS CLI to automate tasks (e.g. configuration of a new gateway).
+- [Observability guidelines](observability) explaion how to retrieve statistics about the state of your LoRaWAN gateways and devices
+
 
 ## Included binary decoders
 LoRaWAN devices often encode transmitted data in a binary format, as it increases transmission efficiency and improves battery lifetime. However, as the data arrive in the cloud, many use cases require a structured format. Transforming the binary data into JSON, for example, enables filtering and enrichment using [AWS IoT SQL](https://docs.aws.amazon.com/iot/latest/developerguide/iot-sql-reference.html) as well as integration with further AWS services using [AWS IoT Rule Actions](https://docs.aws.amazon.com/iot/latest/developerguide/iot-rule-actions.html).
