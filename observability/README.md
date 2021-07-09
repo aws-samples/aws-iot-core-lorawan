@@ -8,7 +8,7 @@ Here you will find guidelines for implementing oservability of LoRaWAN devices a
 
 ## How to use AWS IoT Core for LoRaWAN APIs to retrieve gateway statistics
 
-You can use [GetWirelessGatewayStatistics](https://docs.aws.amazon.com/iot-wireless/2020-11-22/apireference/API_GetWirelessGatewayStatistics.html) to retrieve the information about timestamp of last uplink and the connectivity status of the gateway. The following steps provide an example for an invocation of this API using AWS CLI. Please ensure that [jq tool](https://stedolan.github.io/jq/) is installed before running these steps.
+You can use [GetWirelessGatewayStatistics API](https://docs.aws.amazon.com/iot-wireless/2020-11-22/apireference/API_GetWirelessGatewayStatistics.html) to retrieve the information about timestamp of last uplink and the connectivity status of the gateway. The following steps provide an example for an invocation of this API using AWS CLI. Please ensure that [jq tool](https://stedolan.github.io/jq/) is installed before running these steps.
 
 **Step 1: List wireless gateways**
 
@@ -50,7 +50,7 @@ You will see a timestamp of last uplink and the connectivity status of the gatew
 
 ## How to use AWS IoT Core for LoRaWAN APIs to retrieve device statistics
 
-You can use [GetWirelessDeviceStatistics](https://docs.aws.amazon.com/iot-wireless/2020-11-22/apireference/API_GetWirelessDeviceStatistics.html) to retrieve the information about timestamp of last uplink and the connectivity status of the gateway. The following steps provide an example for an invocation of this API using AWS CLI. Please ensure that [jq tool](https://stedolan.github.io/jq/) is installed before running these steps.
+You can use [GetWirelessDeviceStatistics API](https://docs.aws.amazon.com/iot-wireless/2020-11-22/apireference/API_GetWirelessDeviceStatistics.html) to retrieve the information about timestamp of last uplink and the connectivity status of the gateway. The following steps provide an example for an invocation of this API using AWS CLI. Please ensure that [jq tool](https://stedolan.github.io/jq/) is installed before running these steps.
 
 **Step 1: List wireless gateways**
 
