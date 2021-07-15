@@ -108,7 +108,7 @@ def get_states(self):
                     },
                     {
                         "eventName": "IsDisconnected",
-                        "condition": "$input.LoRaWANGatewayConnectivityStatusInput.last_connection_status == 'Disconnected'",
+                        "condition": "($input.LoRaWANGatewayConnectivityStatusInput.last_connection_status == 'Disconnected') && ($variable.disconnected_timer_pending != true)",
                         "actions": [
                             {
                                 "setTimer": {
