@@ -113,7 +113,7 @@ def get_states(self):
                             {
                                 "setTimer": {
                                     "timerName": "DisconnectedTimer",
-                                    "seconds": 60,
+                                    "seconds": 300,
                                 }
                             },
                             {
@@ -129,7 +129,7 @@ def get_states(self):
                         "condition": "$input.LoRaWANGatewayConnectivityStatusInput.last_connection_status == 'Connected'",
                         "actions": [
                             {
-                                "resetTimer": {
+                                "destroyTimer": {
                                     "timerName": "DisconnectedTimer"
                                 }
                             },

@@ -1,6 +1,6 @@
 # Monitoring and notifications for LoRaWAN gateway connection status
 
-This sample contains an example solution for monitoring connectivity status, i.e. connections and disconnections for LoRaWAN gateways using AWS IoT Core for LoRaWAN. Disconnection detection will consider a configurable grace period. After deploying this solution in your AWS account, you will receive an e-mail notificiation each time your LoRaWAN gateway connects or disconnects.  Additionaly, a message will be published to AWS IoT Core message broker MQTT topic (e.g. `awsiotcorelorawan/events/presence/disconnect/<WirelessGatewayId>`) each time the gateway connects and disconnects. 
+This sample contains an example solution for monitoring connectivity status, i.e. connections and disconnections for LoRaWAN gateways using AWS IoT Core for LoRaWAN. Disconnection detection will consider a configurable grace period (default is 5 minutes). After deploying this solution in your AWS account, you will receive an e-mail notificiation each time your LoRaWAN gateway connects or disconnects.  Additionaly, a message will be published to AWS IoT Core message broker MQTT topic (e.g. `awsiotcorelorawan/events/presence/disconnect/<WirelessGatewayId>`) each time the gateway connects and disconnects.
 
 Please consider the following definition of "connect" and "disconnect" as used in this sample:
 
@@ -10,6 +10,10 @@ Please consider the following definition of "connect" and "disconnect" as used i
 ## Solution architecture
 
 ![Architecture overview](images/connectivity_watchdog_architecture.png)
+
+## Costs
+
+Please note that starting this solution will result in continious additional charges to your AWS account for usage of services such as AWS Step Functions, AWS Lambda , AWS IoT Events and Amazon CloudWatch. For example, the AWS Step Functions state machine will invoke the AWS Lambda every 4 minutes (configurable). Please ensure to follow [these guidelines](#5-stop-the-execution-of-the-solution) stop the execution of the AWS Step Functions state machine and remove the stack to stop incurring costs for this solution.
 
 ## Quick deployment
 
@@ -45,7 +49,7 @@ Outputs:
 LorawanConnectivityWatchdogStack.StateMachineStartCommand = aws stepfunctions start-execution --state-machine-arn arn:aws:states:us-east-1:614797420359:stateMachine:LoRaWANGatewayWatchdogStatemachine67D21B94-Ngdhwg91Keqq
 ```
 
-The state machine will periodically involk the AWS Lambda function to read the gateway connectivity status and ingest it to AWS IoT events input. Please run the previously shown command to start the state machine execution , e.g. :
+The state machine will periodically invoke the AWS Lambda function to read the gateway connectivity status and ingest it to AWS IoT events input. Please run the previously shown command to start the state machine execution , e.g. :
 
 ```shell
 aws stepfunctions start-execution --state-machine-arn arn:aws:states:us-east-1:614797420359:stateMachine:LoRaWANGatewayWatchdogStatemachine67D21B94-Ngdhwg91Keqq
@@ -60,6 +64,25 @@ aws stepfunctions start-execution --state-machine-arn arn:aws:states:us-east-1:6
 
 For a test purpose, disconnect your LoRaWAN gatway from AWS IoT Core for LoRaWAN. Watch out for mails with notification about connects and disconnects. You can also open the [MQTT Test client](https://console.aws.amazon.com/iot/home?region=#/test) and subscribe to the topic pattern `awsiotcorelorawan/events/presence/+/+` to see the published presence events, e.g.:
 ![LoRaWAN gateway presence events](images/mqtttestclient.png)
+
+### **5. Stop the execution of the solution** 
+
+As an output of the stack, you have receiveed a command to start the AWS state machine execution, e.g.
+
+```shell 
+...
+Outputs:
+LorawanConnectivityWatchdogStack.StateMachineStartCommand = aws stepfunctions stop-execution --state-machine-arn arn:aws:states:us-east-1:614797420359:stateMachine:LoRaWANGatewayWatchdogStatemachine67D21B94-Ngdhwg91Keqq
+```
+
+Please run this command to stop a periodic execution of the Lambda function.
+
+### **6.Remove the stack**
+
+``` 
+cd cd aws-iot-core-lorawan/lorawan_connectivity_watchdog
+cdk destroy
+```
 
 
 ## Troubleshooting

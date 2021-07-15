@@ -116,7 +116,7 @@ class LorawanConnectivityWatchdogStack(cdk.Stack):
 
         # State 'Wait'
         wait_state = sfn.Wait(self, "Sleep",
-                              time=sfn.WaitTime.duration(cdk.Duration.minutes(1))
+                              time=sfn.WaitTime.duration(cdk.Duration.minutes(4))
                               )
 
         # State 'Ingest gateway connectivity status into IoT Events input'

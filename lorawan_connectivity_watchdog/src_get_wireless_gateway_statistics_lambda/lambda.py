@@ -106,8 +106,11 @@ def handler(event, context):
             put_events_message(event.get("test").get("gatewayid"),
                                connection_status=event.get("test").get("connection_status"), last_uplink_received_timestamp_ms=int(event.get("test").get("last_uplink_received_timestamp_ms")))
 
+        # Iterate over all wireless gateways
         for gateway_id in gateway_ids:
             logger.info(f"Processing gateway with id {gateway_id}")
+
+            # Retrieve gateway statistics
             response = client_iotwireless.get_wireless_gateway_statistics(WirelessGatewayId=gateway_id)
             logger.info(f"Gateway statistics: {response}")
 
