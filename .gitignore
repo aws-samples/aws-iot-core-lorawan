@@ -9,3 +9,9 @@ test-reports/**
 transform_binary_payload/scripts/deploy_lorawan_decoder.sh
 .idea
 node_modules
+.vscode/**
+.venv/**
+cdk.out/**
+localtools/**
+lorawan_connectivity_watchdog/src_put_cloudwatch_metrics/**
+lorawan_connectivity_watchdog/localtools/**

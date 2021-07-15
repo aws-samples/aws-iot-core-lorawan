@@ -1,0 +1,7 @@
+{
+    "test": {
+        "gatewayid": "00000000-0000-0000-0000-000000000000",
+        "connection_status": "Connected",
+        "last_uplink_received_timestamp_ms": 12345
+    }
+}

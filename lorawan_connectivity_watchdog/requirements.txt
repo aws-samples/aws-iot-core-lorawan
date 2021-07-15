@@ -1,0 +1,9 @@
+-e .
+aws_cdk.core
+aws_cdk.aws_iam
+aws_cdk.aws_lambda
+aws_cdk.aws_iotevents
+aws_cdk.aws_stepfunctions
+aws_cdk.aws_stepfunctions_tasks
+aws_cdk.aws_sns
+aws_cdk.aws_sns_subscriptions
