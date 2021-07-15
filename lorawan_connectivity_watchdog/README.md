@@ -1,4 +1,4 @@
-# Monitoring and alarming for LoRaWAN gateway connectivity 
+# Monitoring and notifications for LoRaWAN gateway connection status
 
 This sample contains an example solution for monitoring connectivity status, i.e. connections and disconnections for LoRaWAN gateways using AWS IoT Core for LoRaWAN. Disconnection detection will consider a configurable grace period. After deploying this solution in your AWS account, you will receive an e-mail notificiation each time your LoRaWAN gateway connects or disconnects.  Additionaly, a message will be published to AWS IoT Core message broker MQTT topic each time the gateway connects and disconnects. 
 
@@ -28,7 +28,7 @@ source .env/bin/activate
 npm install -g aws-cdk
 pip3 install -r requirements.txt   
 # Deploy the stack. Ensure to replace <E-Mail> with the E-Mail adresss to send notifications to
-cdk deploy --parameters emailforalarms=svirida+alarm@amazon.de
+cdk deploy --parameters emailforalarms=<E-Mail>
 ```
 
 ### **2. Confirm the SNS e-mail subscription**  
