@@ -31,6 +31,10 @@ source .env/bin/activate
 # Install AWS CDK and neccessary CDK libraries
 npm install -g aws-cdk
 pip3 install -r requirements.txt   
+# If first time running CDK deployment in this account / region, run CDK bootstap
+# This is a one-time activity per account/region, e.g. 
+# cdk bootstrap aws://123456789/us-east-1
+cdk bootstrap aws://<Account Id>/<Region name>
 # Deploy the stack. Ensure to replace <E-Mail> with the E-Mail adresss to send notifications to
 cdk deploy --parameters emailforalarms=<E-Mail>
 ```

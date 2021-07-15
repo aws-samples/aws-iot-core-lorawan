@@ -9,17 +9,17 @@ setuptools.setup(
     name="lorawan_connectivity_watchdog",
     version="0.0.1",
 
-    description="An empty CDK Python app",
+    description="Monitoring and notifications for LoRaWAN gateway connection status",
     long_description=long_description,
     long_description_content_type="text/markdown",
 
-    author="author",
+    author="Andrei Svirida",
 
     package_dir={"": "cdkstack"},
     packages=setuptools.find_packages(where="cdkstack"),
 
     install_requires=[
-        "aws-cdk.core==1.109.0",
+        "aws-cdk.core>=1.109.0",
     ],
 
     python_requires=">=3.6",
