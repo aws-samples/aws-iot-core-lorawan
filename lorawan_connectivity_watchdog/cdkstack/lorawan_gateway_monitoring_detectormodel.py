@@ -129,7 +129,7 @@ def get_states(self):
                         "condition": "$input.LoRaWANGatewayConnectivityStatusInput.last_connection_status == 'Connected'",
                         "actions": [
                             {
-                                "destroyTimer": {
+                                "clearTimer": {
                                     "timerName": "DisconnectedTimer"
                                 }
                             },
