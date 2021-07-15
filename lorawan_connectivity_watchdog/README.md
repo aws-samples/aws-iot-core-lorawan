@@ -1,6 +1,6 @@
 # Monitoring and notifications for LoRaWAN gateway connection status
 
-This sample contains an example solution for monitoring connectivity status, i.e. connections and disconnections for LoRaWAN gateways using AWS IoT Core for LoRaWAN. Disconnection detection will consider a configurable grace period. After deploying this solution in your AWS account, you will receive an e-mail notificiation each time your LoRaWAN gateway connects or disconnects.  Additionaly, a message will be published to AWS IoT Core message broker MQTT topic each time the gateway connects and disconnects. 
+This sample contains an example solution for monitoring connectivity status, i.e. connections and disconnections for LoRaWAN gateways using AWS IoT Core for LoRaWAN. Disconnection detection will consider a configurable grace period. After deploying this solution in your AWS account, you will receive an e-mail notificiation each time your LoRaWAN gateway connects or disconnects.  Additionaly, a message will be published to AWS IoT Core message broker MQTT topic (e.g. `awsiotcorelorawan/events/presence/disconnect/<WirelessGatewayId>`) each time the gateway connects and disconnects. 
 
 Please consider the following definition of "connect" and "disconnect" as used in this sample:
 
