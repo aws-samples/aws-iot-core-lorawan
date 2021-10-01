@@ -1,0 +1,10 @@
+
+{
+    "messages": [
+        {
+            "inputName": "LoRaWANDeviceWatchdogInput",
+            "messageId": "5f5b52ee-eb41-4450-af0f-f507ed46da7a",
+            "payload": "eyJkZXZpY2VpZCI6IjEiLCJ0aW1lc3RhbXBfbXMiOjEyMzR9"
+        }
+    ]
+}

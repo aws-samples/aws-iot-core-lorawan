@@ -1,19 +1,8 @@
-# Monitoring and notifications for LoRaWAN gateway connection status
+# Monitoring and notifications for LoRaWAN device connection status
 
-This sample contains an example solution for monitoring connectivity status, i.e. connections and disconnections for LoRaWAN gateways using AWS IoT Core for LoRaWAN. Disconnection detection will consider a configurable grace period (default is 5 minutes). After deploying this solution in your AWS account, you will receive an e-mail notificiation each time your LoRaWAN gateway connects or disconnects.  Additionaly, a message will be published to AWS IoT Core message broker MQTT topic (e.g. `awsiotcorelorawan/events/presence/disconnect/<WirelessGatewayId>`) each time the gateway connects and disconnects.
+This sample contains an example solution for monitoring connectivity status of LoRaWAN devices. It will generate an alarm if AWS cloud does not receive an uplink from a LoRaWAN for longer then a configurable amount of time.
 
-Please consider the following definition of "connect" and "disconnect" as used in this sample:
-
-- A "connect" refers to a LoRaWAN gateway which successfully reestablishes a new connection, or a gateway successfully connected first time to AWS IoT Core for LoRaWAN.
-- A "disconnect" refers to a LoRaWAN gateway which is disconnected from AWS IoT Core for LoRaWAN for longer then a grace period (configurable, default is 1 minute). The grace periods is intended to filter out short (e.g. < 1 min) disconnections not impacting the IoT application.
-
-## Solution architecture
-
-![Architecture overview](images/connectivity_watchdog_architecture.png)
-
-## Costs
-
-Please note that starting this solution will result in continious additional charges to your AWS account for usage of services such as AWS Step Functions, AWS Lambda , AWS IoT Events and Amazon CloudWatch. For example, the AWS Step Functions state machine will invoke the AWS Lambda every 4 minutes (configurable). Please ensure to follow [these guidelines](#5-stop-the-execution-of-the-solution) stop the execution of the AWS Step Functions state machine and remove the stack to stop incurring costs for this solution.
+After deploying this solution in your AWS account and performing necessary configuration steps, you will receive an e-mail notificiation each time one of configured LoRaWAN devices is silent for longer then amount of time you defined.  Additionaly, a message will be published to AWS IoT Core message broker MQTT topic (e.g. `awsiotcorelorawan/events/presence/disconnect/<WirelessGatewayId>`) each time LoRaWAN device sends uplink or is silent for longer then amount of time you defined.
 
 ## Quick deployment
 
@@ -24,7 +13,7 @@ Please run the following commands in your local shell or in AWS CloudShell.
 ``` shell
 # Clone the repository 
 git clone https://github.com/aws-samples/aws-iot-core-lorawan
-cd aws-iot-core-lorawan/lorawan_connectivity_watchdog
+cd aws-iot-core-lorawan/device_watchdog
 # Set up and activate virtual environment
 python3 -m venv .env
 source .env/bin/activate 
@@ -43,48 +32,31 @@ cdk deploy --parameters emailforalarms=<E-Mail>
 
 Please check your mailbox for an e-mail message with subject "AWS Notification - Subscription Confirmation" and confirm the subscription.
 
-### **3. Start the AWS step functions state machine** 
 
-As an output of the stack, you will receive a command to start the AWS state machine execution, e.g.
+### **3. Add Action to your AWS IoT Rules**
+Please open AWS IoT Rule that processes incoming telemetry from your device. 
 
-```shell 
-...
-Outputs:
-LorawanConnectivityWatchdogStack.StateMachineStartCommand = aws stepfunctions start-execution --state-machine-arn arn:aws:states:us-east-1:614797420359:stateMachine:LoRaWANGatewayWatchdogStatemachine67D21B94-Ngdhwg91Keqq
+**Update IoT SQL statement**
+Please ensure that IoT SQL statement of your AWS IoT Rule adds output attributes "timestamp_ms" with current timestamp and "deviceid" with a unique device identification e.g.:
+
+```SQL
+SELECT timestamp() as timestamp_ms, WirelessDeviceId as deviceid, ...  
 ```
+**Add action**
+Please add Action "Send a message to an IoT Events Input" to the AWS IoT Rule. Please specify `LoRaWANDeviceWatchdogInput` as "Input name" , leave "Message Id" empty and create a new Role for IoT Events access.
 
-The state machine will periodically invoke the AWS Lambda function to read the gateway connectivity status and ingest it to AWS IoT events input. Please run the previously shown command to start the state machine execution , e.g. :
-
-```shell
-aws stepfunctions start-execution --state-machine-arn arn:aws:states:us-east-1:614797420359:stateMachine:LoRaWANGatewayWatchdogStatemachine67D21B94-Ngdhwg91Keqq
-
-{
-    "executionArn": "arn:aws:states:us-east-1:614797420359:execution:LoRaWANGatewayWatchdogStatemachine67D21B94-Ngdhwg91Keqq:4c92e301-8525-4961-80a1-26768d9da294",
-    "startDate": "2021-07-13T21:18:14.426000+02:00"
-}
-```
-    
 ### **4. View notifications and MQTT presence events** 
 
-For a test purpose, disconnect your LoRaWAN gatway from AWS IoT Core for LoRaWAN. Watch out for mails with notification about connects and disconnects. You can also open the [MQTT Test client](https://console.aws.amazon.com/iot/home?region=#/test) and subscribe to the topic pattern `awsiotcorelorawan/events/presence/+/+` to see the published presence events, e.g.:
-![LoRaWAN gateway presence events](images/mqtttestclient.png)
+Please open the [MQTT Test client](https://console.aws.amazon.com/iot/home?region=#/test) and subscribe to the topics `awsiotcorelorawan/events/uplink` and `awsiotcorelorawan/events/presence/missingheartbeat/+`.
 
-### **5. Stop the execution of the solution** 
+Once one of LoRaWAN device you configured in Step 3 is silent for longer then the duration you defined, you will see an MQTT message published on `awsiotcorelorawan/events/presence/missingheartbeat/+` topic.
 
-As an output of the stack, you have receiveed a command to start the AWS state machine execution, e.g.
+Each time one of LoRaWAN device you configured in Step 3 is ingesting data, you will see an MQTT message published on `awsiotcorelorawan/events/uplink`.
 
-```shell 
-...
-Outputs:
-LorawanConnectivityWatchdogStack.StateMachineStartCommand = aws stepfunctions stop-execution --state-machine-arn arn:aws:states:us-east-1:614797420359:stateMachine:LoRaWANGatewayWatchdogStatemachine67D21B94-Ngdhwg91Keqq
-```
-
-Please run this command to stop a periodic execution of the Lambda function.
-
-### **6.Remove the stack**
+### **5.Remove the stack**
 
 ``` 
-cd cd aws-iot-core-lorawan/lorawan_connectivity_watchdog
+cd aws-iot-core-lorawan/device_watchdog
 cdk destroy
 ```
 
@@ -94,7 +66,7 @@ cdk destroy
 ### View AWS Step Functions execution trace
 
 1. Open state machine `LoRaWANGatewayWatchdogStatemachine...` [here](https://console.aws.amazon.com/states/home?region=#/statemachines)
-2. Click on a recent exeuction
+2. Click on a recent execution
 3. View the execution trace and potential errors
 
 ### View AWS IoT Events logs

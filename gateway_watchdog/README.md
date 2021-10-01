@@ -24,7 +24,7 @@ Please run the following commands in your local shell or in AWS CloudShell.
 ``` shell
 # Clone the repository 
 git clone https://github.com/aws-samples/aws-iot-core-lorawan
-cd aws-iot-core-lorawan/lorawan_connectivity_watchdog
+cd aws-iot-core-lorawan/gateway_watchdog
 # Set up and activate virtual environment
 python3 -m venv .env
 source .env/bin/activate 

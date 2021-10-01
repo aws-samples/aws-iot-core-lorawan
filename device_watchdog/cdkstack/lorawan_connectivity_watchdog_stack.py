@@ -17,14 +17,11 @@
 
 from aws_cdk import core as cdk
 from aws_cdk import aws_iam as iam
-from aws_cdk import aws_lambda as lambda_
 from aws_cdk import aws_iotevents as iotevents
-from aws_cdk import aws_stepfunctions as sfn
-from aws_cdk import aws_stepfunctions_tasks as tasks
 import aws_cdk.aws_sns as sns
 import aws_cdk.aws_sns_subscriptions as subscriptions
 import lorawan_device_heartbeat_detectormodel
-import lorawan_device_sliding_window_anomaly_detectormodel
+
 
 class LorawanConnectivityWatchdogStack(cdk.Stack):
     def __init__(self, scope: cdk.Construct, construct_id: str, **kwargs) -> None:

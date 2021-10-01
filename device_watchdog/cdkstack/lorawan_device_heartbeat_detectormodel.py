@@ -15,7 +15,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-initial_state_name = "Initial"
+initial_state_name = "Healthy"
 
 
 def get_states(self):
@@ -44,7 +44,7 @@ def get_states(self):
                         },
                         {
                             "eventName": "ResetDisconnectedTimer",
-                            "condition": "$input.LoRaWANDeviceWatchdogInput.deviceid != ''",
+                            "condition": "true",
                             "actions": [
                                 {
                                     "resetTimer": {
@@ -53,8 +53,7 @@ def get_states(self):
                                 },
                                 {
                                     "setVariable": {
-                                        "variableName": "timestamp_last_uplink",
-                                        "value": "'todo'"
+                                        "variableName": "timestamp_last_uplink"
                                     }
                                 }
                             ]
@@ -88,14 +87,8 @@ def get_states(self):
                     "events": [
                         {
                             "eventName": "InitializeVariables",
-                            "condition": "true",
+                            "condition": "isUndefined($variable.initalization_complete)",
                             "actions": [
-                                {
-                                    "setVariable": {
-                                        "variableName": "deviceid",
-                                        "value": "$input.LoRaWANDeviceWatchdogInput.deviceid"
-                                    }
-                                },
                                 {
                                     "setVariable": {
                                         "variableName": "input_message_count",
@@ -107,17 +100,30 @@ def get_states(self):
                                         "variableName": "lastupdate_timestamp_ms",
                                         "value": "0"
                                     }
+                                },
+                                {
+                                    "setVariable": {
+                                        "variableName": "deviceid",
+                                        "value": "$input.LoRaWANDeviceWatchdogInput.deviceid"
+                                    }
+                                },
+                                {
+                                    "setVariable": {
+                                        "variableName": "initalization_complete",
+                                        "value": "true"
+                                    }
                                 }
                             ]
                         },
                         {
-                            "eventName": "SetDisconnectedTimer",
+                            "eventName": "CreateDisconnectedTimer",
                             "condition": "true",
                             "actions": [
                                 {
                                     "setTimer": {
                                         "timerName": "DisconnectedTimer",
                                         "seconds": 60
+                                        
                                     }
                                 }
                             ]
@@ -154,7 +160,7 @@ def get_states(self):
                     "transitionEvents": [
                         {
                             "eventName": "onIncomingTelemetry",
-                            "condition": "$input.LoRaWANDeviceWatchdogInput.deviceid == $variable.deviceid",
+                            "condition": "$input.LoRaWANDeviceWatchdogInput.deviceid != \"\"",
                             "actions": [],
                             "nextState": "Healthy"
                         }
@@ -175,7 +181,6 @@ def get_states(self):
                                         }
                                     }
                                 }
-                                
                             ]
                         },
                         {
@@ -195,5 +200,5 @@ def get_states(self):
                     "events": []
                 }
             }
-        ]
+        ];
     return states
