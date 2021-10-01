@@ -25,7 +25,7 @@ LoRaWAN devices typically send uplink payloads as binary encoded messages. Below
 - [Updating IoT Thing shadow with decoded device payload](iotthingshadow)  
     AWS IoT Thing [Shadows](https://docs.aws.amazon.com/iot/latest/developerguide/iot-device-shadows.html) can make a device’s state available to apps and other services whether the device is connected to AWS IoT or not. In this sample you will learn how to update the shadow of an AWS IoT Thing with the telemetry from a LoRaWAN device. 
 
-- [Monitoring and notifications for LoRaWAN gateway connection status](lorawan_connectivity_watchdog)  
+- [Monitoring and notifications for LoRaWAN gateway connection status](gateway_watchdog)  
   Example solution for monitoring connectivity status for LoRaWAN gateways.  After deploying this solution in your AWS account, you will receive an e-mail notificiation each time your LoRaWAN gateway connects or disconnects.  Additionaly, a message will be published to AWS IoT Core message broker MQTT topic (e.g. `awsiotcorelorawan/events/presence/disconnect/<WirelessGatewayId>`) each time the gateway connects and disconnects. Disconnection detection will consider a configurable grace period (default setting is 5 minutes), i.e. only disconnection which is longer then grace period will result in a notification/presence message.
 
 

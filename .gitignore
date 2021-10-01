@@ -13,5 +13,18 @@ node_modules
 .venv/**
 cdk.out/**
 localtools/**
-lorawan_connectivity_watchdog/src_put_cloudwatch_metrics/**
-lorawan_connectivity_watchdog/localtools/**
+gateway_watchdog/src_put_cloudwatch_metrics/**
+gateway_watchdog/localtools/**
+device_watchdog/localtools/**
+*.swp
+package-lock.json
+__pycache__
+.pytest_cache
+.env
+.venv
+*.egg-info
+
+# CDK asset staging directory
+.cdk.staging
+cdk.out
+workshop/webinar/**
