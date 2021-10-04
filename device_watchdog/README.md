@@ -63,12 +63,6 @@ cdk destroy
 
 ## Troubleshooting
 
-### View AWS Step Functions execution trace
-
-1. Open state machine `LoRaWANGatewayWatchdogStatemachine...` [here](https://console.aws.amazon.com/states/home?region=#/statemachines)
-2. Click on a recent execution
-3. View the execution trace and potential errors
-
 ### View AWS IoT Events logs
 
 1. Open AWS IoT Events settings [here](https://console.aws.amazon.com/iotevents/home?region=#/settings/logging)
@@ -80,25 +74,3 @@ cdk destroy
 ### **AWS IoT Events**
 AWS IoT Events Detector model:
 ![IoT Events Detector model](images/ioteventsdetectormodel.png)
-
-### **AWS Step functions state machine**
-![AWS Step functions state machine](images/step_functions_state_machine.png)
-
-
-## Local testing
-
-
-### Install SAM CDK (beta)
-```
-brew install aws-sam-cli-beta-cdk.
-```
-
-### Locally invoke AWS Lambda
-
-```
-sam-beta-cdk local invoke LorawanConnectivityWatchdogStack/GetWirelessGatewayStatisticsLambda -e tests/input_connected.json
-```
-
-```
-sam-beta-cdk local invoke LorawanConnectivityWatchdogStack/GetWirelessGatewayStatisticsLambda -e tests/input_disconnected.json
-```
