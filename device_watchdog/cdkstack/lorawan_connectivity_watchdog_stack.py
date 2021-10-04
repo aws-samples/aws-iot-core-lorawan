@@ -16,7 +16,9 @@
 
 
 from aws_cdk import core as cdk
+from aws_cdk.core import Aws
 from aws_cdk import aws_iam as iam
+from aws_cdk import aws_iot as iot
 from aws_cdk import aws_iotevents as iotevents
 import aws_cdk.aws_sns as sns
 import aws_cdk.aws_sns_subscriptions as subscriptions
@@ -33,14 +35,9 @@ class LorawanConnectivityWatchdogStack(cdk.Stack):
         # IoT Events: Execution role
         iot_events_execution_role = iam.Role(self, "IoTEventsExecutionRole", assumed_by=iam.ServicePrincipal("iotevents.amazonaws.com"))
         iot_events_execution_role.add_to_policy(iam.PolicyStatement(
-            resources=["*"],
+            resources=["arn:aws:iot:"+Aws.REGION+":"+Aws.ACCOUNT_ID+":topic/awsiotcorelorawan/*"],
             actions=["iot:Publish"]
         ))
-
-        # iot_events_execution_role.add_to_policy(iam.PolicyStatement(
-        #     resources=["*"],
-        #     actions=["SNS:Publish"]
-        # ))
 
         # IoT Events: Input
         inputDefinitionProperty = iotevents.CfnInput.InputDefinitionProperty(
@@ -55,9 +52,12 @@ class LorawanConnectivityWatchdogStack(cdk.Stack):
 
                                               )
         # IoT Events: Detector Model
+        notify_if_inactive_seconds_value = cdk.CfnParameter(self, "notifyifinactivseconds", type="Number").value_as_number
+
         lorawan_device_heartbeat_detectormodel_definition = iotevents.CfnDetectorModel.DetectorModelDefinitionProperty(
             initial_state_name=lorawan_device_heartbeat_detectormodel.initial_state_name,
-            states=lorawan_device_heartbeat_detectormodel.get_states(self))
+            states=lorawan_device_heartbeat_detectormodel.get_states(self, notify_if_inactive_seconds=notify_if_inactive_seconds_value)  
+        )
 
 
         iot_events_model_1 = iotevents.CfnDetectorModel(self, "LoRaWANDeviceHeartbeatWatchdogModel",
@@ -70,6 +70,46 @@ class LorawanConnectivityWatchdogStack(cdk.Stack):
 
         
 
+        ####################################################################################
+        # AWS IoT TRule
+        iot_rule_role = iam.Role(self, "LoRaWANDeviceHeartbeatWatchdogSampleRuleRole", assumed_by=iam.ServicePrincipal("iot.amazonaws.com"))
+        iot_rule_role.add_to_policy(iam.PolicyStatement(
+            resources=["arn:aws:iotevents:"+Aws.REGION+":"+Aws.ACCOUNT_ID+":input/"+iot_events_input.input_name],
+            actions=["iotevents:BatchPutMessage"]
+        ))
+        iot_rule_role.add_to_policy(iam.PolicyStatement(
+            resources=["arn:aws:iot:"+Aws.REGION+":"+Aws.ACCOUNT_ID+":topic/awsiotcorelorawan/*"],
+            actions=["iot:Publish"]
+        ))
+
+        iot_rule = iot.CfnTopicRule(self, "LoRaWANDeviceHeartbeatWatchdogSampleRule",
+                                    rule_name="LoRaWANDeviceHeartbeatWatchdogSampleRule",
+                                    topic_rule_payload = {
+                                        "sql": "SELECT WirelessDeviceId as deviceid, timestamp() as timestamp_ms FROM LoRaWANDeviceHeartbeatWatchdogSampleRule_sampletopic",
+                                        "actions": [
+                                        {
+                                            "iotEvents": {
+                                                "inputName": iot_events_input.input_name,
+                                                "roleArn": iot_rule_role.role_arn
+                                            },
+                                             "republish": {
+                                                "roleArn": iot_rule_role.role_arn,
+                                                "topic": "iotcorelorawan/debug"
+                                            }
+
+                                        },
+                                        ],
+                                        "error_action": {
+                                            "republish": {
+                                                "roleArn": iot_rule_role.role_arn,
+                                                "topic": "iotcorelorawan/error"
+                                            }
+
+                                        },
+                                        "ruleDisabled": False,
+                                        "awsIotSqlVersion": "2016-03-23",
+                                    })
+    
     
         ####################################################################################
         # SNS topic

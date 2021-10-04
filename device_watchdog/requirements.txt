@@ -2,5 +2,6 @@
 aws_cdk.core
 aws_cdk.aws_iam
 aws_cdk.aws_iotevents
+aws_cdk.aws_iot
 aws_cdk.aws_sns
 aws_cdk.aws_sns_subscriptions

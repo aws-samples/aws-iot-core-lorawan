@@ -28,3 +28,4 @@ __pycache__
 .cdk.staging
 cdk.out
 workshop/webinar/**
+device_watchdog/out.yaml

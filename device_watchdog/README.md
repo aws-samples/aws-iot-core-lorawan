@@ -25,7 +25,7 @@ pip3 install -r requirements.txt
 # cdk bootstrap aws://123456789/us-east-1
 cdk bootstrap aws://<Account Id>/<Region name>
 # Deploy the stack. Ensure to replace <E-Mail> with the E-Mail adresss to send notifications to
-cdk deploy --parameters emailforalarms=<E-Mail>
+cdk deploy --parameters emailforalarms=<E-Mail> --parameters notifyifinactivseconds=600
 ```
 
 ### **2. Confirm the SNS e-mail subscription**  

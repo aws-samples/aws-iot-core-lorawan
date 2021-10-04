@@ -18,7 +18,7 @@
 initial_state_name = "Healthy"
 
 
-def get_states(self):
+def get_states(self, notify_if_inactive_seconds: int):
     states = [
             {
                 "stateName": "Healthy",
@@ -53,7 +53,8 @@ def get_states(self):
                                 },
                                 {
                                     "setVariable": {
-                                        "variableName": "timestamp_last_uplink"
+                                        "variableName": "timestamp_last_uplink",
+                                        "value": "'todo'"
                                     }
                                 }
                             ]
@@ -122,7 +123,7 @@ def get_states(self):
                                 {
                                     "setTimer": {
                                         "timerName": "DisconnectedTimer",
-                                        "seconds": 60
+                                        "seconds": notify_if_inactive_seconds
                                         
                                     }
                                 }
