@@ -78,31 +78,31 @@ class LorawanConnectivityWatchdogStack(cdk.Stack):
             actions=["iotevents:BatchPutMessage"]
         ))
         iot_rule_role.add_to_policy(iam.PolicyStatement(
-            resources=["arn:aws:iot:"+Aws.REGION+":"+Aws.ACCOUNT_ID+":topic/awsiotcorelorawan/*"],
+            resources=["arn:aws:iot:"+Aws.REGION+":"+Aws.ACCOUNT_ID+":topic/*"],
             actions=["iot:Publish"]
         ))
 
         iot_rule = iot.CfnTopicRule(self, "LoRaWANDeviceHeartbeatWatchdogSampleRule",
                                     rule_name="LoRaWANDeviceHeartbeatWatchdogSampleRule",
                                     topic_rule_payload = {
-                                        "sql": "SELECT WirelessDeviceId as deviceid, timestamp() as timestamp_ms FROM LoRaWANDeviceHeartbeatWatchdogSampleRule_sampletopic",
+                                        "sql": "SELECT WirelessDeviceId as deviceid, timestamp() as timestamp_ms from 'LoRaWANDeviceHeartbeatWatchdogSampleRule_sampletopic'",
                                         "actions": [
                                         {
                                             "iotEvents": {
                                                 "inputName": iot_events_input.input_name,
                                                 "roleArn": iot_rule_role.role_arn
-                                            },
+                                            }
+                                        },
+                                         {
                                              "republish": {
                                                 "roleArn": iot_rule_role.role_arn,
-                                                "topic": "iotcorelorawan/debug"
-                                            }
-
-                                        },
+                                                "topic": "awsiotcorelorawan/debug"
+                                            }}
                                         ],
-                                        "error_action": {
+                                        "errorAction": {
                                             "republish": {
                                                 "roleArn": iot_rule_role.role_arn,
-                                                "topic": "iotcorelorawan/error"
+                                                "topic": "awsiotcorelorawan/error"
                                             }
 
                                         },
