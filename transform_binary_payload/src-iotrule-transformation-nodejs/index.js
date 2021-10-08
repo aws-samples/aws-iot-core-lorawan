@@ -29,7 +29,7 @@ Two measures will be taken to restrict values of allowed binary decoder files:
 2. Whitelisting(disabled by default , recommended to enable for non-prototyping usage)*/
 const ALLOWED_DECODER_NAME_REGEX = /^[A-Za-z\_01-9]+$/;
 const ENABLE_DECODER_NAME_WHITELIST = false;
-const ALLOWED_DECODER_NAME_WHITELIST = ["sample_device"]
+const ALLOWED_DECODER_NAME_WHITELIST = ["sample_device", "elsys"]
 
 
 // Read command line parameters. You can provide parameter "local" to override path for decoder libraries,
