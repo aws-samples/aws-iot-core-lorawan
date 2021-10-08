@@ -207,7 +207,6 @@ function DecodeElsysPayload(data){
     return obj;
 }
 
-function Decoder(bytes, port) {
-  return DecodeElsysPayload(bytes);
+function decodeUplink(input) { 
+    return DecodeElsysPayload(input.bytes);
 }
-        
