@@ -1,0 +1,118 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Sample minimalistic binary decoder for RFI power switch 
+
+Parameters:
+  TopicError:
+    Type: String
+    Default: sampledecoder/error
+    Description: Name of MQTT topic for to publish IoT Rule action error messages
+
+  TopicDebug:
+    Type: String
+    Default: sampledecoder/debug
+    Description: |
+      Prefix of a MQTT topic to publish debugging information
+
+Resources:
+  ############################################################################################
+  # Payload transformation Lambda function to be called from AWS IoT Core. This function will refer to
+  # layer "DecoderLayer" to include the necessary decoding libraries
+  ############################################################################################
+
+  TransformLoRaWANBinaryPayloadFunction:
+    Type: AWS::Serverless::Function
+    Name: !Sub "${AWS::StackName}-SampleBinaryDecodingFunction"
+    Properties:
+      CodeUri: src
+      Handler: app.lambda_handler
+      Runtime: python3.8
+      Timeout: 10
+
+  TransformLoRaWANBinaryPayloadFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt TransformLoRaWANBinaryPayloadFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: iot.amazonaws.com
+
+  TransformLoRaWANBinaryPayloadRule:
+    Type: "AWS::IoT::TopicRule"
+    Properties:
+      RuleName: SampeLoRaWANPayloadRule_RFI_Remote_Switch
+      TopicRulePayload:
+        AwsIotSqlVersion: "2016-03-23"
+        RuleDisabled: false
+
+        Sql: !Sub
+          - |
+            SELECT * as decoding_input, aws_lambda("${LambdaARN}",
+                              {
+                                "PayloadData":PayloadData, 
+                                "WirelessDeviceId": WirelessDeviceId, 
+                                "WirelessMetadata": WirelessMetadata
+                              }
+                            ) as decoding_output
+          - { LambdaARN: !GetAtt TransformLoRaWANBinaryPayloadFunction.Arn }
+        Actions:
+          - Republish:
+              RoleArn: !GetAtt TransformLoRaWANBinaryPayloadRuleRole.Arn
+              Topic: !Ref TopicDebug
+              Qos: 0
+
+        ErrorAction:
+          Republish:
+            RoleArn: !GetAtt TransformLoRaWANBinaryPayloadRuleRole.Arn
+            Topic: !Ref TopicError
+            Qos: 0
+
+  TransformLoRaWANBinaryPayloadRuleRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - iot.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: iot:Publish
+                Resource:
+                  !Join [
+                    "",
+                    [
+                      "arn:aws:iot:",
+                      !Ref "AWS::Region",
+                      ":",
+                      !Ref "AWS::AccountId",
+                      ":topic/",
+                      !Ref TopicDebug,
+                    ],
+                  ]
+              - Effect: Allow
+                Action: iot:Publish
+                Resource:
+                  !Join [
+                    "",
+                    [
+                      "arn:aws:iot:",
+                      !Ref "AWS::Region",
+                      ":",
+                      !Ref "AWS::AccountId",
+                      ":topic/",
+                      !Ref TopicError,
+                    ],
+                  ]
+
+Outputs:
+  TransformLoRaWANBinaryPayloadFunctionArn:
+    Value: !Ref TransformLoRaWANBinaryPayloadFunction

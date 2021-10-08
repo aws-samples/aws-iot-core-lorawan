@@ -29,3 +29,5 @@ __pycache__
 cdk.out
 workshop/webinar/**
 device_watchdog/out.yaml
+workshop/sampledecoder/downlink/Archive.zip
+workshop/sampledecoder/.python-version
