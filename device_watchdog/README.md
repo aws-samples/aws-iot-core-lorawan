@@ -1,8 +1,18 @@
 # Monitoring and notifications for LoRaWAN device connection status
 
-This sample contains an example solution for monitoring connectivity status of LoRaWAN devices. It will generate a notification if AWS cloud does not receive an uplink from a LoRaWAN for longer then a configurable amount of time.
+This sample contains an example solution for monitoring connectivity status of LoRaWAN devices. 
 
-After deploying this solution in your AWS account and performing necessary configuration steps, you will receive an e-mail notificiation each time one of configured LoRaWAN devices is silent for longer then amount of time you defined.  Additionaly, a message will be published to AWS IoT Core message broker MQTT topic (e.g. `awsiotcorelorawan/events/presence/disconnect/<WirelessGatewayId>`) each time LoRaWAN device sends uplink or is silent for longer then amount of time you defined.
+After deploying this solution in your AWS account and performing necessary configuration steps, you will receive an e-mail notificiation each time one of configured LoRaWAN devices is silent for longer then amount of time you defined.  Additionaly, a message will be published to AWS IoT Core message broker MQTT topic (e.g. `awsiotcorelorawan/events/presence/disconnect/<WirelessGatewayId>`) each time LoRaWAN device sends uplink or is silent for longer then amount of time you defined.  
+
+For example, imagine you have a temperature sensor which typically sends telemetry once an hour. If you want to be notified if no telemetry from the sensor arrived after 60 minutrs (e.g, due to connectivity issues or sensor malfunction), you can use this sample and configure notification duration to 60 minutes.
+
+## Solution Architecture
+
+Below you see a diagram with the solution architecture:
+![Solution Architecture](images/ioteventarch.png)
+
+For AWS IoT Events, the following detector model (i.e., the state machine) will be deployed:  
+![IoT Events state machine](images/ioteventsdetectormodel.png)
 
 ## Quick deployment
 
