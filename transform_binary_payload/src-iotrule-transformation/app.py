@@ -45,6 +45,7 @@ import dragino_lgt92
 import dragino_lse01
 import dragino_lbt1
 import dragino_lds01
+import dragino_laq4
 import nas_um3080
 import adeunis_ftd2
 import adeunis_dc_v2
@@ -61,7 +62,7 @@ import meteo_helix
 # If you want to implement additional binary decoders:
 # please add name of your binary decoder (e.g. "mylorawandevice") here (see "Step 4" above)
 VALID_PAYLOAD_DECODER_NAMES = ["sample_device", "axioma_w1", "tabs_objectlocator",
-                               "dragino_lht65", "dragino_lgt92", "dragino_lse01", "dragino_lbt1", "dragino_lds01",
+                               "dragino_lht65", "dragino_lgt92", "dragino_lse01", "dragino_lbt1", "dragino_lds01","dragino_laq4",
                                "elsys", "globalsat_lt100", "nas_um3080", "adeunis_ftd2", "adeunis_dc_v2",
                                "sentrius_rs1xx", "meteo_helix"]
 
