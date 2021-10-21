@@ -64,6 +64,7 @@ The sample [Decoding binary payloads from LoRaWAN devices](transform_binary_payl
 - **Temperature, humidity and moisture**
   - Dragino LHT65 (temperature and humidity)
   - Dragino LSE01 (temperature and moisture)
+  - Dragino LAQ4 (Air Quality Sensor CO2 + TVOC)
   - Elsys ERS Lite
   - Laird Senstrius RS1xx
 - **Water Metering**
