@@ -1,4 +1,4 @@
-# Ready to use example applications to quickly get started with AWS IoT Core for LoRaWAN (binary decoding, device and gateway monitoring, downlink, dashboarding, provisioning automation)
+#  Quickly get started with AWS IoT Core for LoRaWAN with a feature-rich set of sample solutions (binary decoding, device and gateway monitoring, downlink, dashboarding, provisioning automation)
 
 AWS IoT Core for LoRaWAN enables you to set up a private LoRaWAN network by connecting your devices and gateways with no LoRaWAN Network Server setup required. This repository contains resources to quickly get started developing solutions using AWS IoT Core for LoRaWAN. It includes samples for typical design patterns ([binary decoder](transform_binary_payload), [downlink messaging](send_downlink_payload), [Thing shadow update](iotthingshadow)) and fully functional applications ([dashboards](timestream), [condition monitoring and alarming](soilmoisture_alarming)).
 
