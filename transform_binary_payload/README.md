@@ -14,7 +14,7 @@ This repository contains resources to quickly onboard included LoRaWAN devices o
 - Examples of binary decoders for a set of devices. These examples are in Python 3 or Node.js and will be deployed in an [AWS Lambda layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html). Following devices are included:
   - Decoder simulating a temperature and humidity sensor device. It enables you to test this sample without need for a physical LoRaWAN device. You can also use it as a boilerplate to developer your own decoder.
   - Browan Tabs Object Locator
-  - Dragino LHT65, LGT92, LSE01, LBT1, LDS01
+  - Dragino LHT65, LGT92, LSE01, LBT1, LDS01, LSN50, LLMS01 
   - Axioma W1
   - Elsys
   - Globalsat LT-100
