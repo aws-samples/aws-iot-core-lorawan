@@ -2,7 +2,7 @@
 
 This sample contains an example solution for monitoring connectivity status of LoRaWAN devices. For example, imagine you have a temperature sensor which typically sends telemetry once an hour.  You want to be notified if no telemetry from the sensor arrived after 60 minutrs, e.g, due to connectivity issues or sensor malfunction. 
 
-After deploying this solution in your AWS account and performing necessary configuration steps, you will receive an e-mail notificiation each time one of configured LoRaWAN devices is silent for longer then amount of time you defined.  Additionaly, a message will be published to AWS IoT Core message broker MQTT topic (e.g. `awsiotcorelorawan/events/presence/disconnect/<WirelessGatewayId>`) each time LoRaWAN device sends uplink or is silent for longer then amount of time you defined.  
+After deploying and configuring this solution in your AWS account, you will receive an e-mail message each time one of configured LoRaWAN devices is not sending uplink for longer then specified period of time. Additionaly, a message will be published to AWS IoT Core message broker MQTT topic (`awsiotcorelorawan/events/presence/missingheartbeat/+`).
 
 
 ## Solution Architecture
