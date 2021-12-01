@@ -13,6 +13,7 @@ This repository contains resources to quickly onboard included LoRaWAN devices o
 
 - Examples of binary decoders for a set of devices. These examples are in Python 3 or Node.js and will be deployed in an [AWS Lambda layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html). Following devices are included:
   - Decoder simulating a temperature and humidity sensor device. It enables you to test this sample without need for a physical LoRaWAN device. You can also use it as a boilerplate to developer your own decoder.
+  - Browan Tabs Temperature & Humidity Sensor
   - Browan Tabs Object Locator
   - Dragino LHT65, LGT92, LSE01, LBT1, LDS01, LSN50, LLMS01 
   - Axioma W1
@@ -55,22 +56,23 @@ Before you proceed, please select a preferred approach for using this sample:
 
 Example binary decoders for the following devices are included in this sample:
 
-| Manufacturer | Device              | Decoder name       | Python 3 | Node.js |
-| ------------ | ------------------- | ------------------ | -------- | ------- |
-| Browan       | Tabs Object Locator | tabs_objectlocator | x        |         |
-| Axioma       | W1                  | axioma_w1          | x        |         |
-| Dragino      | LHT65               | dragino_lht65      | x        | x       |
-| Dragino      | LGT92               | dragino_lgt92      | x        |         |
-| Dragino      | LSE01               | dragino_lse01      | x        |         |
-| Dragino      | LBT1                | dragino_lbt1       | x        |         |
-| Dragino      | LDS01               | dragino_lds01      | x        |         |
-| Elsys        | all                 | elsys              | x        |         |
-| Globalsat    | LT-100              | globalsat_lt100    | x        |         |
-| NAS          | Pulse Reader UM3080 | nas_um3080         | x        |         |
-| Adeunis      | FTD2                | adeunis_ftd2       | x        |         |
-| Adeunis      | Dry Contacts        | adeunis_dc_v2      | x        |         |
-| Laird        | Sentrius RS1xx      | sentrius_rs1xx     | x        |         |
-| BaraniDesign | MeteoHelix Iot Pro  | meteo_helix        | x        |         |
+| Manufacturer | Device                            | Decoder name       | Python 3 | Node.js |
+| ------------ | --------------------------------- | ------------------ | -------- | ------- |
+| Browan       | Tabs Object Locator               | tabs_objectlocator | x        |         |
+| Browan       | Tabs Temperature & Humidty Sensor | tabs_temphumsensor | x        |         |
+| Axioma       | W1                                | axioma_w1          | x        |         |
+| Dragino      | LHT65                             | dragino_lht65      | x        | x       |
+| Dragino      | LGT92                             | dragino_lgt92      | x        |         |
+| Dragino      | LSE01                             | dragino_lse01      | x        |         |
+| Dragino      | LBT1                              | dragino_lbt1       | x        |         |
+| Dragino      | LDS01                             | dragino_lds01      | x        |         |
+| Elsys        | all                               | elsys              | x        |         |
+| Globalsat    | LT-100                            | globalsat_lt100    | x        |         |
+| NAS          | Pulse Reader UM3080               | nas_um3080         | x        |         |
+| Adeunis      | FTD2                              | adeunis_ftd2       | x        |         |
+| Adeunis      | Dry Contacts                      | adeunis_dc_v2      | x        |         |
+| Laird        | Sentrius RS1xx                    | sentrius_rs1xx     | x        |         |
+| BaraniDesign | MeteoHelix Iot Pro                | meteo_helix        | x        |         |
 
 
 ## Approach A: using simulated decoder
@@ -301,23 +303,24 @@ Please perform the following steps to deploy a sample application:
     Please select the default values of parameters by typing "Enter", with the following exceptions:
     - Parameter **AWS Region:** select a region supporting AWS IoT Core for LoRaWAN
     - Parameter **ParamBinaryDecoderName**: select a decoder name according to a following overview:
-  
-      | Manufacturer | Device              | Decoder name       | Python 3 | Node.js |
-      | ------------ | ------------------- | ------------------ | -------- | ------- |
-      | Browan       | Tabs Object Locator | tabs_objectlocator | x        |         |
-      | Axioma       | W1                  | axioma_w1          | x        |         |
-      | Dragino      | LHT65               | dragino_lht65      | x        | x       |
-      | Dragino      | LGT92               | dragino_lgt92      | x        |         |
-      | Dragino      | LSE01               | dragino_lse01      | x        |         |
-      | Dragino      | LBT1                | dragino_lbt1       | x        |         |
-      | Dragino      | LDS01               | dragino_lds01      | x        |         |
-      | Elsys        | all                 | elsys              | x        |         |
-      | Globalsat    | LT-100              | globalsat_lt100    | x        |         |
-      | NAS          | Pulse Reader UM3080 | nas_um3080         | x        |         |
-      | Adeunis      | FTD2                | adeunis_ftd2       | x        |         |
-      | Adeunis      | Dry Contacts        | adeunis_dc_v2      | x        |         |
-      | Laird        | Sentrius RS1xx      | sentrius_rs1xx     | x        |         |
-      | BaraniDesign | MeteoHelix Iot Pro  | meteo_helix        | x        |         |
+
+      | Manufacturer | Device                            | Decoder name       | Python 3 | Node.js |
+      | ------------ | --------------------------------- | ------------------ | -------- | ------- |
+      | Browan       | Tabs Object Locator               | tabs_objectlocator | x        |         |
+      | Browan       | Tabs Temperature & Humidty Sensor | tabs_temphumsensor | x        |         |
+      | Axioma       | W1                                | axioma_w1          | x        |         |
+      | Dragino      | LHT65                             | dragino_lht65      | x        | x       |
+      | Dragino      | LGT92                             | dragino_lgt92      | x        |         |
+      | Dragino      | LSE01                             | dragino_lse01      | x        |         |
+      | Dragino      | LBT1                              | dragino_lbt1       | x        |         |
+      | Dragino      | LDS01                             | dragino_lds01      | x        |         |
+      | Elsys        | all                               | elsys              | x        |         |
+      | Globalsat    | LT-100                            | globalsat_lt100    | x        |         |
+      | NAS          | Pulse Reader UM3080               | nas_um3080         | x        |         |
+      | Adeunis      | FTD2                              | adeunis_ftd2       | x        |         |
+      | Adeunis      | Dry Contacts                      | adeunis_dc_v2      | x        |         |
+      | Laird        | Sentrius RS1xx                    | sentrius_rs1xx     | x        |         |
+      | BaraniDesign | MeteoHelix Iot Pro                | meteo_helix        | x        |         |
 
     Please note that `sam deploy --guided` should be only executed for a first deployment. To redeploy after that please use `sam deploy`.
 
@@ -341,24 +344,25 @@ Please perform the following steps to deploy a sample application:
 
     First please use the table below to identify an appropriate PayloadData (this is Base64-payload example as it would be ingsted by your LoRaWAN device):
           
-    | Manufacturer | Device name         | Sample "PayloadData"                                              |
-    | ------------ | ------------------- | ----------------------------------------------------------------- |
-    | Axioma       | W1                  | eoFaXxADAAAAwKRZXwMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=  |
-    | Dragino      | LHT65               | y6QHxgG4AQhmf/8=                                                  |
-    | Dragino      | LSE01               | AuHtlACmawQPVGM=                                                  |
-    | Dragino      | LGT92               | DSEAAAEVCMUGpAA=                                                  |
-    | Dragino      | LBT1                | DxwAAAIDQUJCQ0NEREVFRkYwMjcxMjFGNkFDMy0wNTk=                      |
-    | Browan       | Tabs Object Locator | Ae48SPbhAgRupmA=                                                  |
-    | Elsys        | all                 | MDEwMEUyMDIyOTA0MDAyNzA1MDYwNjAzMDgwNzBENjIxOTAwRTIxOTAwQTM=      |
-    | Globalsat    | LT-100              | MDA4MjY0MDI2NERBRDlGQjg4RENENg==                                  |
-    | NAS          | Pulse Reader UM3080 | (fPort 24) NDNGNjFBNEIxMjAxMDAwMDAwMjBDNDA5MDAwMA==               |
-    | NAS          | Pulse Reader UM3080 | (fPort 25) MDMxMjAxMDAwMDAwMTAwMDAwMDAwMA==                       |
-    | NAS          | Pulse Reader UM3080 | (fPort 99, boot) MDBDNzAxMTY0QzAwMDcwODEwMDI=                     |
-    | NAS          | Pulse Reader UM3080 | (fPort 99, shutdown) MDEzMTQzRjYxQTRCMTIwMTAwMDAwMDIwQzQwOTAwMDA= |
-    | Adeunis      | FTD2                | QkYxQjQ1MTU5NjkwMDA1MzQ1MDAyNzIwMjAwRkM5NTIwNw==                  |                              
-    | Adeunis      | Dry Contacts        | QMAAAQACAAMABKU=                                                  |
-    | Laird        | Sentrius RS1xx      | AQAeAUEZAgAAAAA=                                                  |
-    | BaraniDesign | MeteoHelix Iot Pro  | cScjZ0+jGvrTA/A=                                                  |
+    | Manufacturer | Device name                        | Sample "PayloadData"                                              |
+    | ------------ | ---------------------------------- | ----------------------------------------------------------------- |
+    | Axioma       | W1                                 | eoFaXxADAAAAwKRZXwMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=  |
+    | Dragino      | LHT65                              | y6QHxgG4AQhmf/8=                                                  |
+    | Dragino      | LSE01                              | AuHtlACmawQPVGM=                                                  |
+    | Dragino      | LGT92                              | DSEAAAEVCMUGpAA=                                                  |
+    | Dragino      | LBT1                               | DxwAAAIDQUJCQ0NEREVFRkYwMjcxMjFGNkFDMy0wNTk=                      |
+    | Browan       | Tabs Object Locator                | Ae48SPbhAgRupmA=                                                  |
+    | Browan       | Tabs Temperature & Humidity Sensor | CAs1Mv////8=                                                      |
+    | Elsys        | all                                | MDEwMEUyMDIyOTA0MDAyNzA1MDYwNjAzMDgwNzBENjIxOTAwRTIxOTAwQTM=      |
+    | Globalsat    | LT-100                             | MDA4MjY0MDI2NERBRDlGQjg4RENENg==                                  |
+    | NAS          | Pulse Reader UM3080                | (fPort 24) NDNGNjFBNEIxMjAxMDAwMDAwMjBDNDA5MDAwMA==               |
+    | NAS          | Pulse Reader UM3080                | (fPort 25) MDMxMjAxMDAwMDAwMTAwMDAwMDAwMA==                       |
+    | NAS          | Pulse Reader UM3080                | (fPort 99, boot) MDBDNzAxMTY0QzAwMDcwODEwMDI=                     |
+    | NAS          | Pulse Reader UM3080                | (fPort 99, shutdown) MDEzMTQzRjYxQTRCMTIwMTAwMDAwMDIwQzQwOTAwMDA= |
+    | Adeunis      | FTD2                               | QkYxQjQ1MTU5NjkwMDA1MzQ1MDAyNzIwMjAwRkM5NTIwNw==                  |
+    | Adeunis      | Dry Contacts                       | QMAAAQACAAMABKU=                                                  |
+    | Laird        | Sentrius RS1xx                     | AQAeAUEZAgAAAAA=                                                  |
+    | BaraniDesign | MeteoHelix Iot Pro                 | cScjZ0+jGvrTA/A=                                                  |
 
     The payload is structured in a same way as it will be ingested by AWS IoT Core for LoRaWAN. Please replace the `<Sample PayloadData>` with the value of "Sample PayloadData>" from the following table:
 
