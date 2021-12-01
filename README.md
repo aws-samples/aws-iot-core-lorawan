@@ -69,6 +69,7 @@ The sample [Decoding binary payloads from LoRaWAN devices](transform_binary_payl
 - **Sound level measurement**
   - Elsys ERS Sound
 - **Temperature, humidity and moisture**
+  - Browan Tabs Temperature & Humidity Sensor
   - Dragino LHT65 (temperature and humidity)
   - Dragino LSE01 (temperature and moisture)
   - Dragino LLMS01 (leaf moisture sensor)
