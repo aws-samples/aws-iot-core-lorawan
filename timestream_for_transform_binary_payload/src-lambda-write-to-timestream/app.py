@@ -150,7 +150,7 @@ def lambda_handler(event, context):
             del input_transformed["status"]
         if "decoder_name" in input_transformed:
             del input_transformed["decoder_name"]
-        if "WirelessMetadata" in input_transformed:
+        if "WirelessDeviceId" in input_transformed:
             del input_transformed["WirelessDeviceId"]
         if "DevEui" in input_transformed:
             del input_transformed["DevEui"]
