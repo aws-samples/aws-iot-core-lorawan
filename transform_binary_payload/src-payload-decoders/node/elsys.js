@@ -208,5 +208,7 @@ function DecodeElsysPayload(data){
 }
 
 function decodeUplink(input) { 
-    return DecodeElsysPayload(input.bytes);
+    result = {};
+    result.data= DecodeElsysPayload(input.bytes);
+    return result;
 }
