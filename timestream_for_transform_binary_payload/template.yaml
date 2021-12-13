@@ -1,0 +1,218 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Timestream integration
+
+Parameters:
+  ParamBinaryDecoderName:
+    Type: String
+    Default: sample_device
+    Description: Name of binary decoder as configured in src-iotrule-transformation/app.py
+    
+  TopicError:
+    Type: String
+    Default: dt/lorawanerror
+    Description: Name of MQTT topic for to publish IoT Rule action error messages
+
+
+  BinaryDecoderLambdaARN:
+    Type: String
+    Description: ARN of the Lambda function that decodes binary payloads, it MUST be a Lambda following input/output conventions of https://github.com/aws-samples/aws-iot-core-lorawan/tree/main/transform_binary_payload sample
+  
+  TopicDebug:
+    Type: String
+    Default: lorawan/debug
+    Description: 
+        |
+        Prefix of a MQTT topic to publish debugging information.'
+
+Resources:
+  ############################################################################################
+  # Payload transformation Lambda function to be called from AWS IoT Core. This function will refer to 
+  # layer "DecoderLayer" to include the necessary decoding libraries 
+  ############################################################################################
+
+  WriteLoRaWANDataToTimestreamFunction:
+    Type: AWS::Serverless::Function
+    Name: !Sub '${AWS::StackName}-WriteLoRaWANDataToTimestreamFunction'
+    Properties:
+      CodeUri: src-lambda-write-to-timestream
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Timeout: 10
+      Environment:
+        Variables:
+          DB_NAME: !Ref TimestreamDatabase
+          TABLE_NAME_TELEMETRY: !Select [ "1", !Split [ "|" , !Ref TimestreamTableTelemetry]]
+          TABLE_NAME_METADATA: !Select [ "1", !Split [ "|" , !Ref TimestreamTableMetadata]]
+      Policies:
+         -  Statement:
+            - Sid: Pol1
+              Effect: Allow
+              Action:
+                - timestream:WriteRecords
+              Resource: !GetAtt TimestreamTableTelemetry.Arn
+            - Sid: Pol2
+              Effect: Allow
+              Action:
+                - timestream:WriteRecords
+              Resource: !GetAtt TimestreamTableMetadata.Arn
+            - Sid: Pol3
+              Effect: Allow
+              Action:
+                - timestream:DescribeEndpoints
+              Resource: "*"
+
+  WriteLoRaWANDataToTimestreamFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt WriteLoRaWANDataToTimestreamFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: iot.amazonaws.com
+
+
+  
+
+              
+
+  ############################################################################################
+  # This IoT Rule converts a binary message to a JSON message using a payload decoder, and then 
+  # writes the payload of message and metadata into a Amazon Timestream database.
+  # Incoming message topic: 
+  # dt/lorawanbinary/<application id>/<device type id>/<device id>
+  # Example:
+  # dt/lorawanbinary/moisture/dragino_lht65/12345678
+  ############################################################################################
+  
+  WriteLoRaWANDataToTimestreamRule:
+
+    Type: "AWS::IoT::TopicRule"
+    Properties:
+      RuleName: !Sub '${AWS::StackName}_WriteLoRaWANDataToTimestream_${ParamBinaryDecoderName}'
+      TopicRulePayload:
+        AwsIotSqlVersion: "2016-03-23"
+        RuleDisabled: false
+
+        Sql:
+            !Sub 
+              - |
+                SELECT aws_lambda("${LambdaARN}",
+                                  {"PayloadDecoderName": "${ParamBinaryDecoderName}", 
+                                  "PayloadData":PayloadData, 
+                                  "WirelessDeviceId": DeviceId, 
+                                   "WirelessMetadata": WirelessMetadata}) as transformed_payload, 
+                        WirelessDeviceId as transformed_payload.WirelessDeviceId,                                   
+                        WirelessMetadata.LoRaWAN.DevEui as transformed_payload.DevEui,
+                        WirelessDeviceId as lns_payload.WirelessDeviceId, 
+                        WirelessMetadata as lns_payload.WirelessMetadata,
+                        PayloadData as lns_payload.PayloadData,
+                        timestamp() as timestamp
+              - { LambdaARN: !Ref BinaryDecoderLambdaARN }      
+        Actions:
+            - Lambda:
+                FunctionArn:  !GetAtt WriteLoRaWANDataToTimestreamFunction.Arn
+            - Republish:
+                RoleArn: !GetAtt StoreLoRaWANPayloadInTimestreamRuleRepublishActionRole.Arn
+                Topic:
+                  !Join [
+                      "",
+                      [
+                        !Ref TopicDebug
+                      ],
+                    ]
+                Qos: 0
+
+        ErrorAction:
+            Republish:
+              RoleArn: !GetAtt StoreLoRaWANPayloadInTimestreamRuleRepublishActionRole.Arn
+              Topic: !Ref TopicError
+              Qos: 0
+
+  
+  StoreLoRaWANPayloadInTimestreamRuleRepublishActionRole:
+      Type: "AWS::IAM::Role"
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: 2012-10-17
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - iot.amazonaws.com
+              Action:
+                - "sts:AssumeRole"
+        Policies:
+          - PolicyName: root
+            PolicyDocument:
+              Version: 2012-10-17
+              Statement:
+                - Effect: Allow
+                  Action: iot:Publish
+                  Resource:
+                    !Join [
+                      "",
+                      [
+                        "arn:aws:iot:",
+                        !Ref "AWS::Region",
+                        ":",
+                        !Ref "AWS::AccountId",
+                        ":topic/",
+                        !Ref TopicDebug
+                      
+                      ],
+                    ]
+                - Effect: Allow
+                  Action: iot:Publish
+                  Resource:
+                    !Join [
+                      "",
+                      [
+                        "arn:aws:iot:",
+                        !Ref "AWS::Region",
+                        ":",
+                        !Ref "AWS::AccountId",
+                        ":topic/",
+                        !Ref TopicError
+                      ],
+                    ]
+
+
+
+  TimestreamDatabase:
+    Type: AWS::Timestream::Database
+    Properties:
+      DatabaseName: !Sub ${AWS::StackName}LoRaWANDatabase
+
+  TimestreamTableTelemetry:
+    Type: AWS::Timestream::Table
+    Properties:
+      TableName: !Sub ${AWS::StackName}LoRaWANTelemetryTable
+      DatabaseName:
+        Ref: TimestreamDatabase
+      RetentionProperties:
+        MemoryStoreRetentionPeriodInHours: '24'
+        MagneticStoreRetentionPeriodInDays: '5'
+  
+  TimestreamTableMetadata:
+      Type: AWS::Timestream::Table
+      Properties:
+        TableName: !Sub ${AWS::StackName}LoRaWANMetadataTable
+        DatabaseName:
+          Ref: TimestreamDatabase
+        RetentionProperties:
+          MemoryStoreRetentionPeriodInHours: '24'
+          MagneticStoreRetentionPeriodInDays: '5'
+
+        
+Outputs:
+  DatabaseName:
+    Description: "Database Name"
+    Value: !Ref TimestreamDatabase
+  TableNameTelemetry:
+    Description: "Table Name for Telemetry "
+    Value: !Select [ "1", !Split [ "|" , !Ref TimestreamTableTelemetry]]
+  TableNameMetadata:
+    Description: "Table Name for Metadata"
+    Value: !Select [ "1", !Split [ "|" , !Ref TimestreamTableMetadata]]
+  WriteLoRaWANDataToTimestreamFunctionArn:
+    Value: !Ref WriteLoRaWANDataToTimestreamFunction

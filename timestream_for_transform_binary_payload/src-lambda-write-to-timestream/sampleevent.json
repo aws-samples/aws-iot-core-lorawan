@@ -1,0 +1,32 @@
+{
+    "transformed_message": {
+        "status": 200,
+        "payload": {
+            "temperature": 29.7,
+            "humidity": 52.41,
+            "input_length": 11
+        },
+        "WirelessDeviceId": "904d63b1-ed1d-42ad-8cb4-6778dd03e86c",
+        "DevEui": "a84041d55182720b"
+    },
+    "lns_message": {
+        "WirelessDeviceId": "904d63b1-ed1d-42ad-8cb4-6778dd03e86c",
+        "WirelessMetadata": {
+            "LoRaWAN": {
+                "DataRate": 0,
+                "DevEui": "a84041d55182720b",
+                "FPort": 2,
+                "Frequency": 867300000,
+                "Gateways": [
+                    {
+                        "GatewayEui": "dca632fffe45b3c0",
+                        "Rssi": -70,
+                        "Snr": 10.75
+                    }
+                ],
+                "Timestamp": "2020-12-09T16:33:19Z"
+            }
+        },
+        "PayloadData": "y68JUAHBAQlsf/8="
+    }
+}
