@@ -24,6 +24,7 @@ This repository contains resources to quickly onboard included LoRaWAN devices o
   - Adeunis Dry Contacts
   - Laird Sentrius RS1xx
   - MeteoHelix Iot Pro
+  - ST Nucleo-WL55JC
 
 - AWS Lambda functions in [Python 3](transform_binary_payload/src-iotrule-transformation) and [Node.js](transform_binary_payload/src-iotrule-transformation-node) that will be invoked by the AWS IoT Rule to perform binary decoding
 
@@ -73,6 +74,7 @@ Example binary decoders for the following devices are included in this sample:
 | Adeunis      | Dry Contacts                      | adeunis_dc_v2      | x        |         |
 | Laird        | Sentrius RS1xx                    | sentrius_rs1xx     | x        |         |
 | BaraniDesign | MeteoHelix Iot Pro                | meteo_helix        | x        |         |
+| ST           | Nucleo-WL55JC                     | st_nucleo_wl55jc   | x        |         |
 
 
 ## Approach A: using simulated decoder
@@ -321,6 +323,7 @@ Please perform the following steps to deploy a sample application:
       | Adeunis      | Dry Contacts                      | adeunis_dc_v2      | x        |         |
       | Laird        | Sentrius RS1xx                    | sentrius_rs1xx     | x        |         |
       | BaraniDesign | MeteoHelix Iot Pro                | meteo_helix        | x        |         |
+      | ST           | Nucleo-WL55JC                     | st_nucleo_wl55jc   | x        |         |
 
     Please note that `sam deploy --guided` should be only executed for a first deployment. To redeploy after that please use `sam deploy`.
 
@@ -363,6 +366,7 @@ Please perform the following steps to deploy a sample application:
     | Adeunis      | Dry Contacts                       | QMAAAQACAAMABKU=                                                  |
     | Laird        | Sentrius RS1xx                     | AQAeAUEZAgAAAAA=                                                  |
     | BaraniDesign | MeteoHelix Iot Pro                 | cScjZ0+jGvrTA/A=                                                  |
+    | ST           | Nucleo-WL55JC                      | ACcQGAH0AAAAAA==                                                  |
 
     The payload is structured in a same way as it will be ingested by AWS IoT Core for LoRaWAN. Please replace the `<Sample PayloadData>` with the value of "Sample PayloadData>" from the following table:
 
@@ -665,7 +669,7 @@ Please perform following steps to implement your own binary transformation model
     ```
  
 4. Edit `src-iotrule-transformation/app.py` and
-    1. Add `import mymanufacturer_mydevice.py` 
+    1. Add `import mymanufacturer_mydevice` 
     2. Add "mymanufacturer_mydevice" value to VALID_PAYLOAD_DECODER_NAMES
 
 5. This sample uses AWS SAM to build and deploy all necessary resources (e.g. AWS Lambda function, AWS IoT Rule, AWS IAM Roles) to your AWS account. Please perform the following commands to build the SAM artifacts:

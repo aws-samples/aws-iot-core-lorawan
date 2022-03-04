@@ -85,6 +85,8 @@ The sample [Decoding binary payloads from LoRaWAN devices](transform_binary_payl
   - Adeunis Dry Contacts
 - **Weather station**
   - MeteoHelix Iot Pro
+- **Development Board**
+  - ST Nucleo-WL55JC
 
 [Contributions](CONTRIBUTING.md) to example binary decoders are welcome.
 
