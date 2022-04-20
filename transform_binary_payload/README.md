@@ -354,6 +354,17 @@ Please perform the following steps to deploy a sample application:
     | Dragino      | LSE01                              | AuHtlACmawQPVGM=                                                  |
     | Dragino      | LGT92                              | DSEAAAEVCMUGpAA=                                                  |
     | Dragino      | LBT1                               | DxwAAAIDQUJCQ0NEREVFRkYwMjcxMjFGNkFDMy0wNTk=                      |
+	  | Dragino      | LHT65                              | y6QHxgG4AQhmf/8=                                                  |
+	  | Dragino      | LSE01                              | AuHtlACmawQPVGM=                                                  |
+	  | Dragino      | LGT92                              | DSEAAAEVCMUGpAA=                                                  |
+	  | Dragino      | LAQ4                               | C0UEAAcBkAEFAZc=                                                  |
+	  | Dragino      | LLMS01                             | C0UBBQAVAQUAAQ==                                                  |
+	  | Dragino      | LSPH01                             | C0UBBQK3AQUAAQ==                                                  |
+	  | Dragino      | LDDS20                             | DRYKbwA=                                                          |
+	  | Dragino      | LWL02                              | S+ICAAAIAAAB                                                      |
+	  | Dragino      | LSN50v2-D23                        | DO8BVQDqAf////8=                                                  |
+	  | Dragino      | LSN50v2-S31                        | DPcAAAEJAAEMAZc=                                                  |
+	  | Dragino      | LBT1                               | DxwAAAIDQUJCQ0NEREVFRkYwMjcxMjFGNkFDMy0wNTk=                      |
     | Browan       | Tabs Object Locator                | Ae48SPbhAgRupmA=                                                  |
     | Browan       | Tabs Temperature & Humidity Sensor | CAs1Mv////8=                                                      |
     | Elsys        | all                                | MDEwMEUyMDIyOTA0MDAyNzA1MDYwNjAzMDgwNzBENjIxOTAwRTIxOTAwQTM=      |
