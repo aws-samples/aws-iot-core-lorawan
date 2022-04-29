@@ -67,6 +67,14 @@ Example binary decoders for the following devices are included in this sample:
 | Dragino      | LSE01                             | dragino_lse01      | x        |         |
 | Dragino      | LBT1                              | dragino_lbt1       | x        |         |
 | Dragino      | LDS01                             | dragino_lds01      | x        |         |
+| Dragino      | LAQ4                              | dragino_laq4       | x        |         |
+| Dragino      | LLMS01                            | dragino_llms01     | x        |         |
+| Dragino      | LSPH01                            | dragino_lsph01     |          | x       |
+| Dragino      | LDDS20                            | dragino_ldds20     |          | x       |
+| Dragino      | LWL02                             | dragino_lwl02      |          | x       |
+| Dragino      | LSN50                             | dragino_lsn50      | x        |         |
+| Dragino      | LSN50v2                           | dragino_lsn50v2    | x        |         |
+| Dragino      | LSN50v2-D23                       | dragino_lsn50v2d23 |          | x       |
 | Elsys        | all                               | elsys              | x        |         |
 | Globalsat    | LT-100                            | globalsat_lt100    | x        |         |
 | NAS          | Pulse Reader UM3080               | nas_um3080         | x        |         |
@@ -316,6 +324,14 @@ Please perform the following steps to deploy a sample application:
       | Dragino      | LSE01                             | dragino_lse01      | x        |         |
       | Dragino      | LBT1                              | dragino_lbt1       | x        |         |
       | Dragino      | LDS01                             | dragino_lds01      | x        |         |
+      | Dragino      | LAQ4                              | dragino_laq4       | x        |         |
+      | Dragino      | LLMS01                            | dragino_llms01     | x        |         |
+      | Dragino      | LSPH01                            | dragino_lsph01     |          | x       |
+      | Dragino      | LDDS20                            | dragino_ldds20     |          | x       |
+      | Dragino      | LWL02                             | dragino_lwl02      |          | x       |
+      | Dragino      | LSN50                             | dragino_lsn50      | x        |         |
+      | Dragino      | LSN50v2                           | dragino_lsn50v2    | x        |         |
+      | Dragino      | LSN50v2-D23                       | dragino_lsn50v2d23 |          | x       |
       | Elsys        | all                               | elsys              | x        |         |
       | Globalsat    | LT-100                            | globalsat_lt100    | x        |         |
       | NAS          | Pulse Reader UM3080               | nas_um3080         | x        |         |
@@ -354,6 +370,17 @@ Please perform the following steps to deploy a sample application:
     | Dragino      | LSE01                              | AuHtlACmawQPVGM=                                                  |
     | Dragino      | LGT92                              | DSEAAAEVCMUGpAA=                                                  |
     | Dragino      | LBT1                               | DxwAAAIDQUJCQ0NEREVFRkYwMjcxMjFGNkFDMy0wNTk=                      |
+	  | Dragino      | LHT65                              | y6QHxgG4AQhmf/8=                                                  |
+	  | Dragino      | LSE01                              | AuHtlACmawQPVGM=                                                  |
+	  | Dragino      | LGT92                              | DSEAAAEVCMUGpAA=                                                  |
+	  | Dragino      | LAQ4                               | C0UEAAcBkAEFAZc=                                                  |
+	  | Dragino      | LLMS01                             | C0UBBQAVAQUAAQ==                                                  |
+	  | Dragino      | LSPH01                             | C0UBBQK3AQUAAQ==                                                  |
+	  | Dragino      | LDDS20                             | DRYKbwA=                                                          |
+	  | Dragino      | LWL02                              | S+ICAAAIAAAB                                                      |
+	  | Dragino      | LSN50v2-D23                        | DO8BVQDqAf////8=                                                  |
+	  | Dragino      | LSN50v2-S31                        | DPcAAAEJAAEMAZc=                                                  |
+	  | Dragino      | LBT1                               | DxwAAAIDQUJCQ0NEREVFRkYwMjcxMjFGNkFDMy0wNTk=                      |
     | Browan       | Tabs Object Locator                | Ae48SPbhAgRupmA=                                                  |
     | Browan       | Tabs Temperature & Humidity Sensor | CAs1Mv////8=                                                      |
     | Elsys        | all                                | MDEwMEUyMDIyOTA0MDAyNzA1MDYwNjAzMDgwNzBENjIxOTAwRTIxOTAwQTM=      |
