@@ -18,7 +18,7 @@ aws iotwireless list-service-profiles
 
 You can use `devices_list.csv` as an example file.
 
-Required columns, separated by `;`:
+Required columns:
 
 - DevEui
 - AppKey
@@ -29,6 +29,14 @@ Required columns, separated by `;`:
 - AuthenticationMethod (allowed values: OtaaV1_0_x)
 - Name
 - Description
+
+
+Few rules for the file:
+
+- Columns must be separated by `;`
+- Header line with above column names is required
+- Please note that the specific ordering of columns is NOT required.
+- CSV file can also contain additional columns
 
 ## Step 4: Run batch registration script
 
