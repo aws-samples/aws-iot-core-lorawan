@@ -16,7 +16,9 @@ aws iotwireless list-service-profiles
 
 ## Step 3: Build CSV file
 
-Required columns:
+You can use `devices_list.csv` as an example file.
+
+Required columns, separated by `;`:
 
 - DevEui
 - AppKey
