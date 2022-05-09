@@ -28,8 +28,8 @@ Required columns:
 - ServiceProfileId (see Step 2)
 - DestinationName (must exist before this script runs)
 - AuthenticationMethod (allowed values: OtaaV1_0_x)
-- Name
-- Description
+- Name (see [API doc](https://docs.aws.amazon.com/iot-wireless/2020-11-22/apireference/API_CreateWirelessDevice.html#iotwireless-CreateWirelessDevice-request-Name))
+- Description (see [API doc](https://docs.aws.amazon.com/iot-wireless/2020-11-22/apireference/API_CreateWirelessDevice.html#iotwireless-CreateWirelessDevice-request-Description))
 
 
 Few rules for the file:
