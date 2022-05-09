@@ -20,6 +20,7 @@ You can use `example_device_list.csv` as an example file.
 
 Required columns:
 
+- Type (currently only "LoRaWAN" is supported)
 - DevEui
 - AppKey
 - AppEui
