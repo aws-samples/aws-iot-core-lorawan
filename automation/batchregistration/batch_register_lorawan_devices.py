@@ -18,12 +18,37 @@ import pandas as pd
 import boto3
 import json
 import logging
+import argparse
 
-iotwireless_client = boto3.client('iotwireless')
+# Command line arguments
+parser = argparse.ArgumentParser(description='Batch registration of LoRaWAN devices for AWS IoT Core for LoRaWAN')
+parser.add_argument('inputfilename', type=str,  help='Path to CSV file to process')
+# parser.add_argument('--errorfilename', type=str, help='Path to CSV file to store failed registrations', required=True)
+parser.add_argument('--verbose', '-v', action='count', default=1, help='Provide more output')
+parser.add_argument('--dryrun', '-d', action='count', default=1, help='Do everything but API calls')
+parser.add_argument('--region', "-r", type=str, help='AWS region', required=True)
+args = parser.parse_args()
+args.verbose = 70 - (10*args.verbose) if args.verbose > 0 else 0
+
+# Logging
 logger = logging.getLogger()
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
+
+# AWS IoT Wireless client
+if args.dryrun == 1:
+    iotwireless_client = boto3.client('iotwireless', region_name=args.region)
+else:
+    logger.info("Dry run, not creating wireless devices")
+
+
+
 
 def register_wireless_device(devicerow) -> bool:
+
+    if (devicerow.Type != "LoRaWAN"):
+        logger.error("Allowed device types are: LoRaWAN")
+        return False;
 
     if (devicerow.AuthenticationMethod == "OtaaV1_0_x"):
         authentication_data = {
@@ -36,38 +61,47 @@ def register_wireless_device(devicerow) -> bool:
 
 
     create_wireless_device_input = {
-                        "Type":"LoRaWAN",
-                        "Name": device_row.Name,
-                        "Description": device_row.Description,
-                        "DestinationName": device_row.DestinationName,
+                        "Type": devicerow.Type,
+                        "Name": devicerow.Name,
+                        "Description": devicerow.Description,
+                        "DestinationName": devicerow.DestinationName,
                         "LoRaWAN": {
                                 'DevEui': devicerow.DevEui,
                                 'DeviceProfileId': devicerow.DeviceProfileId,
                                 'ServiceProfileId':    devicerow.ServiceProfileId,
-                                device_row.AuthenticationMethod : authentication_data
+                                devicerow.AuthenticationMethod : authentication_data
                             
                 }
     }
-    logger.info(f"Creating wireless device with data {json.dumps(create_wireless_device_input, indent=4)}")
+    logger.info(f"Creating device with DevEui {devicerow.DevEui}")
+    logger.debug(f"Creating wireless device with data {json.dumps(create_wireless_device_input, indent=4)}")
     try: 
-        iotwireless_client.create_wireless_device(**create_wireless_device_input)        
+        if args.dryrun == 1:
+            iotwireless_client.create_wireless_device(**create_wireless_device_input)        
     except Exception as e:
         logger.error(f"Error creating wireless device {e}")
         return False
         
-    return True    
+    return False    
 
-
-df = pd.read_csv("devices_list.csv", delimiter=';', quotechar='|')
+logger.info(f"Loading input file {args.inputfilename}")
+df = pd.read_csv(args.inputfilename, delimiter=';', quotechar='|')
+df_failed = pd.DataFrame().reindex_like(df)
 
 success_count = 0
 failure_count = 0
 
-for device_row in df.itertuples():
-    logger.info(f"Adding device {device_row}")
+for device_row in df.itertuples(index=False, name="DeviceRow"):
+    logger.info(f"Adding device with data {device_row}")
     if register_wireless_device(device_row)         :
         success_count += 1
     else:
         failure_count += 1
+#        df_failed.append(pd.Series(device_row), ignore_index=True)
+        
     
 logger.info("Successfully added {} devices, failed to add {} devices".format(success_count, failure_count))
+
+# if failure_count > 0:
+#    logger.info("Writing list of failed devices to {}".format(args.errorfilename))
+#    df_failed.to_csv(args.errorfilename, sep=';', index=True)   

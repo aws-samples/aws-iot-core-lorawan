@@ -16,7 +16,7 @@ aws iotwireless list-service-profiles
 
 ## Step 3: Build CSV file
 
-You can use `devices_list.csv` as an example file.
+You can use `example_device_list.csv` as an example file.
 
 Required columns:
 
@@ -42,5 +42,5 @@ Few rules for the file:
 
 ```shell
 pip3 install -r requirements.txt     
-python3 batch_register_lorawan_devices.py
+python3 batch_register_lorawan_devices.py example_device_list.csv --region eu-west-1
 ```

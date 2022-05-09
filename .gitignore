@@ -31,3 +31,5 @@ workshop/webinar/**
 device_watchdog/out.yaml
 workshop/sampledecoder/downlink/Archive.zip
 workshop/sampledecoder/.python-version
+automation/batchregistration/testerrors.csv
+automation/batchregistration/failed_devices_list.csv
