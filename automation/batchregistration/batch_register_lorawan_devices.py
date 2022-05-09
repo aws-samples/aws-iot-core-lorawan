@@ -82,7 +82,7 @@ def register_wireless_device(devicerow) -> bool:
         logger.error(f"Error creating wireless device {e}")
         return False
         
-    return False    
+    return True    
 
 logger.info(f"Loading input file {args.inputfilename}")
 df = pd.read_csv(args.inputfilename, delimiter=';', quotechar='|')
