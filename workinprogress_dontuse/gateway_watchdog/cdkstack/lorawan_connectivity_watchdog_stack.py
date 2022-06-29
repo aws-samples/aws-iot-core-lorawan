@@ -21,6 +21,8 @@ from aws_cdk import aws_lambda as lambda_
 from aws_cdk import aws_iotevents as iotevents
 from aws_cdk import aws_stepfunctions as sfn
 from aws_cdk import aws_stepfunctions_tasks as tasks
+from aws_cdk.aws_events import EventPattern, Rule, Schedule
+import aws_cdk.aws_events_targets as targets
 import aws_cdk.aws_sns as sns
 import aws_cdk.aws_sns_subscriptions as subscriptions
 import lorawan_gateway_monitoring_detectormodel
@@ -114,10 +116,8 @@ class LorawanConnectivityWatchdogStack(cdk.Stack):
         # State 'Fail'
         failure_state = sfn.Fail(self, "Fail")
 
-        # State 'Wait'
-        wait_state = sfn.Wait(self, "Sleep",
-                              time=sfn.WaitTime.duration(cdk.Duration.minutes(4))
-                              )
+        # State 'Success'
+        success_state = sfn.Succeed(self, "Success")
 
         # State 'Ingest gateway connectivity status into IoT Events input'
         lambda_invoke_state = tasks.LambdaInvoke(self,
@@ -129,12 +129,13 @@ class LorawanConnectivityWatchdogStack(cdk.Stack):
 
         # Stat 'Did IoT events ingestion run successfull?'
         choice_lambda_state = sfn.Choice(self, "Did IoT events ingestion run successfull?")
-        choice_lambda_state.when(sfn.Condition.number_equals("$.wireless_gateway_stats.Payload.status", 200), wait_state)
+        choice_lambda_state.when(sfn.Condition.number_equals("$.wireless_gateway_stats.Payload.status", 200), success_state)
         choice_lambda_state.otherwise(failure_state)
 
-        # Define transitions
-        wait_state.next(lambda_invoke_state)
+        
+        # Define transitions        
         lambda_invoke_state.next(choice_lambda_state)
+        
 
         # Crreate a state machine
         gateway_watchdog_state_machine = sfn.StateMachine(
@@ -143,24 +144,28 @@ class LorawanConnectivityWatchdogStack(cdk.Stack):
             definition=lambda_invoke_state,
             state_machine_name="LoRaWANGatewayWatchdogStatemachine"
         )
+
+        ####################################################################################
+        # Event bridge
+
+        #create the trigger for the state machine
+        gateway_watchdog_rule = Rule(self, "LoRaWANGatewayWatchdogScheduledTrigger",
+            schedule=Schedule.rate(cdk.Duration.minutes(4)),
+            targets=[targets.SfnStateMachine(gateway_watchdog_state_machine)],
+            enabled=False
+        )
+
         ####################################################################################
         # CloudFormation Stack outputs
 
         cdk.CfnOutput(
-            self, "StateMachineARN",
-            value=gateway_watchdog_state_machine.state_machine_arn,
-            description="Please run 'aws stepfunctions start-execution --state-machine-arn  <LorawanConnectivityWatchdogStack.StateMachineARN>' to start the monitoring of LoRaWAN gateway connectivity",
-
-        )
-
-        cdk.CfnOutput(
-            self, "StateMachineStartCommand",
-            value='aws stepfunctions start-execution --state-machine-arn ' + gateway_watchdog_state_machine.state_machine_arn,
+            self, "WatchdogStartCommand",
+            value='aws events enable-rule --name ' + gateway_watchdog_rule.rule_name,
             description="Please run this command to start the monitoring of LoRaWAN gateway connectivity",
         )
 
         cdk.CfnOutput(
-            self, "StateMachineStopommand",
-            value='aws stepfunctions stop-execution --state-machine-arn ' + gateway_watchdog_state_machine.state_machine_arn,
+            self, "WatchdogStopommand",
+            value='aws events disable-rule --name ' + gateway_watchdog_rule.rule_name,
             description="Please run this command to stop the monitoring of LoRaWAN gateway connectivity",
         )

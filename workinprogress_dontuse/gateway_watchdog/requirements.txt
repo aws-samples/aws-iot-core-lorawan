@@ -7,3 +7,5 @@ aws_cdk.aws_stepfunctions
 aws_cdk.aws_stepfunctions_tasks
 aws_cdk.aws_sns
 aws_cdk.aws_sns_subscriptions
+aws_cdk.aws_events
+aws_cdk.aws_events_targets
