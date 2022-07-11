@@ -43,26 +43,17 @@ cdk deploy --parameters emailforalarms=<E-Mail>
 
 Please check your mailbox for an e-mail message with subject "AWS Notification - Subscription Confirmation" and confirm the subscription.
 
-### **3. Start the AWS step functions state machine** 
+### **3. Enable the Amazon EventBridge Rule** 
 
-As an output of the stack, you will receive a command to start the AWS state machine execution, e.g.
+As an output of the stack, you will receive a command to enable the Amazon EventBridge rule, e.g.
 
 ```shell 
 ...
 Outputs:
-LorawanConnectivityWatchdogStack.StateMachineStartCommand = aws stepfunctions start-execution --state-machine-arn arn:aws:states:us-east-1:614797420359:stateMachine:LoRaWANGatewayWatchdogStatemachine67D21B94-Ngdhwg91Keqq
+LorawanConnectivityWatchdogStack.WatchdogStartCommand = aws events enable-rule --name LorawanConnectivityWatchd-LoRaWANGatewayWatchdogSc-17GJ9GEWHDDE0
 ```
 
-The state machine will periodically invoke the AWS Lambda function to read the gateway connectivity status and ingest it to AWS IoT events input. Please run the previously shown command to start the state machine execution , e.g. :
-
-```shell
-aws stepfunctions start-execution --state-machine-arn arn:aws:states:us-east-1:614797420359:stateMachine:LoRaWANGatewayWatchdogStatemachine67D21B94-Ngdhwg91Keqq
-
-{
-    "executionArn": "arn:aws:states:us-east-1:614797420359:execution:LoRaWANGatewayWatchdogStatemachine67D21B94-Ngdhwg91Keqq:4c92e301-8525-4961-80a1-26768d9da294",
-    "startDate": "2021-07-13T21:18:14.426000+02:00"
-}
-```
+The EventBridge rule will periodically trigger the state machine that invoke the AWS Lambda function to read the gateway connectivity status and ingest it to AWS IoT events input. 
     
 ### **4. View notifications and MQTT presence events** 
 
@@ -71,15 +62,15 @@ For a test purpose, disconnect your LoRaWAN gatway from AWS IoT Core for LoRaWAN
 
 ### **5. Stop the execution of the solution** 
 
-As an output of the stack, you have receiveed a command to start the AWS state machine execution, e.g.
+As an output of the stack, you have receiveed a command to disable the Amazon EventBridge rule, e.g.
 
 ```shell 
 ...
 Outputs:
-LorawanConnectivityWatchdogStack.StateMachineStartCommand = aws stepfunctions stop-execution --state-machine-arn arn:aws:states:us-east-1:614797420359:stateMachine:LoRaWANGatewayWatchdogStatemachine67D21B94-Ngdhwg91Keqq
+LorawanConnectivityWatchdogStack.WatchdogStopommand = aws events disable-rule --name LorawanConnectivityWatchd-LoRaWANGatewayWatchdogSc-17GJ9GEWHDDE0
 ```
 
-Please run this command to stop a periodic execution of the Lambda function.
+Please run this command to stop the periodic execution of the watchdog.
 
 ### **6.Remove the stack**
 
@@ -130,3 +121,6 @@ sam-beta-cdk local invoke LorawanConnectivityWatchdogStack/GetWirelessGatewaySta
 ```
 sam-beta-cdk local invoke LorawanConnectivityWatchdogStack/GetWirelessGatewayStatisticsLambda -e tests/input_disconnected.json
 ```
+
+**Note**
+This architecture makes an opinionated use of AWS StepFunctions. An alternative approach is to invoke the Lambda function directly with the EventBridge periodic rule. However, using StepFunctions allows to easily add states in our state machine to combine several watchdogs for example.
