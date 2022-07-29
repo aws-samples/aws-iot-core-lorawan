@@ -7,8 +7,8 @@ AWS IoT Core for LoRaWAN enables you to set up a private LoRaWAN network by conn
 Please consider our [developer guide](https://docs.aws.amazon.com/iot/latest/developerguide/connect-iot-lorawan.html) to learn how to connect your wireless devices and gateways to AWS IoT Core for LoRaWAN.  
 
 ## Automation and observability
-- [Automated gateway registation using AWS CLI](automation) 
-- [Automated batch device registation using Python boto3 SDK](automation/batchregistration) 
+- [Automated gateway registration using AWS CLI](automation) 
+- [Automated batch device registation using Python Boto3 SDK](automation/batchregistration) 
 - [Observability implementation guidelines](observability).
 
 ## Decoding binary payloads
