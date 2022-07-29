@@ -4,7 +4,12 @@ __New to AWS IoT Core for LoRaWAN? Consider step-by-step tutorial at [https://io
 
 AWS IoT Core for LoRaWAN enables you to set up a private LoRaWAN network by connecting your devices and gateways with no LoRaWAN Network Server setup required. This repository contains resources to quickly get started developing solutions using AWS IoT Core for LoRaWAN. It includes samples for typical design patterns ([binary decoder](transform_binary_payload), [downlink messaging](send_downlink_payload), [Thing shadow update](iotthingshadow)) and fully functional applications ([dashboards](timestream), [condition monitoring and alarming](soilmoisture_alarming)).
 
-Please consider our [developer guide](https://docs.aws.amazon.com/iot/latest/developerguide/connect-iot-lorawan.html) to learn how to connect your wireless devices and gateways to AWS IoT Core for LoRaWAN.  Please also consider [automation guidelines](automation) and [observability implementation guidelines](observability).
+Please consider our [developer guide](https://docs.aws.amazon.com/iot/latest/developerguide/connect-iot-lorawan.html) to learn how to connect your wireless devices and gateways to AWS IoT Core for LoRaWAN.  
+
+## Automation and observability
+- [Automated gateway registation using AWS CLI](automation) 
+- [Automated batch device registation using Python boto3 SDK](automation/batchregistration) 
+- [Observability implementation guidelines](observability).
 
 ## Decoding binary payloads
 LoRaWAN devices typically send uplink payloads as binary encoded messages. Below you will find various options for an implementation of binary payload decoding.
